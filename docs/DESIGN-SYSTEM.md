@@ -661,8 +661,14 @@ that amount; only the render is meant to be consumed.
 ## The preloader
 
 The site's entry. A field of `--blue-700` split by a white 2px line that draws
-left to right while the first view loads; when it is ready the line completes
-and the two blue halves part from it, opening the page.
+left to right while the first view loads. The line carries a trail of
+`PixelCard`'s pixels — the same effect as the Stats and meter cards — and the
+standing line **CONNECTED INTELLIGENT ENERGY**, right-aligned to the leading
+edge. At 99% the label and the trail fade off; at 100% the line completes and
+the two blue halves part from it, opening the page.
+
+Phases are `drawing → closing → opening → gone`. The draw creeps to a **0.99
+ceiling** over 3.4s; `closing` is the 99→100 fade, `opening` the parting.
 
 `components/Preloader.tsx` + `.module.css`, mounted **first in `<body>`** in
 `app/layout.tsx` — above `SmoothScroll`, so it covers every route including the
@@ -699,6 +705,38 @@ where there are no frames to wait for and the poster is the hero.
    error, a stalled chunk. It is on the container's visibility only, so it
    cannot fight the halves' transforms.
 
+### The pixel trail is clipped, never resized
+
+`PixelCard` rebuilds its entire pixel field from a `ResizeObserver`, so
+animating the canvas's own width would re-initialise it on every frame of the
+draw. The canvas sits in a fixed-width inner element and a wrapper clips it;
+only the wrapper moves. Verified: the canvas stayed `1483x20` across the whole
+draw. A `mask-image` fades the tail so it reads as a trail rather than a bar
+with a hard left end.
+
+The label's brand-blue ground is not decoration — it is what stops the pixels
+running underneath the text, which is the relationship in the comp.
+
+### The label has to be measured, not guessed
+
+It is right-aligned to the leading edge, so early in the draw it runs off the
+left of the viewport: measured at **-298px of a 301px label on a 375 phone, at
+full opacity, for the first 1.2s**. A fraction would only know today's copy, so
+the component measures the label (`ResizeObserver` + `fonts.ready` + resize) and
+publishes `--labelw`. Two things use it, and they share one threshold so they
+cannot disagree:
+
+- CSS `left: max(calc(var(--p) * 100%), var(--labelw))` — the hard guard, so it
+  can never be pushed off-screen.
+- `labelFits` in the component — the label is only painted once the line is
+  genuinely long enough to carry it, so it never sticks out past the end of the
+  line it is supposed to be riding.
+
+Below 640px the label steps down to 11px / 0.08em tracking. At the desktop
+setting it is 80% of a phone's width and would only clear its own width in the
+last fifth of the draw; the step-down brings that forward to about 60%. 11px is
+the floor — below that Montserrat stops being a label a reader can use.
+
 ### Two things that bit during the build
 
 **The draw is never tied to a real total.** The only honest number here is
@@ -713,8 +751,9 @@ single `lenis?.stop()` there silently no-ops and the page scrolls behind the
 panel. Verified: `isStopped` stayed `false`. The `documentElement.overflow` lock
 masks it enough to look fine, which is what makes it easy to miss.
 
-Measured lifecycle (desktop, dev): draw holds to ~730ms, halves part 1097 →
-1824ms from the seam, line fades as they go, node removed at ~2.0s.
+Measured lifecycle (desktop, dev): draw runs to the 0.99 ceiling with the label
+and trail tracking the edge, `closing` at ~1.2s fades both over 400ms, `opening`
+at ~1.8s parts the halves, node removed at ~3.0s.
 
 ## The hero sequence
 

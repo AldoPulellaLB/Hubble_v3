@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import PixelCard from './PixelCard'
 import s from './Preloader.module.css'
 
 /** Fired by `SequenceHero` the moment frame 0 has decoded — the point at which
@@ -8,21 +9,35 @@ import s from './Preloader.module.css'
  *  no sequence never fires it, which is why `window.load` is also a resolver. */
 export const HERO_READY = 'hubble:hero-ready'
 
+export const PRELOADER_LABEL = 'Connected intelligent energy'
+
 /* The line must be visibly drawn before it opens, or a warm reload flashes a
    blue frame and reads as a glitch rather than an intro. */
-const MIN_MS = 900
+const MIN_MS = 1400
+/* How long the creep takes to reach its 99% ceiling. */
+const DRAW_MS = 3400
+/* 99% → 100%: the label and the trail fade off the line. */
+const CLOSE_MS = 420
 /* And it must never be the reason the site cannot be reached. Past this the
-   preloader opens regardless of what has or has not loaded. The CSS failsafe
-   in the stylesheet sits further out again, for the case where none of this
-   code runs at all. */
-const MAX_MS = 5000
+   preloader runs its close and open regardless of what has loaded. The CSS
+   failsafe in the stylesheet sits further out again, for the case where none
+   of this code runs at all. */
+const MAX_MS = 6500
 
-type Phase = 'drawing' | 'opening' | 'gone'
+/* The draw stops here and waits. The last percent belongs to the real ready
+   signal, so the line *completing* is always the truth and never a guess. */
+const CEILING = 0.99
+
+type Phase = 'drawing' | 'closing' | 'opening' | 'gone'
 
 /**
  * The site's entry: a brand-blue field split by a white line that draws across
  * the page while the first view loads, then parts at that line to present the
  * site behind it.
+ *
+ * The line carries a trail of `PixelCard`'s pixels — the same effect as the
+ * Stats and meter cards — and the standing line, right-aligned to the leading
+ * edge. At 99% both fade off; at 100% the halves part.
  *
  * Three things it has to get right, each of which is a way this pattern
  * normally breaks:
@@ -45,18 +60,45 @@ export default function Preloader() {
   const [p, setP] = useState(0)
   const done = useRef(false)
 
+  /* The label is right-aligned to the leading edge, so on a narrow screen it
+     runs off the left of the viewport: measured at -298px of a 301px label on
+     a 375 phone, at full opacity, for the first 1.2s. Both fixes below need
+     its real width, and a fraction would only know today's copy — so measure
+     it, and re-measure when the webfont swaps in and on resize. */
+  const labelRef = useRef<HTMLSpanElement>(null)
+  const [labelW, setLabelW] = useState(0)
+  const [vw, setVw] = useState(0)
+
+  useEffect(() => {
+    const el = labelRef.current
+    if (!el) return
+    const measure = () => { setLabelW(el.offsetWidth); setVw(window.innerWidth) }
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    window.addEventListener('resize', measure)
+    document.fonts?.ready.then(measure)
+    return () => { ro.disconnect(); window.removeEventListener('resize', measure) }
+  }, [])
+
+  /* Show it only once the line is actually long enough to carry it. Before
+     that the label would either clip off-screen or stick out past the end of
+     the line it is supposed to be riding. Same threshold as the `max()` in
+     the stylesheet, so the two cannot disagree. */
+  const labelFits = labelW > 0 && vw > 0 && p * vw >= labelW + 8
+
   useEffect(() => {
     const mountedAt = performance.now()
     let raf = 0
-    let openTimer = 0
-    let maxTimer = 0
+    const timers: number[] = []
+    const after = (ms: number, fn: () => void) => timers.push(window.setTimeout(fn, ms))
 
-    /* Creep toward 0.9 on an ease-out. It never completes on its own — the
-       last tenth belongs to the real ready signal, so the line finishing is
-       always the truth and never a guess. */
+    /* Creep toward the ceiling on an ease-out — most of the width early, then
+       a slow approach, which is what reads as loading rather than as a timed
+       animation that happens to take 3.4s. */
     const creep = () => {
-      const t = Math.min(1, (performance.now() - mountedAt) / 2200)
-      setP(0.9 * (1 - Math.pow(1 - t, 3)))
+      const t = Math.min(1, (performance.now() - mountedAt) / DRAW_MS)
+      setP(CEILING * (1 - Math.pow(1 - t, 3)))
       if (t < 1) raf = requestAnimationFrame(creep)
     }
     raf = requestAnimationFrame(creep)
@@ -65,12 +107,20 @@ export default function Preloader() {
       if (done.current) return
       done.current = true
       cancelAnimationFrame(raf)
+
+      /* 99% → 100%. The line finishes its last percent while the label and
+         the pixel trail fade, so the line is alone on the field when it
+         opens. */
       setP(1)
-      setPhase('opening')
-      /* Unmount once the longest transition in the stylesheet has run
-         (260ms delay + 860ms travel). Leaving the node in place would keep a
-         fixed, full-screen layer over the site for ever. */
-      openTimer = window.setTimeout(() => setPhase('gone'), 1200)
+      setPhase('closing')
+
+      after(CLOSE_MS, () => {
+        setPhase('opening')
+        /* Unmount once the longest transition in the stylesheet has run
+           (200ms delay + 980ms travel). Leaving the node in place would keep
+           a fixed, full-screen layer over the site for ever. */
+        after(1240, () => setPhase('gone'))
+      })
     }
 
     /* Hold everything until the minimum has elapsed, so the line always gets
@@ -78,7 +128,7 @@ export default function Preloader() {
     const openWhenAllowed = () => {
       const waited = performance.now() - mountedAt
       if (waited >= MIN_MS) open()
-      else window.setTimeout(open, MIN_MS - waited)
+      else after(MIN_MS - waited, open)
     }
 
     /* Resolvers. Whichever arrives first wins — a page with a sequence hero
@@ -93,22 +143,22 @@ export default function Preloader() {
 
     /* Fonts matter here specifically: Sora and Montserrat swapping in behind
        the panel is the difference between the site arriving finished and
-       arriving and then reflowing. */
+       arriving and then reflowing. The label itself is Montserrat, so it
+       would otherwise re-letter mid-draw. */
     Promise.all([whenLoaded, document.fonts?.ready ?? Promise.resolve()])
       .then(() => {
         /* Give a sequence hero a moment to answer first — on the landing page
            `load` fires well before frame 0 has decoded, and opening on `load`
            alone would reveal an empty canvas. */
-        window.setTimeout(() => { if (!done.current) openWhenAllowed() }, 400)
+        after(400, () => { if (!done.current) openWhenAllowed() })
       })
       .catch(openWhenAllowed)
 
-    maxTimer = window.setTimeout(open, MAX_MS)
+    after(MAX_MS, open)
 
     return () => {
       cancelAnimationFrame(raf)
-      clearTimeout(openTimer)
-      clearTimeout(maxTimer)
+      timers.forEach(clearTimeout)
       window.removeEventListener(HERO_READY, onHeroReady)
     }
   }, [])
@@ -153,15 +203,32 @@ export default function Preloader() {
 
   return (
     <div
-      className={`${s.root} ${phase === 'opening' ? s.opening : s.drawing}`}
-      style={{ ['--p' as string]: p }}
+      className={`${s.root} ${s[phase]}`}
+      style={{ ['--p' as string]: p, ['--labelw' as string]: `${labelW}px` }}
       role="status"
       aria-live="polite"
       aria-label="Loading Hubble Energy"
     >
       <div className={`${s.half} ${s.top}`} />
       <div className={`${s.half} ${s.bottom}`} />
-      <span className={s.line} />
+
+      <div className={s.rail}>
+        {/* Clipped, not resized: PixelCard rebuilds its whole field from a
+            ResizeObserver, so the canvas inside is a fixed width and only
+            this wrapper moves. */}
+        <div className={s.band} aria-hidden="true">
+          <div className={s.bandInner}>
+            <PixelCard variant="barBlue" active={phase === 'drawing'} className={s.pix} />
+          </div>
+        </div>
+        <span className={s.line} />
+        <span
+          ref={labelRef}
+          className={`${s.label} ${labelFits ? s.labelIn : ''}`}
+        >
+          {PRELOADER_LABEL}
+        </span>
+      </div>
     </div>
   )
 }

@@ -658,6 +658,64 @@ that amount; only the render is meant to be consumed.
 
 ---
 
+## The preloader
+
+The site's entry. A field of `--blue-700` split by a white 2px line that draws
+left to right while the first view loads; when it is ready the line completes
+and the two blue halves part from it, opening the page.
+
+`components/Preloader.tsx` + `.module.css`, mounted **first in `<body>`** in
+`app/layout.tsx` — above `SmoothScroll`, so it covers every route including the
+nav and the drawer stage. `z-index: 1000`; nothing else in the site claims a
+layer that high (drawer stage 100, skip link 200).
+
+**It is in the server markup, and that is the point.** A preloader mounted after
+hydration shows the site and then covers it up, which is worse than not having
+one. The panel ships in the first paint and JS only ever removes it.
+
+### What it waits for
+
+| Route | Resolver |
+| --- | --- |
+| Landing (`SequenceHero`) | the `hubble:hero-ready` event, dispatched when **frame 0** decodes |
+| Everything else | `window.load` + `document.fonts.ready`, then a 400ms grace |
+
+The grace exists because on the landing page `load` fires well before frame 0 has
+decoded — opening on `load` alone reveals an empty canvas. Fonts are in the wait
+specifically so Sora and Montserrat swap in *behind* the panel rather than
+reflowing the page after it opens.
+
+`HERO_READY` is exported from `Preloader.tsx` and dispatched from two places in
+`SequenceHero` — the frame-0 `onload`, and the reduced-motion early return,
+where there are no frames to wait for and the poster is the hero.
+
+### Three ceilings, because a stuck preloader takes the whole site with it
+
+1. `MIN_MS` (900) — the floor, not a ceiling: the line must visibly draw, or a
+   warm reload flashes a blue frame and reads as a glitch.
+2. `MAX_MS` (5000) — opens regardless of what has or has not loaded.
+3. **A CSS `@keyframes` failsafe at 8s** on `.root`. It runs off the CSS clock,
+   so it fires when the bundle never executes at all — no JS, a hydration
+   error, a stalled chunk. It is on the container's visibility only, so it
+   cannot fight the halves' transforms.
+
+### Two things that bit during the build
+
+**The draw is never tied to a real total.** The only honest number here is
+"frame 0 plus the fonts", which resolves in one jump — a real progress bar would
+sit at 0 and then snap to 1. The line creeps to 0.9 on an ease-out and the last
+tenth belongs to the ready signal, so the line *finishing* is always the truth.
+
+**Lenis has to be acquired by polling, not by one read.** The preloader is
+mounted above `SmoothScroll` so its markup is first in the body — which means
+its effect also runs first, and `window.__hubbleLenis` does not exist yet. A
+single `lenis?.stop()` there silently no-ops and the page scrolls behind the
+panel. Verified: `isStopped` stayed `false`. The `documentElement.overflow` lock
+masks it enough to look fine, which is what makes it easy to miss.
+
+Measured lifecycle (desktop, dev): draw holds to ~730ms, halves part 1097 →
+1824ms from the seam, line fades as they go, node removed at ~2.0s.
+
 ## The hero sequence
 
 Three contracts, all of which the 2026-08-25 desktop re-export broke at once.

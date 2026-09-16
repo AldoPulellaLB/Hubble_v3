@@ -1,0 +1,92 @@
+/* The preloader sits above everything — the drawer stage is 100, the skip
+   link 200. Nothing else in the site claims a layer this high. */
+.root {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  pointer-events: auto;
+
+  /* The failsafe. This animation runs off the CSS clock, so it fires even if
+     the bundle never executes — no JS, a hydration error, a stalled chunk.
+     Without it a dead script leaves a blue sheet over the whole site with no
+     way past it, which is the failure the hero's own loader has already cost
+     us once. The JS path removes this element long before 8s. */
+  animation: failsafe 1ms linear 8s forwards;
+}
+
+@keyframes failsafe {
+  to { opacity: 0; visibility: hidden; pointer-events: none; }
+}
+
+/* Two halves meeting on the centre line. They carry the brand blue; parting
+   them is the reveal. */
+.half {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 50.5%;            /* the .5 overlaps the seam so no hairline of the
+                               site shows between them before they move */
+  background: var(--blue-700);
+  will-change: transform;
+}
+
+.top { top: 0; transform-origin: top; }
+.bottom { bottom: 0; transform-origin: bottom; }
+
+/* The line. Drawn left to right while loading, then held as the seam the
+   halves open from. `scaleX` rather than `width` so the draw is composited
+   and cannot reflow anything behind it. */
+.line {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 100%;
+  height: 2px;
+  margin-top: -1px;
+  background: var(--white);
+  transform: scaleX(0);
+  transform-origin: left center;
+  will-change: transform, opacity;
+}
+
+/* ── Phase: drawing ──────────────────────────────────────────────────────
+   A long ease-out. It covers most of its width early and then creeps, which
+   reads as progress against an unknown total — and it means a fast load
+   still shows a line that is visibly moving rather than a static bar. */
+.drawing .line {
+  transform: scaleX(var(--p, 0));
+  transition: transform 640ms var(--ease-out);
+}
+
+/* ── Phase: opening ──────────────────────────────────────────────────────
+   The line completes, then the halves part from it. The line holds through
+   the first half of the movement and fades on the way out, so the eye reads
+   "the line opened the page" rather than "a line disappeared".
+
+   The delays are what sequence this with no timers in JS: the halves wait
+   for the line to finish its run. */
+.opening .line {
+  transform: scaleX(1);
+  transition:
+    transform 320ms var(--ease-out),
+    opacity 420ms var(--ease-out) 420ms;
+  opacity: 0;
+}
+
+.opening .half {
+  transition: transform 860ms var(--ease-in-out) 260ms;
+}
+
+.opening .top { transform: translateY(-100%); }
+.opening .bottom { transform: translateY(100%); }
+
+/* ── Reduced motion ──────────────────────────────────────────────────────
+   No draw, no parting. The panel is shown and then dropped, which still
+   covers the first paint without animating anything across the screen. */
+@media (prefers-reduced-motion: reduce) {
+  .line { transform: scaleX(1); transition: none; }
+  .opening .line,
+  .opening .half { transition: opacity 200ms linear; }
+  .opening .top,
+  .opening .bottom { transform: none; opacity: 0; }
+}

@@ -4,6 +4,7 @@ import Footer from '@/components/Footer'
 import SmoothScroll from '@/components/SmoothScroll'
 import ScrollSnap from '@/components/ScrollSnap'
 import SavingsStage from '@/components/SavingsStage'
+import Preloader from '@/components/Preloader'
 import { load } from '@/lib/content'
 import type { NavItem, LinkRef } from '@/lib/types'
 import './globals.css'
@@ -49,6 +50,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en-ZA">
       <body>
+        {/* First in the body and on its own layer: it must be in the server
+            markup, or the site paints before it and the panel drops on top. */}
+        <Preloader />
         <SmoothScroll />
         {/* Soft snapping for any `[data-full-vh]` section. Mounted after
             SmoothScroll so Lenis exists by the time its effect runs. */}

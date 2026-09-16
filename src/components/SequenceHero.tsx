@@ -5,6 +5,7 @@ import Button from './Button'
 import RevealText from './RevealText'
 import { PixelArrow } from './Icons'
 import { clamp, onFrame, prefersReducedMotion } from '@/lib/motion'
+import { HERO_READY } from './Preloader'
 import s from './SequenceHero.module.css'
 
 export type Beat = { frame: number; eyebrow: string; title: string; copy: string }
@@ -84,7 +85,13 @@ export default function SequenceHero({
     const cv = canvas.current
     if (!el || !cv) return
 
-    if (prefersReducedMotion()) { setReduced(true); setReady(true); return }
+    if (prefersReducedMotion()) {
+      setReduced(true); setReady(true)
+      /* No frames to wait for under reduced motion — the poster is the hero.
+         Announce immediately or the preloader sits on its minimum. */
+      window.dispatchEvent(new Event(HERO_READY))
+      return
+    }
 
     const variant = window.innerWidth < MOBILE_BREAK ? 'mobile' : 'desktop'
     const frames = variant === 'mobile' ? mobileCount : desktopCount
@@ -148,7 +155,12 @@ export default function SequenceHero({
         images[index] = img
         count++
         setLoaded(count)
-        if (index === 0) { setReady(true); lastDrawn = -1 }
+        if (index === 0) {
+          setReady(true); lastDrawn = -1
+          /* Frame 0 is the first thing the canvas can actually paint, so it is
+             the honest moment to let the preloader open. */
+          window.dispatchEvent(new Event(HERO_READY))
+        }
         else if (index === lastWanted) lastDrawn = -1
       }
       img.onerror = () => { count++ }

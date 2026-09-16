@@ -11,7 +11,7 @@ Theme: **"Power keeps life in motion."** Services lead, products prove.
 ## Quick start
 
 ```bash
-cd "v2/site" && npm install && npm run dev
+npm install && npm run dev
 ```
 
 Dev server runs on **:3210**.
@@ -42,39 +42,44 @@ capture listener and intercepts the link from anywhere on the site.
 
 ## Layout
 
-```
-v2/site/              The build
-  src/app/            Routes, layout, globals.css
-  src/components/     Shared UI + motion primitives (Reveal, FlowLines, …)
-  src/sections/       Page sections
-  src/lib/            content.ts, motion.ts, savings.ts, emphasis.tsx
-  content/*.json      All page copy, read at runtime — edits land on next request
-  public/             Runtime assets only (104 MB, mostly the hero sequences)
-  README.md           The deep documentation — read this first (129 KB)
+The repository **is** the Next.js app — `package.json` is at the root, so any
+host auto-detects it and `npm install && npm run dev` works from a fresh clone
+with no root-directory configuration.
 
-context/              Project history and decisions
-  SESSION-HANDOVER.md Current state, session by session. Read "Awaiting Aldo" first.
-  decisions.md        Reasoning behind the stack and scope
-  v2-direction.md     Measured geometry
-  _concept-backups/   The only copy of two retired concepts — see below
-  _exports/           Full-page renders
-
-Brand Assets/         Fonts (Sora, Montserrat) and the 10 logo SVGs
-docs/ASSETS.md        What is in public/, what lives outside the repo
-Placeholder Images/   Stand-in photography
-tools/                Standalone scripts (link check, screenshots, placeholders)
 ```
+src/app/              Routes, layout, globals.css
+src/components/       Shared UI + motion primitives (Reveal, FlowLines, …)
+src/components/sections/  Page sections
+src/lib/              content.ts, motion.ts, savings.ts, emphasis.tsx
+content/*.json        All page copy, read at runtime — edits land on next request
+public/               Runtime assets only (97 MB, mostly the hero sequences)
+scripts/              normalise-sequence.mjs
+
+docs/
+  DESIGN-SYSTEM.md    The deep documentation — read this first (129 KB)
+  ASSETS.md           What is in public/, what lives outside the repo
+
+support/              Not part of the build; excluded from tsconfig
+  context/            Project history, decisions, session handover
+  Brand Assets/       Fonts (Sora, Montserrat) and the 10 logo SVGs
+  Placeholder Images/ Stand-in photography, procedurally generated
+  tools/              Standalone scripts (link check, screenshots, placeholders)
+```
+
+`support/` is excluded in `tsconfig.json`. It holds a few `.tsx` concept
+backups, and without that exclusion `tsc` and `next build` both try to compile
+them.
 
 ## Where the detail lives
 
-**[`v2/site/README.md`](v2/site/README.md) is the real documentation.** The
+**[`docs/DESIGN-SYSTEM.md`](docs/DESIGN-SYSTEM.md) is the real documentation.** The
 layout system, motion contracts, the design-system tokens and roughly thirty-five
 hard-won failure modes are written up there in full. Read it before building a
 page, and add to it rather than starting a parallel set of notes.
 
 ## Assets
 
-`v2/site/public/` holds **only what the site serves** — 97 MB, of which 68 MB is
+`public/` holds **only what the site serves** — 97 MB, of which 68 MB is
 the encoded webp hero sequences. See [`docs/ASSETS.md`](docs/ASSETS.md) for the
 full inventory, how to re-encode a sequence, and the frame-naming rule that
 gates the hero's loader.

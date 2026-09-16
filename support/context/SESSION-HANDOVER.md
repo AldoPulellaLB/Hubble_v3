@@ -22,11 +22,11 @@ else.
 was read as a request for one and a repo was initialised, then removed when Aldo
 clarified he meant "locked in, back it up". The tree is exactly as it was. If it
 is ever wanted: 1,127 files / 150 MB tracked with `node_modules/`, `.next*/`,
-`.DS_Store`, `v2/site/public/product sequence/` (347 MB of PNG masters, superseded
-by the webp sets) and `v2/site/public/Intro/` (323 MB, referenced nowhere in
+`.DS_Store`, `public/product sequence/` (347 MB of PNG masters, superseded
+by the webp sets) and `public/Intro/` (323 MB, referenced nowhere in
 `src/`) ignored — the optimised sets the app serves stay tracked, so a clone runs.
 
-**Read first:** `v2/site/README.md`. It holds the working knowledge — the
+**Read first:** `docs/DESIGN-SYSTEM.md`. It holds the working knowledge — the
 layout system, the motion contracts, and the traps that have already cost time.
 This file is orientation and open questions only.
 
@@ -34,17 +34,17 @@ This file is orientation and open questions only.
 
 ## Where things stand
 
-`v2/site` is the live build; `v1/site` is archived and still runnable.
+the repo root is the live build; `v1/site` is archived and still runnable.
 
 - **Home page** — complete and **signed off**, at Awwwards-quality fidelity
   against Figma `EhfzMjyCPVx7KwWTcfUVee`.
 - **`/products/high-voltage`** — **partial, in progress.** The hero and the first
   section of Figma `1719:27`; Aldo's design for the rest of the page is not
-  finished. The four remaining section nodes are listed in `v2/site/README.md` →
+  finished. The four remaining section nodes are listed in `docs/DESIGN-SYSTEM.md` →
   "Products — High Voltage".
 - **`/solutions/energy-arbitrage`** — complete and **signed off 2026-09-09**.
   Eight sections, all new except `Cta`. See session 7 below and the long
-  "Solutions — Energy Arbitrage" chapter in `v2/site/README.md`.
+  "Solutions — Energy Arbitrage" chapter in `docs/DESIGN-SYSTEM.md`.
 
 **Two pages are now signed off, and the arbitrage page is the pattern for the
 rest of Solutions** — its `ImageHero`, `SolutionSplit`, `ModelCards` and
@@ -56,12 +56,12 @@ Every other nav link is still a dead href.
 **The home page is now the declared source of truth for every page that
 follows.** Aldo's instruction: match its UI, fonts, colours, animations, cards,
 pixel-card hover and hero composition rather than inventing a parallel set.
-That system is written up in `v2/site/README.md` under **The design system —
+That system is written up in `docs/DESIGN-SYSTEM.md` under **The design system —
 the source of truth for new pages**; read it before starting a page. The next
 page's design is coming from Aldo.
 
 ```bash
-cd "v2/site" && npm run dev     # :3210   (v1 is on :3211)
+npm run dev     # :3210   (v1 is on :3211)
 npm run check                   # production build into .next-check
 ```
 
@@ -70,7 +70,7 @@ and the dev server 404s on `main-app.js`, so nothing hydrates and the page
 renders as unstyled inert markup. `npm run check` exists to avoid exactly that.
 Full note in the README.
 
-### Section order (`v2/site/src/app/page.tsx`)
+### Section order (`src/app/page.tsx`)
 
 Hero → Statement → dissolve → **Products** → Services → Strings → Marquee →
 CloudLink → dissolve(overlap) → Projects → **Stats** → dissolve → CTA → Footer.
@@ -459,7 +459,7 @@ composing eight sections — `ImageHero`, `CommercialCase`, `SolutionSplit`,
 ground alternates blue / light / blue / light and closes on black, which is the
 home page's own rhythm.
 
-**All of the how-and-why is in `v2/site/README.md`** under "Solutions — Energy
+**All of the how-and-why is in `docs/DESIGN-SYSTEM.md`** under "Solutions — Energy
 Arbitrage". This section is the orientation only.
 
 ### Shared components that changed (check these before touching the home page)
@@ -626,7 +626,7 @@ of truth — see the README's design-system section before starting.
 calculator. `SavingsStage` holds a `mode` (`savings` | `contact`) instead of a
 boolean, so one component still owns the shell's transform — two overlays both
 animating `scale`/`translate` on it would fight. Full write-up in
-`v2/site/README.md` → **The contact sheet**.
+`docs/DESIGN-SYSTEM.md` → **The contact sheet**.
 
 - Site knocks back to `scale .94` and **stays put**; the nav **retracts
   upwards**; the sheet slides in from the right over a `.42` scrim.
@@ -648,7 +648,7 @@ key off `data-mode`, never `data-open`, since both modes are "open".
 
 ## Session 4 (2026-09-03) — the calculator, and a cleanup pass
 
-Home page only; still no new routes. Everything is in `v2/site/README.md` in
+Home page only; still no new routes. Everything is in `docs/DESIGN-SYSTEM.md` in
 detail — this is the orientation.
 
 **The savings calculator went from placeholder to finished.** Seven steps, and
@@ -764,7 +764,7 @@ Three things this leaves open, all needing Aldo:
 
 ## Session 3 (2026-08-26) — what changed
 
-Still the home page only. Everything below is in `v2/site/README.md` in detail.
+Still the home page only. Everything below is in `docs/DESIGN-SYSTEM.md` in detail.
 
 **The hero.** Aldo dropped a new desktop render — a different animation
 entirely (isometric battery cubes, not the cabinet), 422 frames at 2400x1359
@@ -819,7 +819,7 @@ does that spacing now.
 
 ### From session 8 (High Voltage — in progress)
 
-- **259 source PNGs (333 MB) are still in `v2/site/public/product sequence/`.**
+- **259 source PNGs (333 MB) are still in `public/product sequence/`.**
   Everything in `public/` is served and copied into the build. The webp sets are
   made and in use, so these should move to `3D Files/Sequence/product/` with the
   other source sequences — **not done, because they are Aldo's source assets and
@@ -946,7 +946,7 @@ not defects that block the page.
 Every route other than `/`. The v1 build has 40+ stubbed routes and a working
 `/admin` CMS writing flat JSON — neither has been ported. `lib/content.ts`
 reads the same flat-JSON shape, so the v1 CMS should point at
-`v2/site/content/` with little change.
+`content/` with little change.
 
 **`content/*.json` is read at build time.** The dev server does not watch it —
 touch a source file or restart after editing copy.

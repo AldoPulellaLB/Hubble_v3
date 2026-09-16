@@ -7,7 +7,7 @@ intelligent energy to work": *Our process* + *Your options*, Figma `1797:618`
 and `1797:684`) at Aldo's request.
 
 `services.json` here is the exact block that was removed from
-`v2/site/content/home.json`. Nothing reads it; it is kept only because the repo
+`content/home.json`. Nothing reads it; it is kept only because the repo
 has no version control, so this file is the only copy of that copy.
 
 The five solutions it linked are still reachable from the Solutions mega-panel

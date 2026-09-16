@@ -27,13 +27,17 @@ next-env.d.ts
 # back into the tree must not be able to reach a commit by accident.
 
 # Uncompressed render masters. The site ships the encoded webp sets in
-# v2/site/public/sequence/ — these are the originals they were made from.
+# public/sequence/ — these are the originals they were made from.
 **/Intro/
 **/product sequence/
 *.zip
 
-# Client-supplied material.
-**/Docs/
+# Client-supplied material. Matched by file type, NOT by a folder named
+# "Docs/" — git sets core.ignorecase=true on macOS, so such a rule also
+# swallows this repo's own docs/ directory, silently and without warning.
+*.pdf
+*.docx
+*.pptx
 **/*.fig
 **/reference/calc/
 **/Electricity Calculator/
@@ -41,14 +45,14 @@ next-env.d.ts
 # ON.energy placeholder artwork — removed from the repo. The landing hero
 # shares Hubble's own desktop render across both variants until a real mobile
 # cut is rendered. Do not restore these frames.
-v2/site/public/sequence/mobile/
+public/sequence/mobile/
 **/sequence-old-onenergy/
 
 # Internal working record.
-context/_transcripts/
-context/_backup-*/
-context/reference-on-energy.md
-context/reference-cantor8.md
+support/context/_transcripts/
+support/context/_backup-*/
+support/context/reference-on-energy.md
+support/context/reference-cantor8.md
 
 # ─── macOS / editor noise ────────────────────────────────────────────────────
 .DS_Store
@@ -59,6 +63,9 @@ Thumbs.db
 *.swp
 *~
 ~$*
+
+# Runtime upload target for the future /admin CMS.
+public/uploads/
 
 # ─── Logs & caches ───────────────────────────────────────────────────────────
 *.log

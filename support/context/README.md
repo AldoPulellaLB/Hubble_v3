@@ -17,13 +17,13 @@ of the two reference sites. The teardowns themselves now live outside the repo
 
 ## Source material locations
 
-The build's own assets are in `v2/site/public/` and `Brand Assets/`:
+The build's own assets are in `public/` and `Brand Assets/`:
 
 ```
 Brand Assets/Logo/        10 logo SVGs (do not redraw)
 Brand Assets/fonts/       Sora + Montserrat (ttf + woff2)
-v2/site/public/models/    Per-product GLB placeholders (drop-in replaceable)
-v2/site/public/sequence/  Hero frame sequences, encoded webp
+public/models/    Per-product GLB placeholders (drop-in replaceable)
+public/sequence/  Hero frame sequences, encoded webp
 ```
 
 Client deliverables, render masters and the internal working record are **not in

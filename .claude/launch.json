@@ -5,8 +5,6 @@
       "name": "hubble-v2",
       "runtimeExecutable": "npm",
       "runtimeArgs": [
-        "--prefix",
-        "v2/site",
         "run",
         "dev"
       ],

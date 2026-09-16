@@ -88,4 +88,4 @@ designer's own artwork, revealed by a radial mask rather than redrawn.
    renders it as a plain pill. Confirm whether News gets a dropdown.
 4. The comp's copy differs in places from the v1 content (e.g. Low Voltage's
    body still references "the same template as the High Voltage page"). v2 uses
-   corrected copy — see `v2/site/content/home.json`.
+   corrected copy — see `content/home.json`.

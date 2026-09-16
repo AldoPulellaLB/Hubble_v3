@@ -1,6 +1,0 @@
-# Site-local additions. The repo-root .gitignore covers node_modules, .next,
-# .env* and OS noise for every workspace.
-
-# Prototype reference kept in reference/calc — it must never be served, so
-# nothing from it belongs in public/.
-public/uploads/

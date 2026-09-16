@@ -1,0 +1,114 @@
+.sec { position: relative; background: var(--white); padding-block: clamp(2rem, 4.2vw, 3.75rem); }
+
+/* `.wrap` supplies the max-width and gutters; this only adds the grid. */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+/* Products' circuit run carries on into this section behind the cards, so the
+   cells have to claim a layer above it — the trace is painted above this
+   section's ground on its way in. */
+.cell { display: block; position: relative; z-index: 1; }
+
+/* The plate. `.pixel-card` (PixelCard.css) contributes only `position`,
+   `overflow`, `isolation` and `user-select` — the look is all here, so the
+   card can be restyled without touching the vendored component. */
+.card {
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  min-height: clamp(15rem, 20.8vw, 18.75rem);
+  padding: clamp(1.25rem, 1.5vw, 1.375rem);
+  border-radius: var(--r-card);
+  background: var(--blue-400);
+  /* Hover drops the ground two steps, to the brand's darkest blue, so the
+     scattered pixels have something to read against. Slow, because the pixels
+     themselves are the event — the ground should only settle underneath them.
+     `--ease-out` is an expo curve: it covers most of the distance in the first
+     100ms, which on a colour reads as a snap with a long invisible tail. The
+     symmetric curve is what makes the drop legible as a travel, in and out. */
+  transition: background-color 560ms var(--ease-in-out);
+}
+.card:hover,
+.card:focus-within { background: var(--blue-700); }
+
+/* The hover glyph.
+ *
+ * One per stat, picked by `stat.icon`. Painted as a mask rather than dropped in
+ * as an <img> so the colour stays a CSS value — the exports carry a hard
+ * #123AB8, and the hover ground wants #1239B4: one step above the darkened
+ * plate, enough for the shape to read without competing with the number.
+ *
+ * It rides on the same layer as the type, above the pixel canvas, so the
+ * pixels scatter behind it and the shape stays solid. Being ahead of the
+ * number and the label in the DOM, an equal `z-index` still leaves it under
+ * them where they overlap. */
+.icon {
+  position: absolute;
+  z-index: 1;
+  right: clamp(1.5rem, 3.2vw, 2.75rem);
+  bottom: clamp(1rem, 1.8vw, 1.5rem);
+  height: clamp(8.5rem, 11.7vw, 10.5rem);
+  aspect-ratio: var(--icon-ar);
+  background: #0D34AE;
+  -webkit-mask: var(--icon-src) no-repeat center / contain;
+  mask: var(--icon-src) no-repeat center / contain;
+  pointer-events: none;
+  /* Rest state is fully out. It fades in place — no travel, so the mark reads
+     as the ground resolving rather than as a second thing arriving. */
+  opacity: 0;
+  /* Same curve and length as the ground, so the two settle as one event. */
+  transition: opacity 560ms var(--ease-in-out);
+}
+
+.card:hover .icon,
+.card:focus-within .icon { opacity: 1; }
+
+/* Each glyph keeps its own export ratio so nothing is stretched to a square. */
+.wrench { --icon-src: url('/images/icons/Pixlecard1_icon.svg'); --icon-ar: 169 / 169; }
+.bars   { --icon-src: url('/images/icons/Pixlecard2_icon.svg'); --icon-ar: 209 / 169; }
+.bolt   { --icon-src: url('/images/icons/Pixlecard3_icon.svg'); --icon-ar: 127 / 169; }
+.africa { --icon-src: url('/images/icons/Pixlecard4_icon.svg'); --icon-ar: 147 / 169; }
+
+/* Above the canvas, which is absolutely positioned at inset 0. */
+.value,
+.label,
+.arrow { position: relative; z-index: 1; }
+
+.value {
+  font-family: var(--font-heading);
+  font-size: var(--t-num-md);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.045em;
+  color: var(--white);
+  margin-inline-start: -0.04em;
+}
+
+.label {
+  margin-top: var(--s-4);
+  max-width: 400px;
+  color: var(--blue-200);
+}
+
+.arrow { align-self: end; justify-self: start; }
+
+/* Extra-large displays, matching the sections above. The global `wrap` class
+   caps this at --maxw (1440) and centres it, and from 1440 up globals.css zeroes
+   every wrapper's inline padding — so at 1920 the cards are a 1440 box with
+   240px of bare ground either side. Releasing the cap puts them on a flat 120px
+   gutter, on the same lines as the rest of the page.
+
+   `.sec` is in the selector to out-specify the global `.wrap`, which sets the
+   cap and the padding at the same single-class specificity. */
+@media (min-width: 1920px) {
+  .sec .grid {
+    max-width: none;
+    padding-inline: 120px;
+  }
+}
+
+@media (max-width: 767px) {
+  .grid { grid-template-columns: 1fr; }
+}

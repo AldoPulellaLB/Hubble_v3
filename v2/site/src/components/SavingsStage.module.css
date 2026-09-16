@@ -1,0 +1,219 @@
+/* The surface behind the site. Kept out of the paint entirely while closed —
+   it is a full-viewport opaque plate and has no business being composited under
+   every scroll frame of the page. */
+.stage {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: #CDD2DB;
+  visibility: hidden;
+}
+.stage[data-open='true'] { visibility: visible; }
+
+/* ── The contact dock ─────────────────────────────────────────────────────────
+   The second overlay on the same stage. It gets a scrim rather than a ground
+   of its own: the sheet only takes the right-hand third, so the site stays in
+   view behind it — knocked back and dimmed, which is what says it is still
+   there and still where you are going back to. */
+.dock {
+  position: fixed;
+  inset: 0;
+  /* Above the shell, which is `z-index: 1`. The calculator's `.stage` can sit
+     at 0 because that card *moves away* — it drops 75vh and stops covering
+     anything. Here the site stays put and only knocks back, so at 0 the sheet
+     rendered behind it and the whole form was unclickable. */
+  z-index: 2;
+  visibility: hidden;
+  background: rgba(6, 10, 20, 0);
+  transition: background-color 520ms var(--ease-out), visibility 0s linear 700ms;
+}
+.dock[data-open='true'] {
+  visibility: visible;
+  background: rgba(6, 10, 20, .42);
+  transition: background-color 560ms var(--ease-out), visibility 0s;
+}
+
+/* The sheet itself slides; the scrim only fades. Out is shorter, and it is the
+   sheet that leads on the way out — the dim lingering under a sheet that has
+   already gone reads as a stall. */
+.dock > * {
+  translate: 100% 0;
+  transition: translate 520ms var(--ease-in-out);
+}
+.dock[data-open='true'] > * {
+  translate: 0 0;
+  transition: translate 680ms var(--ease-out) 60ms;
+}
+
+/* The card's motion, carried by two elements: the page itself and the nav layer
+ * riding above it. Both move as one.
+ *
+ * `scale` and `translate` are used as their own properties rather than as one
+ * `transform`, which is the whole reason the choreography works: they are
+ * separately animatable, so the recede and the drop can carry different
+ * durations, curves and delays while staying on the compositor. As individual
+ * properties the translate is also applied *before* the scale, so 70vh means
+ * 70vh rather than 70vh of shrunken space.
+ *
+ * Timings here are the exit, since a transition is read off the state being
+ * moved *to*. The drop reverses first and the frame unwinds underneath it — and
+ * the whole thing is shorter than the entrance, because a reader closing
+ * something wants it gone, not performed at them. */
+.shell,
+.bar {
+  transform-origin: 50% 50%;
+  scale: 1;
+  translate: 0 0;
+  transition:
+    translate 620ms var(--ease-in-out) 0ms,
+    scale 460ms var(--ease-out) 240ms;
+}
+
+.shell {
+  position: relative;
+  z-index: 1;
+  border-radius: 0;
+  transition:
+    translate 620ms var(--ease-in-out) 0ms,
+    scale 460ms var(--ease-out) 240ms,
+    border-radius 360ms var(--ease-out) 300ms,
+    box-shadow 520ms linear 160ms;
+}
+
+/* Zero height, so the fixed bar inside still resolves `top: 0` against the top
+   of the viewport and nothing here can swallow a click. The origin is pushed
+   down to the viewport's middle, which is the point the card scales about — the
+   two have different boxes and have to agree on one centre. */
+.bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 0;
+  z-index: 100;
+  transform-origin: 50% 50vh;
+}
+
+/* Fixed for the length of the transition, so the card is a window on the page
+   rather than the page itself. `overflow` does the corner clipping and holds
+   the scroll offset; see the component for why it is a scrollTop. */
+.frozen {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  will-change: scale, translate;
+}
+
+/* Nothing inside the card answers the pointer while it is off its ground —
+   `inert` is not enough on its own, since an inert subtree still hit-tests and
+   simply swallows the event. That was the close button being unclickable: the
+   card is a viewport-sized fixed box whatever its transform says, and the
+   hero's own fixed layers inside it were catching everything.
+
+   The card element itself stays live, and it *is* only the card: transforms
+   are honoured in hit testing, so its box is the 90%-scaled rectangle sitting
+   75vh down. That is what lets a click on the card read as "put it back" while
+   a click above it goes to the surface behind. */
+.frozen * { pointer-events: none; }
+
+/* Carries `inert` and nothing else — no box, so it cannot affect the card. */
+.reel { display: contents; }
+
+/* The entrance. The frame forms and recedes first; the drop is held 360ms so it
+   starts as the recede is settling — one gesture with a hand-off in it, rather
+   than two things moving at once. */
+.shell[data-mode='savings'],
+.bar[data-mode='savings'] {
+  scale: .9;
+  translate: 0 calc(75vh + var(--calc-drop));
+  transition:
+    scale 560ms var(--ease-out) 0ms,
+    translate 720ms var(--ease-in-out) 360ms;
+}
+
+/* ── Contact mode ────────────────────────────────────────────────────────────
+   The site knocks back and stays put — no drop. The sheet only covers the
+   right-hand third, so dropping the page 75vh would leave the reader looking
+   at empty ground for the two thirds the sheet does not use. A recede plus the
+   dim is enough to put it behind, and it keeps the page readable, which is the
+   point of a contact form appearing over it rather than instead of it.
+
+   The scale is the same gesture as the savings card, one step shallower. Its
+   own curve and duration, because this one has nothing to hand off to. */
+.shell[data-mode='contact'],
+.bar[data-mode='contact'] {
+  scale: .94;
+  translate: 0 0;
+  transition: scale 620ms var(--ease-out);
+}
+
+.shell[data-mode='contact'] {
+  border-radius: 32px;
+  box-shadow: 30px 30px 60px 0 rgba(0, 0, 0, .3);
+  transition:
+    scale 620ms var(--ease-out),
+    border-radius 420ms var(--ease-out),
+    box-shadow 560ms linear;
+}
+
+/* The nav retracts upward and does not come back until the sheet is gone. It
+   cannot simply ride the scale as it does in savings mode: there the bar
+   travels with the card and stays legible on it, whereas here the card barely
+   moves and a nav sitting on it would compete with the sheet for the same
+   corner. Up and out is the honest answer, and it is why `.bar` takes its own
+   `translate` here rather than inheriting the shared one. */
+.bar[data-mode='contact'] {
+  /* A length, not a percentage. `.bar` is a deliberately **zero-height** fixed
+     layer (see its own note), and a percentage in `translate` resolves against
+     the element's own size — so `-140%` was -140% of 0 and the nav sat exactly
+     where it started while every other part of the mode worked. The pills are
+     `--nav-h` tall and sit ~30px down; 9rem clears them with room. */
+  translate: 0 -9rem;
+  transition:
+    scale 620ms var(--ease-out),
+    translate 520ms var(--ease-in-out);
+}
+
+/* The whole card is the way back — clicking it does what the close button does,
+   so the pointer says so. */
+.shell[data-open='true'] { cursor: pointer; }
+
+/* Its bar rides above it and never takes a click of its own: a click anywhere
+   over the pills falls through to the card and dismisses like the rest of it. */
+.bar[data-open='true'] { pointer-events: none; }
+
+/* Frame and shadow belong to the card alone. On the nav layer, which is zero
+   pixels tall, a shadow would paint as a dark rule across the viewport.
+
+   Keyed to the mode, not to `data-open`: contact mode is also "open" and wants
+   a shallower frame, and this rule sits below its block — on `[data-open]` the
+   two had the same specificity and this one silently won. */
+.shell[data-mode='savings'] {
+  border-radius: 50px;
+  /* Cast down and to the right, so the light reads as coming from the top-left
+     rather than from straight above — the offset is what makes the card look
+     lifted off the ground instead of pressed onto it. */
+  box-shadow: 40px 40px 40px 0 rgba(0, 0, 0, .35);
+  transition:
+    scale 560ms var(--ease-out) 0ms,
+    translate 720ms var(--ease-in-out) 360ms,
+    border-radius 420ms var(--ease-out) 0ms,
+    box-shadow 560ms linear 0ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* The reveal still happens — it is the mechanism, not decoration. It just
+     doesn't travel. */
+  .shell,
+  .bar,
+  .shell[data-open='true'],
+  .bar[data-open='true'],
+  .shell[data-mode='savings'],
+  .bar[data-mode='savings'],
+  .shell[data-mode='contact'],
+  .bar[data-mode='contact'],
+  .dock,
+  .dock[data-open='true'],
+  .dock > *,
+  .dock[data-open='true'] > * { transition: none; }
+}

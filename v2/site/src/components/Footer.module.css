@@ -1,0 +1,171 @@
+.sec { background: var(--black); padding-bottom: var(--frame); }
+
+.panel {
+  border-radius: var(--r-panel);
+  background: var(--blue-700);
+  color: var(--white);
+  /* Even top and bottom, at the reduced value the top was cut to — 70% of the
+     original ramp, every stop scaled rather than just the cap, so the plate
+     holds its symmetry at every width. */
+  padding: clamp(1.75rem, 3.43vw, 3.08rem) clamp(1.5rem, 3.4vw, 3.1rem);
+}
+
+.top {
+  display: grid;
+  grid-template-columns: minmax(0, 6fr) minmax(0, 6fr);
+  gap: clamp(2.5rem, 5vw, 4.5rem);
+  align-items: start;
+}
+
+/* A flex column stretched to the row, so the social group can be pushed to its
+   foot and land on the Contact row's stroke opposite.
+
+   `align-self` and not `align-items: stretch` on `.top`: the right-hand column
+   is itself a grid, and stretching it would hand the spare height to its own
+   rows and re-space all six links. Only this side needs to fill. */
+.brand {
+  max-width: 34rem;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+}
+.title { color: var(--white); max-width: 12ch; }
+.actions { display: flex; flex-wrap: wrap; gap: .625rem; margin-top: clamp(1.75rem, 3vw, 2.5rem); }
+/* 30rem, not the old 34ch (360px). The line needs 438px to sit on one, and
+   `.brand` is 544 wide — so the measure was forcing a wrap it had room to avoid.
+   Worse, 360 lands in the window where "integrated, end-to-" fits and
+   "end-to-end" does not, so it broke the compound at its own hyphen.
+
+   Where it does still wrap — the panel narrows below 480 on a phone — it breaks
+   at the comma (272 + 160), so the compound stays whole without help. No
+   `text-wrap` override here: `.t-body`'s `pretty` is at the same specificity
+   and later in the cascade, so anything set here would be dead code. */
+.sub {
+  color: rgba(255, 255, 255, .82);
+  margin-top: var(--s-5);
+  max-width: 30rem;
+}
+
+/* The title and the icons as one block at the foot of the column. `margin-top:
+   auto` does the pushing; the gap above is `padding` and not margin, because an
+   auto margin *is* the gap and collapses to nothing the moment the column has no
+   spare height — which is exactly what happens below 1024, where the two columns
+   stack and this would otherwise sit hard against the buttons. Padding is not
+   consumed by the push, so it is a floor at every width. */
+.connect {
+  margin-top: auto;
+  padding-top: clamp(1.75rem, 3vw, 2.5rem);
+}
+.connectTitle {
+  font-size: var(--t-sm);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .92);
+  margin-bottom: var(--s-4);
+}
+
+/* No top margin of its own any more — the group above carries it. */
+.socials { display: flex; gap: 1.25rem; }
+.social {
+  display: grid;
+  place-items: center;
+  width: 40px; height: 40px;
+  margin-inline-start: -8px;
+  border-radius: var(--r-btn);
+  color: var(--white);
+  transition: background-color var(--dur-std) var(--ease-out), transform var(--dur-std) var(--ease-out);
+}
+.social:hover { background: rgba(255, 255, 255, .12); transform: translateY(-2px); }
+
+/* ── Primary links ──────────────────────────────────────────── */
+.primary { display: grid; }
+.big {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-4);
+  padding-block: .75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, .28);
+}
+.bigLabel {
+  color: var(--white);
+  display: inline-block;
+  transition: transform 420ms var(--ease-out);
+}
+.big:hover .bigLabel { transform: translateX(10px); }
+.bigChev { color: var(--cyan-600); transition: transform 420ms var(--ease-out); }
+.big:hover .bigChev { transform: translateX(6px); }
+
+/* ── Columns ────────────────────────────────────────────────── */
+.cols {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+  margin-top: clamp(3rem, 6vw, 5.5rem);
+}
+.colTitle {
+  font-size: var(--t-sm);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .92);
+  margin-bottom: var(--s-5);
+}
+/* Tight: the links are 12.8px on a 1.62 line, so the line box already carries
+   most of the separation and .5rem read as five loose lines rather than a list.
+   The Presence column shares this class — its own block breaks come from
+   `.presenceGap`, which is independent of this. */
+.colList { display: grid; gap: .2rem; }
+.colLink {
+  /* Footer-only step down from `--t-body`; the token stays where it is so the
+     rest of the page is untouched. */
+  font-size: .8rem;
+  color: rgba(255, 255, 255, .84);
+  transition: color var(--dur-fast) linear;
+}
+.colLink:hover { color: var(--cyan-400); }
+.presenceLine { font-size: .8rem; color: rgba(255, 255, 255, .84); }
+/* 600 rather than 700: Montserrat ships Regular, Medium and SemiBold here, so
+   700 would be a browser-synthesised bold instead of a real cut. Full white as
+   well — at this size, weight alone is a thin signal. */
+.presenceRegion { font-weight: 600; color: var(--white); }
+.presenceGap { height: .25rem; }
+
+/* ── Base row ───────────────────────────────────────────────── */
+.base {
+  display: flex;
+  align-items: center;
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+  flex-wrap: wrap;
+  margin-top: clamp(2.5rem, 5vw, 4.5rem);
+}
+.logo { width: 110px; height: auto; }
+.legal { display: flex; flex-wrap: wrap; gap: 1.25rem; }
+.legalLink { font-size: var(--t-sm); color: rgba(255, 255, 255, .8); }
+.legalLink:hover { color: var(--cyan-400); }
+.copy { margin-inline-start: auto; font-size: var(--t-sm); color: rgba(255, 255, 255, .8); }
+
+/* Extra-large displays, matching the sections above. The global wrapper caps
+   this at --maxw (1440) and centres it, and from 1440 up globals.css zeroes
+   every wrapper's inline padding — so at 2560 the content sits 560px in from
+   the edge. Full width on a flat 120px gutter puts it on the page's own line.
+
+   `.sec` is in the selector to out-specify the global class, which sets the cap
+   and the padding at the same single-class specificity. */
+@media (min-width: 1920px) {
+  /* `:global` because Footer.tsx uses the bare global `.frame`; there is no
+     module class on that element to target. */
+  .sec :global(.frame) {
+    max-width: none;
+    padding-inline: 120px;
+  }
+}
+
+@media (max-width: 1023px) {
+  .top { grid-template-columns: 1fr; }
+  .cols { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .title { max-width: none; }
+}
+@media (max-width: 560px) {
+  .cols { grid-template-columns: 1fr; }
+  .copy { margin-inline-start: 0; }
+}

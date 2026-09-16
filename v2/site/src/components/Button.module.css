@@ -1,0 +1,140 @@
+.btn {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  gap: .75rem;
+  min-height: var(--btn-h);
+  padding: 0 1.25rem;
+  border-radius: var(--r-btn);
+  font-family: var(--font-body);
+  font-size: var(--t-btn);
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: color var(--dur-std) var(--ease-out),
+              background-color var(--dur-std) var(--ease-out),
+              border-color var(--dur-std) var(--ease-out);
+}
+.label { position: relative; z-index: 1; }
+.icon  { position: relative; z-index: 1; display: grid; place-items: center; opacity: .9; }
+
+/* No padding here, deliberately. The mark is a 4x6 svg and its `width`
+   attribute is a presentation attribute, so under the global `border-box` the
+   6.4px of inline padding this used to carry was subtracted from the 4px box —
+   content width zero, and the arrow disappeared entirely while still reporting
+   a colour and a size. The button's own 12px `gap` does the spacing. */
+.chev {
+  position: relative;
+  z-index: 1;
+  flex: none;
+  color: var(--chev-ink, currentColor);
+  margin-inline-start: auto;
+  transition: transform var(--dur-std) var(--ease-out);
+}
+.btn:hover .chev { transform: translateX(3px); }
+
+/* The fill wipe. Scaled from the left on hover; parked at 0 otherwise. */
+.wipe {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 460ms var(--ease-out);
+}
+.btn:hover .wipe { transform: scaleX(1); }
+
+/* ── Variants ───────────────────────────────────────────────────
+   The chevron reads `--chev-ink`, so a use site can set its own without
+   reaching for a class it cannot see across module boundaries — which is how
+   Products' `.quiet` gets a blue arrow on its light plate.
+   
+   The rule the ink follows: a blue plate takes a white arrow, a light plate
+   takes a blue one. Green and dark plates keep their own. The nav is untouched
+   by all of it — every button up there passes `chevron={false}`. */
+.primary { background: var(--blue-500); color: var(--white); --chev-ink: var(--white); }
+.primary .wipe { background: var(--blue-700); }
+
+.accent { background: var(--green-500); color: var(--n-900); --chev-ink: var(--blue-700); }
+.accent .wipe { background: var(--green-400); }
+
+.light { background: var(--white); color: var(--blue-500); --chev-ink: var(--blue-500); }
+.light .wipe { background: var(--blue-200); }
+
+.ghost {
+  background: rgba(255, 255, 255, .10);
+  color: var(--white);
+  backdrop-filter: blur(6px);
+}
+/* White-on-dark in the hero and the CTA, so the arrow follows the label. Where
+   this variant is re-skinned onto a light plate — Products' `.quiet` — that use
+   site sets `--chev-ink` itself. */
+.ghost .wipe { background: rgba(255, 255, 255, .2); }
+
+.onBlue {
+  background: rgba(4, 12, 40, .45);
+  color: var(--white);
+  --chev-ink: var(--cyan-600);
+}
+
+.onBlue .wipe { background: rgba(4, 12, 40, .75); }
+
+/* ── Circular arrow ─────────────────────────────────────────── */
+.arrow {
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-full);
+  flex: none;
+  overflow: hidden;
+  transition: background-color var(--dur-std) var(--ease-out),
+              border-color var(--dur-std) var(--ease-out),
+              transform var(--dur-std) var(--ease-out);
+}
+.a_sm { --ring: 44px; width: var(--ring); height: var(--ring); }
+.a_lg { --ring: 56px; width: var(--ring); height: var(--ring); }
+
+.hairline { border: 1px solid var(--n-300); color: var(--blue-500); }
+.hairline:hover { background: var(--blue-500); border-color: var(--blue-500); color: var(--white); }
+
+.solid { background: var(--white); color: var(--blue-500); }
+.solid:hover { transform: scale(1.06); }
+
+/* No stroke in either state — the disc itself carries the shape. It rests at
+   40% and fills to solid on hover. */
+.onBlue.arrow {
+  border: 0;
+  background: rgba(12, 45, 150, .4);
+  color: var(--white);
+}
+.onBlue.arrow:hover { background: var(--white); color: var(--blue-700); }
+
+/* The arrow leaves through the right of the ring and returns from the left,
+   so it reads as travelling through rather than nudging inside.
+   
+   One element, not two. The earlier version put a second arrow on a track and
+   slid it, which only works while the pitch clears the ring's diameter — at
+   44px it did not, so both arrows sat in the ring at once with one pinned
+   against the left edge. A keyframe on a single arrow has no such geometry to
+   get wrong, and the clip does the rest. */
+.arrowChev {
+  flex: none;
+  will-change: transform;
+}
+.arrow:hover .arrowChev { animation: pass 460ms var(--ease-out); }
+
+@keyframes pass {
+  0%   { transform: translateX(0);     opacity: 1; }
+  45%  { transform: translateX(15px);  opacity: 0; }
+  46%  { transform: translateX(-15px); opacity: 0; }
+  100% { transform: translateX(0);     opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arrow:hover .arrowChev { animation: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wipe, .arrowTrack, .chev { transition: none; }
+}

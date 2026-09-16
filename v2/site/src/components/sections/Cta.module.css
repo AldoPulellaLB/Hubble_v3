@@ -1,0 +1,31 @@
+.sec { position: relative; background: var(--black); padding-block: clamp(3.5rem, 6.9vw, 6.25rem); }
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  gap: clamp(2rem, 4vw, 3.5rem);
+  align-items: start;
+}
+
+.title { color: var(--white); margin-top: var(--s-5); max-width: 14ch; }
+.copy { color: rgba(255, 255, 255, .78); max-width: 36ch; }
+.actions { display: flex; flex-wrap: wrap; gap: .625rem; margin-top: var(--s-6); }
+
+/* Extra-large displays, matching the sections above. The global wrapper caps
+   this at --maxw (1440) and centres it, and from 1440 up globals.css zeroes
+   every wrapper's inline padding — so at 2560 the content sits 560px in from
+   the edge. Full width on a flat 120px gutter puts it on the page's own line.
+
+   `.sec` is in the selector to out-specify the global class, which sets the cap
+   and the padding at the same single-class specificity. */
+@media (min-width: 1920px) {
+  .sec .grid {
+    max-width: none;
+    padding-inline: 120px;
+  }
+}
+
+@media (max-width: 1023px) {
+  .grid { grid-template-columns: 1fr; }
+  .title { max-width: 16ch; }
+}

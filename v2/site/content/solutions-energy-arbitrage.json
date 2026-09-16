@@ -1,0 +1,189 @@
+{
+  "meta": {
+    "title": "Energy Arbitrage",
+    "description": "Storage and intelligent software buy power when it is cheap and deploy it when it is worth most — turning the gap between off-peak and peak tariffs into margin."
+  },
+  "hero": {
+    "eyebrow": "Solutions / Energy Arbitrage",
+    "title": "Make timing work harder.",
+    "copy": "Hubble storage and intelligent software time every charge and deploy for maximum advantage, lowering peak costs, strengthening returns, and turning stored energy into a new source of income.",
+    "image": {
+      "src": "/images/solutions/arbitrage-hero.webp",
+      "alt": "A Hubble Energy battery building clad in blue profile sheeting, the Hubble Energy mark across its flank"
+    },
+    "primary": {
+      "label": "Tell me more",
+      "href": "#commercial-case"
+    },
+    "secondary": {
+      "label": "More about our solutions",
+      "href": "/solutions"
+    }
+  },
+  "commercialCase": {
+    "eyebrow": "The commercial case",
+    "title": "Turn energy into\nan asset, not\nan expense.",
+    "copy": "Grid tariffs rise and fall through the day, and peak windows can cost several times off-peak rates. Hubble’s system reads that spread and acts on it, storing low-cost energy, then releasing it exactly when the grid is most expensive.\nThe result: demand flattened, maximum-demand charges cut, and your operation protected from tariff volatility."
+  },
+  "split": {
+    "eyebrow": "Solutions",
+    "title": "One system, built around\nyour business.",
+    "chips": [
+      {
+        "icon": "installation",
+        "label": "Installation"
+      },
+      {
+        "icon": "commissioning",
+        "label": "Commissioning"
+      },
+      {
+        "icon": "field-service",
+        "label": "Field service"
+      },
+      {
+        "icon": "maintenance",
+        "label": "Maintenance"
+      },
+      {
+        "icon": "slas",
+        "label": "SLAs"
+      }
+    ],
+    "_note": "PLACEHOLDER COPY — these two columns came through from another brand's file ('financial environments', 'institutions', 'regulatory contexts'). Reproduced verbatim from the Figma frame; needs Hubble copy.",
+    "columns": [
+      "From installation to service, we design around how your business already runs, not the other way round. The result is a system that fits into your daily operations, stays predictable as conditions change, and keeps delivering long after commissioning.",
+      "The relationship doesn't end at go-live either. We stay close to how the system performs for as long as it's running, because a system's real test isn't day one, but every day after."
+    ],
+    "image": {
+      "src": "/images/solutions/arbitrage-design.webp",
+      "alt": "A Hubble engineer inspecting a row of ground-mounted solar panels"
+    },
+    "primary": {
+      "label": "View our product range",
+      "href": "/products"
+    },
+    "secondary": {
+      "label": "Talk to our team",
+      "href": "/contact"
+    }
+  },
+  "moves": {
+    "eyebrow": "How arbitrage works",
+    "title": "Three moves, made automatically",
+    "items": [
+      {
+        "title": "1. Charge when it’s cheap",
+        "copy": "Batteries fill through off-peak windows and whenever solar is producing more than the site can use buying energy at its lowest cost of the day."
+      },
+      {
+        "title": "2. When it counts",
+        "copy": "During peak-demand windows the system supplies stored energy instead of the grid, avoiding the most expensive tariff blocks and cutting maximum-demand charges."
+      },
+      {
+        "title": "3. Optimise, and sell back",
+        "copy": "CloudLink continuously re-schedules charge and discharge against live tariffs, offsets expensive grid purchases and can export surplus power back to the grid."
+      }
+    ]
+  },
+  "meter": {
+    "eyebrow": "A day on the meter",
+    "title": "Buy the trough.\nSell the peak.",
+    "copy": "The system charges through the overnight and midday troughs, often straight from solar, and discharges into the morning and evening peaks. The shaded spread is the money that used to leave your business.",
+    "barLabel": "The money that used to leave the business",
+    "caption": "Illustrative daily profile. Tariff blocks, charge windows and the resulting saving are modelled from twelve months of metered load for each site.",
+    "axis": [
+      "01",
+      "12"
+    ],
+    "_bands": "Widths are percentages of the track and must total 100 per row. From Figma 1765:4070: 50.05/49.95 on the grid row, 20.24/29.81/49.95 below it — the avoided band's right edge is set to land exactly where the grid row's blue ends (the comp is 1px out), because that alignment is the whole claim: half the bill on the grid, and with Hubble a fifth of it paid and the rest avoided.",
+    "rows": [
+      [
+        {
+          "tone": "grid",
+          "label": "ON THE GRID",
+          "width": 50.05
+        },
+        {
+          "tone": "rest",
+          "label": "Unclear sight of ongoing costs",
+          "width": 49.95
+        }
+      ],
+      [
+        {
+          "tone": "hubble",
+          "label": "WITH HUBBLE",
+          "width": 20.24
+        },
+        {
+          "tone": "avoided",
+          "label": "COST AVOIDED",
+          "width": 29.81
+        },
+        {
+          "tone": "rest",
+          "label": "Clear sight of your usage\nthrough an intelligent system",
+          "width": 49.95
+        }
+      ]
+    ]
+  },
+  "model": {
+    "eyebrow": "What makes it work",
+    "title": "Modelled before it's built. Managed once it's live.",
+    "_note": "Add an `href` to a card to make the whole card a link. None of the four has a destination yet, so the ring is decorative for now.",
+    "cards": [
+      {
+        "num": "01",
+        "title": "12-month load analysis",
+        "body": "Every project starts from a full year of the site's real consumption half-hourly load, seasonality and demand spikes mapped before a single rack is specified."
+      },
+      {
+        "num": "02",
+        "title": "Summer & winter tariff mapping",
+        "body": "Charge and discharge schedules are optimised against each season's tariff structure, so the system chases the spread that actually exists on the client's meter."
+      },
+      {
+        "num": "03",
+        "title": "Comparative ROI scenarios",
+        "body": "Solar-only, BESS-only and combined cases are modelled side by side, so the commercial decision is made on numbers, not assumptions."
+      },
+      {
+        "num": "04",
+        "title": "Cloudlink live optimisation",
+        "body": "Once live, the system is monitored continuously energy flow, performance and financial impact visible in real time and tuned as tariffs and load change."
+      }
+    ]
+  },
+  "feature": {
+    "eyebrow": "Projects",
+    "title": "Cerebos Salt",
+    "copy": "An iconic South African brand since 1945 partnered with Hubble Energy and Avianto Energy to build a 5.1 MWh energy system that shifts production off the grid's most expensive hours.",
+    "image": {
+      "src": "/images/solutions/cerebos-aerial.webp",
+      "alt": "Aerial view of the Cerebos Salt plant in the Eastern Cape beside its 2.6MW solar field"
+    },
+    "primary": {
+      "label": "VIEW THE PROJECT",
+      "href": "/projects/cerebos-salt"
+    },
+    "secondary": {
+      "label": "More about our solutions",
+      "href": "/solutions"
+    }
+  },
+  "cta": {
+    "eyebrow": "Calculate your savings",
+    "title": "What could your energy be doing instead?",
+    "copy": "Tell us what your energy needs to achieve. We will model the system, the commercial case and the payback around it.",
+    "primary": {
+      "label": "Calculate your savings",
+      "href": "/calculate-your-savings"
+    },
+    "secondary": {
+      "label": "Get In touch",
+      "href": "/contact"
+    }
+  }
+}

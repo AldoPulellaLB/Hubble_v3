@@ -1,0 +1,359 @@
+{
+  "brand": {
+    "name": "Hubble Energy",
+    "narrative": "Intelligent energy at work"
+  },
+  "nav": [
+    {
+      "label": "Solutions",
+      "href": "/solutions",
+      "children": [
+        {
+          "label": "Energy Solutions",
+          "href": "/solutions/energy-solutions"
+        },
+        {
+          "label": "Energy Arbitrage",
+          "href": "/solutions/energy-arbitrage"
+        },
+        {
+          "label": "Wheeling",
+          "href": "/solutions/wheeling"
+        },
+        {
+          "label": "Power Purchase Agreements",
+          "href": "/solutions/ppa"
+        },
+        {
+          "label": "Service Level Agreements",
+          "href": "/solutions/sla"
+        }
+      ],
+      "_mega": "Figma 1780:6513. `children` is kept as the fallback list — it is what the mobile sheet renders and what shows if `mega` is ever removed. Destinations marked below are best guesses against the routes that exist; the comp names none of them.",
+      "mega": {
+        "title": "Energy Solutions",
+        "columns": [
+          {
+            "label": "Product Ecosystem",
+            "note": "Systems & Support.",
+            "items": [
+              {
+                "title": "Commercial & Industrial",
+                "copy": "Products for larger energy needs.",
+                "href": "/products/high-voltage"
+              },
+              {
+                "title": "Home & Small Business",
+                "copy": "Products for everyday energy needs.",
+                "href": "/products/low-voltage"
+              }
+            ]
+          },
+          {
+            "label": "Configured Solutions",
+            "note": "Projects & Partnerships",
+            "items": [
+              {
+                "title": "Turnkey Projects",
+                "copy": "Design, commission, service & support.",
+                "href": "/solutions/energy-solutions",
+                "chip": {
+                  "label": "ASPEN project",
+                  "href": "/projects"
+                }
+              },
+              {
+                "title": "Funded Partnerships",
+                "copy": "Finance, design, commission & support",
+                "href": "/solutions/ppa",
+                "chip": {
+                  "label": "IDWALA project",
+                  "href": "/projects"
+                }
+              }
+            ],
+            "footnote": "Both can include Energy Arbitrage and Wheeling."
+          },
+          {
+            "label": "Our Process",
+            "note": "How we work",
+            "items": [
+              {
+                "title": "Bespoke Design",
+                "copy": "Designed around your energy needs.",
+                "href": "/solutions/energy-solutions"
+              },
+              {
+                "title": "Install & Commission",
+                "copy": "From plan to live system.",
+                "href": "/solutions/energy-solutions"
+              },
+              {
+                "title": "Monitoring & Field Service",
+                "copy": "Ongoing system support.",
+                "href": "/products/cloudlink"
+              },
+              {
+                "title": "SLA",
+                "copy": "Protect uptime and performance.",
+                "href": "/solutions/sla"
+              }
+            ]
+          }
+        ],
+        "promo": {
+          "title": "How can we help you?",
+          "copy": "Tell us your energy challenge.\nWe'll guide you.",
+          "image": {
+            "src": "/images/nav/expert.webp",
+            "alt": "A Hubble Energy specialist"
+          },
+          "cta": {
+            "label": "Talk to an Expert",
+            "href": "/contact"
+          }
+        }
+      }
+    },
+    {
+      "label": "Products",
+      "href": "/products",
+      "children": [
+        {
+          "label": "High Voltage — Commercial",
+          "href": "/products/high-voltage"
+        },
+        {
+          "label": "Low Voltage — Residential",
+          "href": "/products/low-voltage"
+        },
+        {
+          "label": "CloudLink",
+          "href": "/products/cloudlink"
+        }
+      ]
+    },
+    {
+      "label": "Projects",
+      "href": "/projects",
+      "children": [
+        {
+          "label": "All projects",
+          "href": "/projects"
+        },
+        {
+          "label": "Commercial & Industrial",
+          "href": "/projects?sector=commercial"
+        },
+        {
+          "label": "Lodges & Hospitality",
+          "href": "/projects?sector=lodges"
+        },
+        {
+          "label": "Agriculture",
+          "href": "/projects?sector=agriculture"
+        }
+      ]
+    },
+    {
+      "label": "Partners",
+      "href": "/partners",
+      "children": [
+        {
+          "label": "Become a partner",
+          "href": "/partners/become-a-partner"
+        },
+        {
+          "label": "Find a reseller",
+          "href": "/partners/find-a-reseller"
+        },
+        {
+          "label": "Marketing material",
+          "href": "/partners/marketing-material"
+        }
+      ]
+    },
+    {
+      "label": "About",
+      "href": "/about",
+      "hidden": true,
+      "children": [
+        {
+          "label": "Why Hubble",
+          "href": "/about/why-hubble"
+        },
+        {
+          "label": "Our story",
+          "href": "/about/our-story"
+        },
+        {
+          "label": "Africa presence",
+          "href": "/about/africa-presence"
+        },
+        {
+          "label": "Learn",
+          "href": "/learn"
+        }
+      ]
+    },
+    {
+      "label": "News",
+      "href": "/news"
+    }
+  ],
+  "footer": {
+    "title": "Intelligent energy at work.",
+    "connect": "Connect with us",
+    "primary": [
+      {
+        "label": "About",
+        "href": "/about"
+      },
+      {
+        "label": "Solutions",
+        "href": "/solutions"
+      },
+      {
+        "label": "Team",
+        "href": "/about/our-story"
+      },
+      {
+        "label": "Careers",
+        "href": "/about/careers"
+      },
+      {
+        "label": "News",
+        "href": "/news"
+      },
+      {
+        "label": "Contact",
+        "href": "/contact"
+      }
+    ],
+    "columns": [
+      {
+        "title": "Solutions",
+        "links": [
+          {
+            "label": "Energy Solutions",
+            "href": "/solutions/energy-solutions"
+          },
+          {
+            "label": "Energy Arbitrage",
+            "href": "/solutions/energy-arbitrage"
+          },
+          {
+            "label": "Wheeling",
+            "href": "/solutions/wheeling"
+          },
+          {
+            "label": "Power Purchase Agreements",
+            "href": "/solutions/ppa"
+          },
+          {
+            "label": "Service Level Agreements",
+            "href": "/solutions/sla"
+          }
+        ]
+      },
+      {
+        "title": "Products",
+        "links": [
+          {
+            "label": "Low Voltage",
+            "href": "/products/low-voltage"
+          },
+          {
+            "label": "High Voltage",
+            "href": "/products/high-voltage"
+          },
+          {
+            "label": "CloudLink",
+            "href": "/products/cloudlink"
+          },
+          {
+            "label": "Inverter guides",
+            "href": "/learn/inverter-guides"
+          },
+          {
+            "label": "Warranties",
+            "href": "/learn/warranties"
+          }
+        ]
+      },
+      {
+        "title": "Partners",
+        "links": [
+          {
+            "label": "Become a partner",
+            "href": "/partners/become-a-partner"
+          },
+          {
+            "label": "Find a reseller",
+            "href": "/partners/find-a-reseller"
+          },
+          {
+            "label": "Marketing material",
+            "href": "/partners/marketing-material"
+          },
+          {
+            "label": "Training events",
+            "href": "/learn/training-events"
+          },
+          {
+            "label": "FAQs",
+            "href": "/learn/faqs"
+          }
+        ]
+      }
+    ],
+    "presence": {
+      "title": "Presence",
+      "lines": [
+        "*South Africa*",
+        "Cape Town · JHB · Durban",
+        "",
+        "*Nigeria · Zambia*",
+        "",
+        "Mon–Thu 08:00–16:30 · Fri 08:00–16:00"
+      ]
+    },
+    "socials": [
+      {
+        "label": "Instagram",
+        "href": "https://www.instagram.com/hubbleenergy",
+        "icon": "instagram"
+      },
+      {
+        "label": "YouTube",
+        "href": "https://www.youtube.com/@hubbleenergy",
+        "icon": "youtube"
+      },
+      {
+        "label": "WhatsApp",
+        "href": "https://wa.me/27000000000",
+        "icon": "whatsapp"
+      },
+      {
+        "label": "LinkedIn",
+        "href": "https://www.linkedin.com/company/hubble-energy",
+        "icon": "linkedin"
+      }
+    ],
+    "legal": [
+      {
+        "label": "Privacy & cookies",
+        "href": "/privacy"
+      },
+      {
+        "label": "PAIA manual",
+        "href": "/paia"
+      },
+      {
+        "label": "Warranties",
+        "href": "/learn/warranties"
+      }
+    ],
+    "copyright": "© 2026 Hubble Energy"
+  }
+}

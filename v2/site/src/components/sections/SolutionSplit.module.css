@@ -1,0 +1,292 @@
+/* 681.9 / 10 / 748.1 across the comp's 1440 — held as fractions so the seam
+   stays 10px and the two panes keep their ratio at every width.
+
+   A full screen tall, where the comp draws it 615. The height itself comes from
+   `[data-full-vh]` in globals.css, which is also what gives the section its
+   soft snap — the two are one declaration. */
+.sec {
+  position: relative;
+  display: grid;
+  grid-template-columns: 47.35fr 52.65fr;
+  gap: 10px;
+  background: var(--n-75);
+  --eyebrow-ink: var(--blue-400);
+}
+
+.media { position: relative; overflow: hidden; background: var(--n-200); }
+
+.img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Holds the engineer's head and shoulders in the upper half of a tall crop,
+     and on the phone's 16/11 band it is what keeps him in frame at all. */
+  object-position: 50% 38%;
+}
+
+/* 24 of inner padding on the comp, but the content column inside it is 629 of
+   the panel's 700 — so the pane's own padding is the small number and the copy
+   is measured, not stretched to the pane. */
+.panel {
+  display: flex;
+  flex-direction: column;
+  padding: clamp(2rem, 2.78vw, 2.5rem) clamp(1.25rem, 1.67vw, 1.5rem);
+}
+
+/* The heading takes the pane's own measure while `.foot` keeps the comp's 629
+   for the body copy — a heading wants a wider measure than the copy under it,
+   and here it is load-bearing rather than a preference: at 629 the first line
+   of a 56px title wraps and the authored break becomes a third line, at the
+   panel's 705 it does not. Measured, both. */
+.head { max-width: none; }
+
+/* Type comes from `t-h2s` on the element. Only the colour and the space above
+   it are this section's business. */
+.title {
+  margin-top: var(--s-5);
+  color: var(--blue-700);
+}
+
+/* ── The capability chips ───────────────────────────────────────────────────
+   Five equal cards under the heading. The comp draws them 123.04 wide at a
+   133.04 pitch across 655.18 — so a 10px gap and five equal shares, which is
+   what `flex: 1` gives at any width. Nothing here is a fixed measure except
+   the gap and the icon.
+
+   Every value the comp specifies is already a token: the 20px radius is
+   `--r-card` (and takes its 16 on a phone for free), the #3164FF border is
+   `--blue-400`, the #4D5563 label is `--n-600`. No fill of their own — the
+   panel's `--n-75` shows through, which is what the comp has. */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  /* Free everywhere it matters: a line whose chips have grown to fill it is
+     unaffected, which is every line at every width except the one case where
+     the labels overrun by a hair and one chip lands on a row alone. There it
+     centres instead of sitting out on the left. */
+  justify-content: center;
+  gap: 10px;
+  margin-top: clamp(1.25rem, 1.67vw, 1.5rem);
+  padding: 0;
+  list-style: none;
+}
+
+/* `flex-basis: 0` shares the row equally — the comp's five equal cards — and
+   `min-width: max-content` is the floor that keeps a label inside its own
+   border. Together they need no breakpoint at all: while the equal share is
+   wider than every label the five stay equal, and where it is not, the long
+   chip holds its content width, the others take what is left, and the row wraps
+   once the labels no longer fit at all. It lands on 3 + 2 at a tablet and a
+   phone on its own.
+
+   The floor is not tidiness. Five equal shares of the panel is 92px at a 1024
+   tablet and "Commissioning" is 121px with its padding — measured, it hung 14px
+   outside its own chip. A fraction cannot know that, and a corrected fraction
+   would only be right for these five words: the content file is edited far more
+   often than this file is. */
+.chip {
+  display: flex;
+  flex: 1 1 0;
+  min-width: max-content;
+  /* And a ceiling, because `flex-grow` fills whatever line an item lands on:
+     at 1024 the labels overran the row by a single pixel, "SLAs" wrapped onto a
+     line of its own, and grew to the full 494px of it. Half the row is the
+     widest a chip can be without reading as a banner, and it never gets in the
+     way of filling a line — five need a fifth each, a wrapped row of two need a
+     half each, and both are within it. */
+  max-width: 50%;
+  position: relative;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  /* No gap: the comp butts the label's line box straight under the icon. */
+  min-height: 60px;
+  /* 11 + 8 on the comp, plus the 1px the border used to hold — the outline is
+     an overlay now and takes no space, so the padding carries it and the box is
+     the size it always was. */
+  padding: 12px 9px;
+  text-align: center;
+}
+
+/* ── The outline ────────────────────────────────────────────────────────────
+   A `<rect>` rather than a `border`, so it can be *drawn*. Geometry in CSS
+   because attributes cannot hold a token or a calc: inset by half the stroke so
+   the hairline sits inside the SVG viewport rather than being clipped down the
+   middle of it, and `rx` is `--r-card`, which is where the phone's 16 comes
+   from too. `ry` follows `rx` on its own.
+
+   `stroke-dasharray: 1` against `pathLength="1"` makes one dash the whole
+   perimeter whatever the chip's size, so `stroke-dashoffset` 1 → 0 draws it
+   clockwise from the top-left. No JS, no measuring, nothing to redo on resize —
+   the same reason `FlowLines` normalises its routes. */
+.chipRule {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.chipRule rect {
+  x: 0.5px;
+  y: 0.5px;
+  width: calc(100% - 1px);
+  height: calc(100% - 1px);
+  rx: var(--r-card);
+  fill: none;
+  stroke: var(--blue-400);
+  stroke-width: 1;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 620ms var(--ease-out);
+  transition-delay: calc(120ms + var(--i, 0) * 90ms);
+}
+
+.chipIcon { display: block; width: 24px; height: 24px; }
+
+/* The comp sets this at 10px. `--t-xs` (13) is the smallest step the design
+   system has — it is what every eyebrow and chip on the site takes — and 10px
+   of Montserrat Regular is below anything worth shipping as a label a reader
+   has to actually read. The house token wins; the cards absorb the 4px of
+   extra height without moving anything else. */
+.chipLabel {
+  color: var(--n-600);
+  font-size: var(--t-xs);
+  line-height: 1.4;
+  text-wrap: balance;
+}
+
+/* ── The entrance ───────────────────────────────────────────────────────────
+   Two beats a chip, staggered across the row: the outline draws itself, and a
+   moment later the icon and label rise into the box it has just made. Nothing
+   moves the chip itself — an outline that slides while it is being drawn reads
+   as a smear rather than as a line, so the drawing happens in place.
+
+   `--i` is the chip's index and the only thing the delays are built from, which
+   keeps two timings (`120ms + i*90` for the outline, `360ms + i*90` for the
+   contents) in one place each instead of ten declarations. The first outline is
+   under way 120ms in, while the heading's 950ms wipe is still running, and the
+   last finishes at ~1100ms — one gesture, as asked.
+
+   All of it hangs off `.head[data-in] ~ .chips`, the *heading's* observer, via
+   the general sibling combinator — the same `data-in` the Services numerals
+   use. One trigger driving three stages cannot get into the wrong order at some
+   breakpoint, which is exactly what the head and foot did before they were
+   measured. */
+.chip:nth-child(1) { --i: 0; }
+.chip:nth-child(2) { --i: 1; }
+.chip:nth-child(3) { --i: 2; }
+.chip:nth-child(4) { --i: 3; }
+.chip:nth-child(5) { --i: 4; }
+
+.chipIcon,
+.chipLabel {
+  opacity: 0;
+  transform: translate3d(0, 6px, 0);
+  transition: opacity 420ms var(--ease-out), transform 420ms var(--ease-out);
+  transition-delay: calc(360ms + var(--i, 0) * 90ms);
+}
+
+.head[data-in] ~ .chips .chipRule rect { stroke-dashoffset: 0; }
+.head[data-in] ~ .chips .chipIcon,
+.head[data-in] ~ .chips .chipLabel { opacity: 1; transform: none; }
+
+/* ── The foot's own sequence ─────────────────────────────────────────────────
+   The heading has its own `Reveal` and the house mask wipe. This is the other
+   half: the foot fades as a block and its three parts rise off its `data-in` a
+   beat apart, so "the rest of the content" arrives in an order rather than as
+   one slab. 28px on `--ease-out` is exactly what `Reveal`'s `up` variant does —
+   this is that motion re-timed, not a new one. */
+.cols > *,
+.actions {
+  transform: translate3d(0, 28px, 0);
+  transition: transform 820ms var(--ease-out);
+}
+
+.cols > :nth-child(2) { transition-delay: 80ms; }
+/* The actions' own delay lives in its main rule below, so `.actions` is
+   declared once rather than twice at the same specificity. */
+
+.foot[data-in] .cols > *,
+.foot[data-in] .actions { transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .cols > *, .actions { transform: none; }
+  .chipRule rect { stroke-dashoffset: 0; transition: none; }
+  .chipIcon, .chipLabel { opacity: 1; transform: none; transition: none; }
+}
+
+/* `margin-top: auto` is what puts the comp's 179px of air between the heading
+   and the columns: the foot sits on the panel's floor and the gap is whatever
+   the panel has left over, so it opens and closes with the section rather than
+   being a number that only holds at 1440. */
+.foot { margin-top: auto; max-width: 629px; }
+
+.cols {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1.5rem, 4.42vw, 3.98rem);
+}
+
+.copy {
+  color: var(--n-600);
+  font-size: var(--t-body);
+  line-height: 1.4;
+  text-wrap: pretty;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: clamp(2rem, 4vw, 3.6rem);
+  transition-delay: 180ms;
+}
+
+/* The ghost variant is white-translucent for dark grounds; on this pale panel
+   it would be invisible. Re-skinned to the comp's own value — a 20% black
+   plate, which composites to the same grey over any ground it lands on — the
+   same arrangement Products uses for its `.quiet` secondary. */
+.quiet {
+  background: rgb(43 43 43 / .2);
+  color: var(--n-900);
+  --chev-ink: var(--cyan-600);
+  backdrop-filter: none;
+}
+.quiet .wipe { background: rgb(43 43 43 / .32); }
+
+@media (max-width: 1023px) {
+  .cols { grid-template-columns: minmax(0, 1fr); gap: var(--s-5); }
+
+
+  /* Full height stays, but the head-top / foot-bottom pinning does not. The
+     panel is narrow and tall at this width — 394 x 1024 at a 768 tablet — and
+     `margin-top: auto` puts every one of the ~380 spare pixels in a single gap
+     between the heading and the copy, which reads as a hole rather than as air.
+     Centred, the same content is one block with balanced space above and below
+     it. The pinning is right at 1440, where the panel is wide enough that the
+     foot reads as a foot; it stops being right as soon as it isn't. */
+  .panel { justify-content: center; }
+  .foot { margin-top: clamp(2.5rem, 8vw, 6rem); }
+}
+
+@media (max-width: 767px) {
+  /* Stacked: the photograph becomes a band above the panel rather than a
+     column beside it, so neither is squeezed to a sliver. */
+  .sec {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+  /* Out-specifies the global `[data-full-vh]` rule — both are single-specificity
+     on their own, so this needs the extra selector to win reliably rather than
+     by source order. The phone gets a content-height band, and `ScrollSnap`
+     drops it as a candidate because it re-measures. */
+  .sec[data-full-vh] { min-height: 0; }
+  .media { aspect-ratio: 16 / 11; }
+  .panel { padding: clamp(2.5rem, 9vw, 3.5rem) var(--gut) clamp(3rem, 11vw, 4rem); }
+  .foot { margin-top: clamp(2.5rem, 9vw, 3.5rem); }
+  .actions > * { flex: 1 1 auto; justify-content: center; }
+}

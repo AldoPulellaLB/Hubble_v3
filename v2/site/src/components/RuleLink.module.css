@@ -1,0 +1,47 @@
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--s-6);
+  min-width: 0;
+}
+
+/* The rule takes the slack. `min-width: 0` on the row is what lets it shrink
+   past its content on narrow screens instead of pushing the label off. */
+.rule {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 1px;
+  background: currentColor;
+  opacity: .55;
+}
+
+.link {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: .6875rem .9375rem;
+  border-radius: 4px;
+  transition: opacity var(--dur-std) var(--ease-out);
+}
+.link:hover { opacity: .72; }
+
+.label {
+  font-size: var(--t-nav);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.chev {
+  flex: none;
+  transition: transform var(--dur-std) var(--ease-out);
+}
+.link:hover .chev { transform: translateX(3px); }
+
+@media (max-width: 767px) {
+  /* The rule has nothing to give at this width — it would be a few pixels of
+     line beside a label that already fills the row. The label stands alone. */
+  .rule { display: none; }
+  .link { padding-inline: 0; }
+}

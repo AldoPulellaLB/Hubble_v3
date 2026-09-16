@@ -1,0 +1,16 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "hubble-v2",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "v2/site",
+        "run",
+        "dev"
+      ],
+      "port": 3210
+    }
+  ]
+}

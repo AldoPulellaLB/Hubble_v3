@@ -1,0 +1,48 @@
+.fan {
+  --draw: 0;
+  --fan-ink: var(--blue-500);
+  --fan-weight: 1;
+  position: absolute;
+  pointer-events: none;
+  overflow: visible;
+}
+
+/* Each element clears its own threshold and then takes DRAW_SPAN of the sweep
+   to draw, which is what makes the fan open outward rather than appear.
+   
+   DRAW_SPAN (0.38) plus STAGGER_MAX (0.62, in RadialFan.tsx) must equal 1, or
+   the last strands to start can never finish and the fan reads as cut off.
+   Change the two together. */
+.line {
+  stroke: var(--fan-ink);
+  stroke-width: calc(var(--w) * var(--fan-weight));
+  stroke-opacity: calc(var(--o) * var(--fan-weight));
+  fill: none;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 1;
+  stroke-dashoffset: calc(1 - clamp(0, (var(--draw) - var(--t0)) / 0.38, 1));
+}
+
+.arc {
+  stroke: var(--fan-ink);
+  stroke-width: 0.6;
+  stroke-opacity: .16;
+  fill: none;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 1;
+  stroke-dashoffset: calc(1 - clamp(0, (var(--draw) - var(--t0)) / 0.5, 1));
+}
+
+.dot {
+  fill: none;
+  stroke: var(--fan-ink);
+  stroke-width: 0.8;
+  stroke-opacity: .5;
+  vector-effect: non-scaling-stroke;
+  opacity: clamp(0, calc((var(--draw) - var(--t0)) * 6), 1);
+  transition: opacity 200ms linear;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fan { --draw: 1; }
+}

@@ -1,0 +1,341 @@
+/* The render runs to the section's own floor and past it. The dissolve band is
+   pulled back over that last strip, so the plinth is eaten by the pixels
+   instead of being cropped at a seam beside them.
+
+   The height is set from the render, not from the copy: at 1440 the comp puts
+   the image top 155px below the section top and its foot ~150px below the
+   section's, which is a 900px section. Expressed as 62.5vw so the whole block
+   scales as one thing, capped at 900 because the render itself is capped at
+   --maxw. */
+.sec {
+  position: relative;
+  /* Was `ffffff` — no `#`, so the declaration was invalid, silently dropped,
+     and the section computed to transparent. What showed through was
+     `body { background: var(--black) }`, which is why this read as the darkest
+     ground on the page while the stylesheet claimed it was white. Fixing the
+     one character is most of "make this section lighter". */
+  background: var(--white);
+  /* The eyebrow's ink, set here rather than by adding `.on-light` to the
+     section: that class would bring `--cyan-ink` with it, and this ground wants
+     the blue the reference draws. */
+  --eyebrow-ink: var(--blue-400);
+  padding-block: clamp(3rem, 6.9vw, 6.25rem) 0;
+  min-height: min(62.5vw, 950px);
+  overflow: show;
+}
+/* `overflow: hidden` against `FlowLines`' own `visible`. That default exists for
+   Products, which deliberately draws outside its viewBox; here it meant nothing
+   ever cut the traces, so a tail authored past the frame drew past the *section*
+   and ended in the white above Projects. Clipping to this box is what lets a
+   route be cut by an edge instead of stopping in mid-air. */
+.flow {
+  --flow-ink: var(--blue-400);
+  /* Was `--cyan-400`, which is 12.73:1 on black and 1.65:1 on white — it went
+     from the brightest mark in the section to the faintest when the ground
+     turned over. See the note above `FLOWS`. */
+  --flow-pulse: var(--blue-500);
+  z-index: 0;
+  overflow: hidden;
+}
+
+.grid { position: relative; z-index: 2; }
+
+/* The dissolve band overlaps this section's last strip. The copy is lifted
+   clear of it by exactly the band's height; only the render is meant to be
+   eaten. */
+.copyCol { max-width: 34rem; margin-bottom: 40px; }
+
+/* Blue-700 on white, the same voice every other section title on the page takes
+   once it is on a light ground. */
+.title { color: var(--blue-700); margin-top: var(--s-5); max-width: 12ch; }
+/* `--n-700` is the body ink Products and HowWeWork use on light. The emphasis
+   runs step to `--n-900` rather than to white: on a dark ground the medium
+   weight needed the extra brightness to read, on a light one weight alone
+   carries it and a lift toward black is the same gesture in the other
+   direction. */
+.copy { color: var(--n-700); margin-top: var(--s-5); max-width: 42ch; --em-ink: var(--n-900); }
+.actions { display: flex; flex-wrap: wrap; gap: .625rem; margin-top: clamp(1.75rem, 3vw, 2.5rem); }
+.badges { display: flex; flex-wrap: wrap; gap: .625rem; }
+
+/* The render's own column. A 1440-capped box laid over the section, with the
+   stage pushed to its right-hand end — the copy occupies the left, so the two
+   read as columns without the render having to live inside the copy's grid and
+   be capped by it.
+
+   `pointer-events: none` so the box never swallows a click meant for the copy
+   behind it; the stage puts them back for itself. */
+.media {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: min(100%, var(--maxw));
+  margin-inline: auto;
+  padding-inline: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  pointer-events: none;
+}
+
+/* The handset's box. Sized as a share of the frame with a ceiling, and given
+   the asset's own 933x1920 so its height follows from its width and the layout
+   never has to guess it. */
+.stage {
+  position: relative;
+  /* How much bigger the whole render group is than the comps draw it. The
+     phone, the shape and the tags are all sized and placed against the stage,
+     so this one number scales the group — see the note in the 1920 block. */
+  --group: 1;
+  /* Measured off the comps, where the handset stays about the same size at all
+     three widths rather than growing with the frame: ~260px at 1440 and ~280 by
+     2560. The vw term only carries it down on narrower desktops. */
+  width: calc(clamp(13rem, 19vw, 17.5rem) * var(--group));
+  aspect-ratio: 933 / 1920;
+  pointer-events: auto;
+  /* Lifted off the section's centre line. Applied to the stage rather than to
+     the render, so the shape and the tags travel with it — everything in this
+     block is positioned against the stage, which is the only way the shape can
+     be guaranteed to stay locked to the phone. A transform rather than a margin
+     because it moves nothing else in the flex row. */
+  transform: translateY(-80px);
+}
+
+/* The shape traces the handset's outline. The canvas is 20% larger than the
+   render on both axes — percentage insets resolve against width horizontally
+   and height vertically, so the aspect is preserved — because the shape sits
+   *behind* an opaque PNG: on the phone's exact footprint it renders correctly
+   and is completely hidden by it. The headroom is what lets the stroke read.
+   `shapeSize`/`shapeRatio` on the component put the drawn rect back on the
+   phone's own edges inside that larger canvas. Inert to the pointer so the tags
+   above it stay clickable; the component listens on the section. */
+.blur {
+  position: absolute;
+  inset: -10%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.phone { position: relative; z-index: 1; width: 100%; height: auto; }
+
+/* Tags straddle the handset's edges, as the comps draw them: each is anchored
+   to the side it belongs on and overlaps the render slightly, so their distance
+   from the phone does not change with the stage's width. `--x` no longer places
+   them — it only decides which side they are on, via `data-side`. Tags drift on
+   a long, offset loop so no two are ever in step. */
+.tag {
+  position: absolute;
+  top: var(--y);
+  /* Above the render. `.phone` carries `z-index: 1`, so without a number of
+     their own these paint under it even though they come later in the DOM —
+     the labels that overlap the handset get cut in half. */
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  /* Through --group, inherited from the stage, so a label keeps its proportion
+     to the handset it is pointing at. The chevron is left at its native 4x6:
+     it is drawn as whole pixels and a fractional scale would only soften it. */
+  gap: calc(.75rem * var(--group));
+  padding: calc(.5rem * var(--group)) calc(.75rem * var(--group));
+  border-radius: var(--r-btn);
+  /* Solid blue on white, where they were a smoked dark plate on black. The
+     translucency and the blur were doing a job that only exists over a dark
+     render — reading as glass lifted off the screenshot. Over a white ground
+     the same treatment reads as a grey smudge, so the tags become what the
+     reference draws: opaque pills in the brand blue, which also puts them in
+     the same family as the circuit they are attached to. */
+  background: var(--blue-500);
+  border: 1px solid transparent;
+  font-size: calc(var(--t-sm) * var(--group));
+  color: var(--white);
+  white-space: nowrap;
+  animation: float 7s ease-in-out infinite;
+  animation-delay: calc(var(--i) * -2.3s);
+}
+/* Measured off the 1440 comp: the right-hand pair start about two thirds
+   across the handset and run past its edge, the left-hand one ends just inside
+   it. Anchored this way they overlap the render as drawn and still finish
+   inside the section's gutter. */
+.tag[data-side='right'] { left: calc(64% + var(--dx, 0px)); }
+.tag[data-side='left'] { right: calc(96% - var(--dx, 0px)); }
+/* White, per the house rule the Button variants already follow: a blue plate
+   takes a white arrow, a light plate a blue one. The cyan it carried was for a
+   dark plate and goes muddy against blue. */
+.tagChev { color: var(--white); }
+
+@keyframes float {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50%      { transform: translate3d(0, -7px, 0); }
+}
+
+/* Below the two-column breakpoint the render returns to normal flow under the
+   copy — absolute positioning it would either bury the type or leave a hole. */
+/* ── Large displays, from the comp's own width up ───────────── */
+/* Laid out from the 1440, 1920 and 2560 comps. Two things move with the
+   viewport and one deliberately does not:
+
+   · the gutter is a flat 120px at every one of the three, so the copy's left
+     line never moves. It has to be set here because globals.css drops every
+     wrapper's inline padding from 1440 up, which would otherwise put this copy
+     hard against the glass.
+   · the copy column widens, which is what rewraps the heading across the three
+     comps — three narrow lines, three wider ones, then two — and the body from
+     four lines to three to two. The measures are `ch` so they track the
+     heading's own clamped size, and `.copyCol` grows with them because it
+     otherwise caps the pair before either takes effect.
+   · the render holds one size: its box is capped at --maxw, so above 1440 it
+     stops growing and simply sits further right, as the comps show.
+
+   `.sec` is in the selector to out-specify the global `.wrapIn`, which sets the
+   cap and the padding at the same single-class specificity. */
+@media (min-width: 1440px) {
+  .sec .grid {
+    max-width: none;
+    padding-inline: 120px;
+  }
+
+  .copy { max-width: 52ch; }
+}
+
+/* The 1440 composition only — 1920 and 2560 have their own and are left where
+   they are. The whole stage slides left, which takes the render, the shape and
+   the tags with it in one move; the left-hand tag then has that 80px given back
+   so it alone holds its position. Written into its `right` anchor rather than a
+   transform because `.tag` already animates transform on the float loop. */
+@media (min-width: 1440px) and (max-width: 1919px) {
+  .stage { transform: translate(-80px, -80px); }
+  .tag[data-side='left'] { right: calc(96% - var(--dx, 0px) - 80px); }
+}
+
+@media (min-width: 1920px) {
+  /* The copy hangs on the section's middle line, the same line the render is
+     placed against, rather than sitting under the section's top padding: by
+     these widths it has rewrapped to a short block against a 900px section and
+     top-anchoring leaves it stranded high.
+
+     Grid rather than flex so the row still stretches the full width and
+     `.grid`'s own 120px gutter goes on drawing the copy's left line. `.flow`
+     and `.media` are both absolute, so neither becomes a track — and both are
+     laid out against the section's padding box, which padding does not move,
+     so zeroing it here leaves the render exactly where it is. The padding and
+     the copy's bottom margin both have to go: each would otherwise bias the
+     centre by half of itself. */
+  .sec {
+    display: grid;
+    align-content: center;
+    /* The 120px at the foot is the comp's. It does not lengthen the section —
+       `min-height` still wins at 900px and `box-sizing` is border-box — so what
+       it does is take 120px off the bottom of the box the copy centres in,
+       which lifts the copy 60px off the section's own middle line. */
+    padding-block: 0 120px;
+  }
+
+  .copyCol { max-width: 47rem; margin-bottom: 0; }
+  .copy { max-width: 82ch; }
+
+  /* The 1920 comp breaks the heading unevenly — "Intelligence built / into
+     every Hubble / system" — which `.t-h2`'s inherited `text-wrap: balance`
+     cannot produce: balance only ever distributes lines evenly, so it jumps
+     straight from the 1440 comp's three lines to the 2560 comp's two with
+     nothing in between. Greedy wrapping is what draws that break, and at this
+     size it holds anywhere from 660 to 740px; 700 sits in the middle of the
+     window so a type tweak either way does not flip it. */
+  .title {
+    max-width: 700px;
+    text-wrap: wrap;
+  }
+
+  /* The render group is drawn larger here than in the comps, and sits lower.
+     Both are one move on the stage: everything in the block is positioned
+     against it, so --group carries the handset, the shape and the tags, and
+     the translate carries all three down together.
+
+     --group has to reach the group through *layout* width rather than a
+     `scale()` on the stage. ShapeBlur sizes its canvas from `clientWidth` and
+     maps the pointer through `getBoundingClientRect`, and a transform moves
+     the second without moving the first — the shape would render at the old
+     resolution, stretched, and chase the cursor with a gain error.
+
+     The lift is the base rule's -80px plus the 100px this comp drops it. */
+  .stage {
+    --group: 1.2;
+    transform: translateY(20px);
+  }
+}
+
+@media (min-width: 2560px) {
+  .copyCol { max-width: 60rem; }
+  .copy { max-width: 100ch; }
+
+  /* "Intelligence built into / every Hubble system" — the 2560 comp's break.
+     `--t-h2` has topped out at 72px by now, so the window that draws it is a
+     flat 780-940px; 850 sits in the middle of it. */
+  .title { max-width: 850px; }
+}
+
+@media (max-width: 1023px) {
+  .sec { min-height: 0; }
+  .copyCol { max-width: none; margin-bottom: 0; }
+  /* Below the two-column breakpoint the render returns to normal flow under
+     the copy and centres, rather than being laid over the section's right. */
+  .media {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    padding-inline: 0;
+    justify-content: center;
+    margin-top: clamp(2rem, 5vw, 3rem);
+  }
+  /* No lift below the two-column breakpoint: the render is in normal flow
+     under the copy there, and 80px up would run it into the buttons. */
+  .stage { width: min(70%, 22rem); transform: none; }
+}
+
+/* The phone frame reads bottom-up against the desktop one: the render leads,
+   the store badges sit under it, and the words and the call to action follow.
+   Only the order changes — every block is the same block. */
+@media (max-width: 767px) {
+  .sec { display: flex; flex-direction: column; }
+  .media { order: 1; margin-top: 0; }
+  .grid { order: 2; }
+
+  .copyCol { display: flex; flex-direction: column; }
+  /* Dissolved, so its two halves can take their own places in the column. */
+  .actions { display: contents; }
+
+  .badges { order: 1; justify-content: center; margin-bottom: clamp(2rem, 7vw, 2.75rem); }
+  .head { order: 2; }
+  .body { order: 3; }
+  /* Ordinary foot padding. This used to clear the overlapping dissolve band,
+     which is currently disabled. */
+  .ctaWrap {
+    order: 4;
+    margin-top: clamp(1.5rem, 5vw, 2rem);
+    padding-bottom: 80px;
+  }
+
+  /* Full width across the foot, as the comp draws it. */
+  .cta { width: 100%; justify-content: center; }
+
+  /* No aspect override any more: one upright asset is used at every width, so
+     the element's own 933x1920 is already the right shape. */
+
+  /* The comp runs the heading a good deal larger here than `--t-h2` gives, on
+     the same four lines as the Statement's. Scoped, not tokenised. */
+  .title { font-size: clamp(2.25rem, 11.5vw, 3.25rem); line-height: 1.04; max-width: 11ch; }
+
+
+  .tag {
+    left: auto;
+    right: 2%;
+    top: calc(var(--y) * 1.4);
+  }
+  /* Further over the handset on narrow screens, where there is no room
+     alongside it for them to reach into. */
+  .tag[data-side='left'] { right: calc(84% - var(--dx, 0px)); }
+  .tag[data-side='right'] { left: calc(52% + var(--dx, 0px)); }
+}
+
+@media (max-width: 560px) {
+  .tag { font-size: var(--t-xs); padding: .375rem .5rem; gap: .4rem; }
+}
+@media (prefers-reduced-motion: reduce) { .tag { animation: none; } }

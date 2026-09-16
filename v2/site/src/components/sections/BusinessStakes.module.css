@@ -1,0 +1,145 @@
+/* 848 tall on the comp against 1280 of content, which `.wrap` gives at 1440.
+   The ground is the brand blue and the eyebrow takes the cyan it takes on every
+   other blue band. */
+.sec {
+  position: relative;
+  background: var(--blue-700);
+  --eyebrow-ink: var(--cyan-600);
+}
+
+/* 56 rather than the 80 this page's other bands will take, and rather than the
+   comp's own nothing. The comp's frame is auto-sized to its content — 846 of
+   content in an 848 section — which would put the eyebrow hard against the
+   hero's last frame above and leave the fourth claim 17px off the hard colour
+   change into the light section below. Both seams need more than that. It puts
+   the section at ~960 against the comp's 848; the value is the one thing here
+   not taken from the file, and worth revisiting once the page is finished. */
+.inner { padding-block: clamp(2.5rem, 3.9vw, 3.5rem); }
+
+/* Heading left, standfirst right on the comp's own 300 — the same head shape
+   `DayOnTheMeter` uses, so the two blue-and-evidence sections open alike. */
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--s-10);
+  padding-bottom: clamp(2rem, 3.4vw, 3rem);
+}
+
+.headText { flex: 1 1 auto; min-width: 0; }
+
+.title { margin-top: var(--s-5); color: var(--white); }
+
+/* 16 at 160% — the comp runs this looser than the hero's 120%, and it is a
+   standfirst rather than a paragraph, so it keeps the comp's leading. */
+.lede {
+  flex: 0 1 19.25rem;
+  align-self: center;
+  color: var(--white);
+  font-size: var(--t-body);
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+
+/* The rules are the comp's own #E0E0E0 at 20%: one above the first row and one
+   under each row but the last, so the run is closed at the top and open at the
+   bottom into the section's own padding. */
+.rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-block-start: 1px solid rgb(224 224 224 / .2);
+}
+
+.rowWrap { border-block-end: 1px solid rgb(224 224 224 / .2); }
+.rowWrap:last-child { border-block-end: 0; }
+
+/* Four columns: the numeral on the comp's 100, the label and the claim sharing
+   what is left, and the ring. `align-items: center` is what puts the label on
+   the claim's optical middle rather than its first line. */
+.row {
+  display: grid;
+  grid-template-columns: 100px 1fr 1fr var(--ring, 44px);
+  align-items: center;
+  column-gap: clamp(1rem, 2.78vw, 2.5rem);
+  min-height: clamp(6rem, 11vw, 9.875rem);
+  color: inherit;
+  text-decoration: none;
+  transition: transform var(--dur-std) var(--ease-out);
+}
+
+.num { color: var(--white); }
+
+/* Centred in its own column, which is where the comp puts it — between the
+   numeral and the claim rather than hard against either. */
+.label {
+  justify-self: center;
+  font-family: var(--font-body);
+  font-size: var(--t-xs);
+  font-weight: 600;
+  letter-spacing: .14em;
+  line-height: 1.55;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--cyan-400);
+}
+
+.claim { color: var(--white); text-wrap: pretty; }
+
+.srNum {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* `.sec .row .ring` rather than `.ring`: `ArrowRing`'s own `.onBlue.arrow` is
+   two classes, so a single-class override would tie with it and the winner
+   would depend on CSS-module import order — the same trap `DayOnTheMeter`'s
+   `.band .pix` note records. The comp's disc is a step brighter than the
+   house `onBlue` rest state; the hover fill and the arrow's pass are the
+   component's own and are left alone. */
+.sec .row .ring {
+  background: var(--blue-500);
+  color: var(--blue-200);
+}
+
+/* Only a real link moves. The comp gives every row a ring, but a row with no
+   destination should not offer the affordance of one. */
+@media (hover: hover) and (pointer: fine) {
+  a.row:hover { transform: translate3d(6px, 0, 0); }
+}
+
+@media (min-width: 1920px) {
+  .sec .inner { max-width: none; padding-inline: 120px; }
+}
+
+@media (max-width: 1023px) {
+  .head { flex-direction: column; }
+  .lede { flex: none; align-self: stretch; max-width: 46ch; }
+
+  /* The label leaves the row and sits above the claim: three columns of copy in
+     a tablet's width would give the claim about 200px, which is narrower than
+     its own longest word run. */
+  .row {
+    grid-template-columns: 4.5rem 1fr var(--ring, 44px);
+    row-gap: var(--s-2);
+    padding-block: var(--s-6);
+  }
+  .label { grid-column: 2; justify-self: start; text-align: start; }
+  .claim { grid-column: 2; }
+  .num { grid-row: 1 / span 2; align-self: start; }
+  .sec .row .ring { grid-row: 1 / span 2; }
+}
+
+@media (max-width: 599px) {
+  /* The numeral stops being a column and becomes a line of its own above the
+     label — at this width a 4.5rem gutter for it takes a fifth of the screen. */
+  .row { grid-template-columns: 1fr var(--ring, 44px); }
+  .num { grid-row: 1; grid-column: 1; }
+  .label { grid-row: 2; grid-column: 1; }
+  .claim { grid-row: 3; grid-column: 1; }
+  .sec .row .ring { grid-row: 1; grid-column: 2; align-self: center; }
+}

@@ -1,0 +1,23 @@
+/* Inline, so the words wrap exactly as the unsplit string did. Nothing here
+   touches layout — only opacity moves, which keeps the reveal off the layout
+   and paint paths entirely. */
+.word {
+  display: inline;
+  transition: opacity 120ms linear;
+}
+
+.mount {
+  opacity: 0.16;
+  animation: revealWord 620ms var(--ease-out) both;
+}
+
+@keyframes revealWord {
+  from { opacity: 0.16; }
+  to   { opacity: 1; }
+}
+
+/* The reveal is decoration; the line must simply be legible. */
+@media (prefers-reduced-motion: reduce) {
+  .word { transition: none; }
+  .mount { animation: none; opacity: 1; }
+}

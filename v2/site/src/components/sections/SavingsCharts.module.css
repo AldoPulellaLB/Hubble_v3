@@ -1,0 +1,379 @@
+/* Charts for the savings calculator.
+ *
+ * One palette, three charts. The calculator keeps blue for the step you are on,
+ * the option you chose and the number the exercise is for — so data here is
+ * drawn in the same blue and nothing else is coloured. Where a chart needs more
+ * than one series it steps down the same ramp rather than reaching for a second
+ * hue, which is also what keeps it readable without colour vision. */
+
+/* The charts that stand on their own are cards, like every other read-out on
+   this surface. Before this the caption sat flush at the column's edge while
+   the card beside it inset its own title and the heat grid inset again — three
+   left edges in one column. The padding token comes from the calculator's
+   surface, so one value moves them all.
+
+   The donut is not in this list: it is always placed inside a plate already,
+   and a card inside a card is two borders and two paddings. */
+figure.heat, figure.area {
+  padding: var(--pad-card);
+  border-radius: var(--r-card);
+  background: var(--n-75);
+  border: 1px solid var(--n-200);
+}
+
+.cap {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: .75rem;
+  font-size: var(--t-xs);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--n-500);
+}
+
+/* ── The rate heatmap ─────────────────────────────────────── */
+/* The grid takes whatever height the column has spare, so the cells grow into
+   it instead of the figure sitting short with a gap under it. Capped below,
+   because a 24-wide row of 100px-tall cells stops reading as a grid. */
+figure.heat {
+  /* Takes the column's slack: the grid is the only thing here that reads
+     better larger, and a fixed-height chart above a gap is the waste this
+     whole pass is about.
+
+     `figure.heat`, not `.heat`: this needs to out-specify whatever the host
+     column sets on its children, and a bare class is the same specificity
+     across two CSS modules — so which one won depended on the order the
+     bundler emitted them. Adding the element settles it rather than by luck.
+
+     And basis 0, not auto: on `auto` the flex base size is the content's, and
+     the content of a chart is an SVG whose intrinsic ratio made it as tall as
+     it was wide — 1040px inside a 572px box. */
+  flex: 1 1 0;
+  /* The floor has to clear the caption, the read-out, the key and two rows of
+     cells. At 7rem it did not: on a 900px window the figure got exactly its
+     112px, the grid's `1fr` track resolved to 0, and ~100px of cells spilled
+     out of it — up over the caption and down through the read-out, because the
+     grid centres its content. */
+  min-height: 9.5rem;
+  /* A backstop for the same failure. Whatever the arithmetic works out to,
+     nothing in here paints on a neighbour. */
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  gap: .5rem;
+}
+/* Content-sized rows, centred in whatever height the figure was given. Made
+   to stretch instead, the two rows sat 100px apart with a 44px cell at the top
+   of each — the slack has to be shared around the grid, not poured between its
+   rows. */
+/* The plate moved out to the figure — see the note at the top. What the cells
+   needed it for was contrast: the calculator's ground is --n-300 and the
+   ramp's lightest step is 1.2:1 against it, which is not a pale cell but an
+   invisible one. --n-75 is close enough to white for the cells to read, and
+   the inset border below gives every step an edge whatever its fill. */
+.heatGrid {
+  display: grid;
+  /* `minmax(0, cap)` is the whole trick: each cell row grows to the cap when
+     there is room and gives space up when there is not, so the grid can never
+     be taller than its track. `align-content: center` then packs the three
+     rows together and puts all the slack outside them — which is what keeps
+     the two cell rows adjacent instead of drifting apart.
+
+     Two earlier attempts and why they failed, because both look right:
+     content-sized rows (`auto`) cannot shrink, so on a short window the grid
+     overflowed its track; and `align-self: center` on this item made it
+     content-sized rather than stretched, so a 72px grid sat centred in a 38px
+     track and spilled 17px onto the caption above and the read-out below. */
+  grid-template-rows: minmax(0, 3.25rem) minmax(0, 3.25rem) auto;
+  align-content: center;
+  gap: 3px;
+  min-height: 0;
+}
+.heatRow { display: grid; grid-template-columns: 4.25rem minmax(0, 1fr); align-items: stretch; gap: .5rem; }
+.heatRowLab { align-self: center; }
+.heatRowLab { font-size: var(--t-xs); color: var(--n-600); }
+.heatCells { display: grid; grid-template-columns: repeat(24, 1fr); gap: 3px; }
+
+/* The cells are buttons so they are keyboard-reachable — a tooltip that only
+   answers to a pointer is a value the reader cannot get to. */
+.heatCell {
+  /* Taller than wide, as a 24-column grid has to be — the reference reads the
+     same way. */
+  /* Fills its row, which the grid has already capped — taller than wide when
+     there is room, and it gives way when there is not. The fixed clamp is what
+     made these unable to fit a short window at all. */
+  height: 100%;
+  min-height: .6rem;
+  border-radius: 3px;
+  background: var(--heat);
+  box-shadow: inset 0 0 0 1px rgba(13, 20, 33, .09);
+  transition: transform 160ms var(--ease-out), box-shadow 160ms var(--ease-out);
+}
+/* Five steps up one ramp rather than a continuous gradient, so a reader can
+   tell one step from the next.
+
+   Being honest about what this does and does not satisfy: a five-step ramp
+   cannot hold 3:1 against its own background at both ends — the arithmetic
+   does not allow it. So colour is not carrying the information on its own.
+   Every cell states its rate and its band name on hover and on focus, each is
+   a real focusable button, the legend carries the scale in rands, and the
+   inset border keeps the lightest cell visible as a cell. That is the fallback
+   set a heatmap is graded on; the colour is the pattern, not the value. */
+.heatCell[data-step='0'] { --heat: #D5E0FA; }
+.heatCell[data-step='1'] { --heat: #B9CBF6; }
+.heatCell[data-step='2'] { --heat: #7FA3FF; }
+.heatCell[data-step='3'] { --heat: #3164FF; }
+.heatCell[data-step='4'] { --heat: #123FC7; }
+
+.heatCell[data-on], .heatCell:focus-visible {
+  transform: scaleY(1.12);
+  box-shadow: 0 0 0 2px var(--n-900);
+  outline: none;
+  z-index: 1;
+}
+
+.heatAxis {
+  display: flex;
+  justify-content: space-between;
+  margin: .15rem 0 0 4.75rem;
+  font-size: var(--t-xs);
+  color: var(--n-400);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Reserved height, so reading across the grid never nudges the layout. */
+.heatRead {
+  min-height: 1.25rem;
+  font-size: var(--t-sm);
+  color: var(--n-700);
+  font-variant-numeric: tabular-nums;
+}
+.heatRead b { color: var(--n-900); font-weight: 700; }
+.heatHint { color: var(--n-400); }
+
+.heatKey {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  font-size: var(--t-xs);
+  color: var(--n-500);
+  font-variant-numeric: tabular-nums;
+}
+.heatKeyRamp { display: flex; gap: 2px; }
+.heatKeyRamp i { width: 1.25rem; height: .5rem; border-radius: 2px; background: var(--heat); }
+.heatKeyRamp i[data-step='0'] { --heat: #D5E0FA; }
+.heatKeyRamp i[data-step='1'] { --heat: #B9CBF6; }
+.heatKeyRamp i[data-step='2'] { --heat: #7FA3FF; }
+.heatKeyRamp i[data-step='3'] { --heat: #3164FF; }
+.heatKeyRamp i[data-step='4'] { --heat: #123FC7; }
+
+/* ── The day curve ────────────────────────────────────────── */
+figure.area {
+  /* Same as the heatmap, and the same two reasons — see the note there.
+     The floor matters where the column has no free space to hand out: below
+     900px the step body scrolls and `height: auto` leaves basis 0 with nothing
+     to grow into, which collapsed the curve to 62px. */
+  flex: 1 1 0;
+  min-height: 7rem;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  gap: .35rem;
+}
+.areaTotal {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: .95rem;
+  letter-spacing: -.02em;
+  text-transform: none;
+  color: var(--n-900);
+  font-variant-numeric: tabular-nums;
+}
+
+.areaPlot {
+  position: relative;
+  min-height: 0;
+  border-radius: var(--r-btn);
+  cursor: crosshair;
+}
+.areaPlot:focus-visible { outline: 2px solid var(--blue-500); outline-offset: 2px; }
+/* Out of flow. An in-flow `<svg>` at `height: 100%` inside a box whose height
+   is still being resolved falls back to its own aspect ratio, which is how a
+   956px-wide plot asked for 956px of height and burst the step. Absolute, it
+   paints into whatever the grid row settles on and contributes nothing. */
+.areaPlot svg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+
+.grid { stroke: var(--n-200); stroke-width: 1; }
+.peakBand { fill: rgba(23, 72, 223, .07); }
+
+.stopTop { stop-color: var(--blue-500); stop-opacity: .34; }
+.stopFoot { stop-color: var(--blue-500); stop-opacity: .02; }
+.area[data-tone='solar'] .stopTop { stop-color: #7FA3FF; stop-opacity: .42; }
+
+.areaLine { fill: none; stroke: var(--blue-500); stroke-width: 2; stroke-linejoin: round; }
+.area[data-tone='solar'] .areaLine { stroke: #4E7DFF; }
+
+.cursor { stroke: var(--n-900); stroke-width: 1; stroke-dasharray: 3 3; opacity: .5; }
+
+.dot {
+  position: absolute;
+  width: 9px; height: 9px;
+  margin: -4.5px 0 0 -4.5px;
+  border-radius: var(--r-full);
+  background: var(--white);
+  border: 2px solid var(--blue-500);
+  pointer-events: none;
+}
+
+/* Above the plot, not over it: the curve is only ~120px tall and a label
+   sitting on it would cover the shape being read. */
+.tip {
+  position: absolute;
+  top: -.15rem;
+  transform: translate(-50%, -100%);
+  display: flex;
+  align-items: baseline;
+  gap: .4rem;
+  padding: .25rem .5rem;
+  border-radius: var(--r-btn);
+  background: var(--n-900);
+  color: var(--white);
+  font-size: var(--t-xs);
+  white-space: nowrap;
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+}
+.tip b { color: rgba(255, 255, 255, .6); font-weight: 500; }
+/* Past two thirds across it would hang off the plot's right edge. */
+.tip[data-flip] { transform: translate(-100%, -100%); }
+
+.areaAxis {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--t-xs);
+  color: var(--n-400);
+  font-variant-numeric: tabular-nums;
+}
+
+.areaKey { display: flex; align-items: center; gap: .4rem; font-size: var(--t-xs); color: var(--n-500); }
+.areaKeySwatch {
+  width: .75rem; height: .75rem;
+  border-radius: 2px;
+  background: rgba(23, 72, 223, .14);
+}
+
+/* ── The donut ────────────────────────────────────────────── */
+figure.donut {
+  /* The ring has an intrinsic size and a legend of fixed rows — stretched, it
+     just puts a gap under itself. */
+  flex: none;
+  display: grid;
+  gap: .5rem;
+  align-content: start;
+  min-height: 0;
+  /* Measured against its own box, not the window. The same donut sits in a
+     240px column on the solar step and a 760px card on the results step; on a
+     viewport rule the narrow one kept the side-by-side layout and wrapped
+     "Serves your load" onto three lines beside the ring. */
+  container-type: inline-size;
+}
+.donutBody {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(1rem, 2.2vw, 1.75rem);
+}
+
+.donutRing { position: relative; width: clamp(5rem, 13vh, 7.5rem); aspect-ratio: 1; }
+
+/* Below this the ring and the legend cannot both have a usable measure. */
+@container (max-width: 23rem) {
+  .donutBody { grid-template-columns: minmax(0, 1fr); justify-items: stretch; gap: .5rem; }
+  .donutRing { justify-self: center; }
+}
+.donutRing svg { display: block; width: 100%; height: 100%; transform: rotate(-90deg); }
+
+.donutTrack { fill: none; stroke: var(--n-200); stroke-width: 11; }
+.donutArc {
+  fill: none;
+  stroke: var(--slice);
+  stroke-width: 11;
+  stroke-linecap: butt;
+  transition: stroke-dasharray 620ms var(--ease-out), stroke-dashoffset 620ms var(--ease-out);
+}
+/* Down one ramp rather than across hues, so the order of the slices is
+   legible as an order — and the legend states each share in figures. */
+.donutArc[data-slice='0'] { --slice: #123FC7; }
+.donutArc[data-slice='1'] { --slice: #3164FF; }
+.donutArc[data-slice='2'] { --slice: #7FA3FF; }
+.donutArc[data-slice='3'] { --slice: #B9CBF6; }
+
+.donutMid {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 1px;
+  text-align: center;
+  pointer-events: none;
+}
+.donutMid b {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: clamp(1rem, 2.4vh, 1.35rem);
+  line-height: 1;
+  letter-spacing: -.03em;
+  color: var(--n-900);
+  font-variant-numeric: tabular-nums;
+}
+.donutMid > span { font-size: var(--t-xs); color: var(--n-500); }
+
+.donutKey { display: grid; gap: 1px; min-width: 0; align-content: center; }
+.donutKey > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  /* The label and its percentage were .75rem apart on a row that could be
+     260px wide — they read as one cramped string rather than a pair. */
+  gap: clamp(1rem, 2vw, 2rem);
+  padding: .4rem 0;
+  border-bottom: 1px solid var(--n-200);
+}
+.donutKey > div:last-child { border-bottom: 0; }
+.donutKey dt {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  min-width: 0;
+  font-size: var(--t-sm);
+  color: var(--n-600);
+}
+.donutKey dt i {
+  flex: none;
+  width: .5rem; height: .5rem;
+  border-radius: 2px;
+  background: var(--slice);
+}
+.donutKey dt i[data-slice='0'] { --slice: #123FC7; }
+.donutKey dt i[data-slice='1'] { --slice: #3164FF; }
+.donutKey dt i[data-slice='2'] { --slice: #7FA3FF; }
+.donutKey dt i[data-slice='3'] { --slice: #B9CBF6; }
+.donutKey dd {
+  font-size: var(--t-sm);
+  font-weight: 600;
+  color: var(--n-900);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 560px) {
+  /* The row label column is 68px of a 320px screen. The rows keep their names
+     above the cells instead. */
+  .heatRow { grid-template-columns: minmax(0, 1fr); gap: .15rem; }
+  .heatAxis { margin-left: 0; }
+  .donutBody { grid-template-columns: minmax(0, 1fr); justify-items: center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .heatCell, .donutArc { transition: none; }
+}

@@ -1,0 +1,274 @@
+/* The hero now ends on a 400px fade into `--blue-700`, so this section starts
+   on the same value: no seam, the ground simply continues and the white plate
+   arrives on top of it.
+
+   The blue ground above and below the plate is set to the Services section's
+   own `padding-block`, so the two sections open and close on the same rhythm.
+   Copied as the literal clamps rather than shared through a token, which is
+   what the rest of this file does — if Services' padding moves, this has to be
+   moved with it by hand. It used to be `--frame` on both edges, matching the
+   plate's own left/right inset; that pairing only ever held below 1440, since
+   globals.css drops the inline padding above it. */
+.sec { position: relative; background: var(--blue-700); }
+
+/* ── The pin ────────────────────────────────────────────────────────────────
+   Only when the section carries a rotating claim. The track is a screen plus
+   one hold per line — the last hold is the tail that keeps the final line up
+   until the section releases — and the panel sticks in the middle of it.
+
+   `--hold` is the one number to turn: it is how far the reader scrolls per
+   line, and `--holds` must match the number of lines in the content file. */
+.sec[data-rotating] {
+  --hold: 48vh;
+  --holds: 4;
+  height: calc(100lvh + var(--holds) * var(--hold));
+}
+@supports not (height: 100lvh) {
+  .sec[data-rotating] { height: calc(100vh + var(--holds) * var(--hold)); }
+}
+
+/* Always a grid, rotating or not. The phone's rules stretch the frame to a full
+   screen through `.sec > .frame`, and this wrapper sits between them — as a
+   plain block it would swallow that stretch and the plate would collapse to its
+   content. One child, so it stretches by default. */
+/* A zero-size marker 120vh down the section, out of flow so it changes no
+   layout. It exists only to give the traces a moving second anchor — see the
+   note in the component. */
+.drawEnd {
+  position: absolute;
+  top: 120vh;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+
+.pin { display: grid; }
+
+.sec[data-rotating] .pin {
+  position: sticky;
+  top: 0;
+  align-content: center;
+  min-height: 100lvh;
+}
+
+/* ── Making the plate fit the pin ───────────────────────────────────────────
+   A pinned panel taller than the screen never shows its own bottom edge, and
+   the traces leave through the bottom-left — so the lines read as unfinished
+   for the whole pin no matter how completely they are drawn. Measured: panel
+   890 plus 220 of frame padding inside a 900 viewport left 89px of the plate,
+   and the trace exits with it, permanently below the fold.
+
+   So while pinned the frame gives up its block padding — the section's own
+   height is the spacing now — and the plate takes a tighter vertical rhythm. */
+.sec[data-rotating] .frame { padding-block: 0; }
+
+/* Against the *viewport's* height, not the page's width — a pinned plate has to
+   fit the screen it is pinned to, and a `vw` clamp knows nothing about that. At
+   900 this gives 54/40 and the plate is 791; at 800, 48/36 and it is 780. Below
+   about a 750 viewport the copy alone is taller than the screen and the plate
+   goes back to drifting, which is the old behaviour and the only thing left. */
+.sec[data-rotating] .grid {
+  padding-block: min(4.7rem, 6lvh) min(3.6rem, 4.5lvh);
+}
+.frame { padding-block: clamp(3.5rem, 6.9vw, 6.25rem) clamp(4rem, 8.3vw, 7.5rem); }
+
+.panel {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--r-panel);
+  background: var(--white);
+  /* Both eyebrows in one place — the global `.t-eyebrow` reads this, and on
+     white the comp's cyan would be far too faint. */
+  --eyebrow-ink: var(--blue-500);
+  isolation: isolate;
+}
+
+.flow {
+  /* Re-inked for a light ground: cyan on white is barely a line. The routes
+     keep their own per-flow opacities, so these stay as faint as the comp. */
+  --flow-ink: var(--blue-400);
+  --flow-pulse: var(--cyan-500);
+  z-index: 0;
+}
+
+/* The phone's band. Off until the breakpoint asks for it. */
+.flowM { display: none; }
+
+.grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: clamp(2.5rem, 5vw, 4.5rem) var(--s-6);
+  padding: clamp(3rem, 9.4vw, 8.4rem) clamp(1.5rem, 2.8vw, 2.5rem) clamp(3rem, 7vw, 6.3rem);
+  /* 80px in from the panel's edge — `--gut` rather than a flat value, because it
+     is the page's own gutter ramp: it tops out at exactly 80 and still gives way
+     on narrow screens, where a fixed 80 would be a fifth of the width. */
+  padding-inline-start: var(--gut);
+}
+
+.head { grid-column: 1 / span 7; }
+
+/* ── The rotating claim ─────────────────────────────────────────────────────
+   Sits under the heading in the same column, on the comp's own measures: the
+   eyebrow 8 clear of a 40px Sora SemiBold pair, the lead and the rotating line
+   stacked with no gap between them. */
+/* `top` rather than trimming the margin, for the same reason `.aside` uses it:
+   this plate is pinned and its height is load-bearing. Taking 30px out of the
+   margin would shorten the grid by 30, which shortens the panel, which lifts
+   the bottom-aligned `.aside` by 30 as well — moving two blocks when one was
+   asked for. An offset moves this block and nothing else. */
+.possible {
+  grid-column: 1 / span 7;
+  margin-top: clamp(2rem, 3.4vw, 3rem);
+  position: relative;
+  top: -30px;
+}
+
+.keep {
+  margin: 8px 0 0;
+  font-family: var(--font-heading);
+  font-size: clamp(1.75rem, 2.78vw, 2.5rem);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -.014em;
+  text-transform: uppercase;
+}
+
+.lead { display: block; color: var(--blue-400); }
+
+/* The rotating line's box. The lines are stacked on top of each other so the
+   swap has nothing to push around, which means the wrapper has to carry the
+   height itself — one line of the same type. */
+/* Two lines' worth, always. The lines are stacked on top of each other so the
+   box has to carry its own height — and it reserves the tallest, not the
+   current one, or a swap into a two-line entry would shove everything under it
+   down and back. */
+.rotWrap {
+  position: relative;
+  display: block;
+  min-height: 2.1em;
+  color: var(--n-900);
+}
+
+/* Out goes up, in comes from below — so the run reads as a list advancing
+   rather than as four unrelated words. 420ms on the house curve; the pair
+   overlap, which is what keeps the box from ever looking empty. */
+.rot {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  opacity: 0;
+  transform: translate3d(0, .42em, 0);
+  transition: opacity 420ms var(--ease-out), transform 420ms var(--ease-out);
+  /* `pre-line`, so a `\n` in the content file breaks a line where it is written
+     and the rest still wraps if the column gets narrow. */
+  white-space: pre-line;
+}
+
+.rot[data-state='past'] { transform: translate3d(0, -.42em, 0); }
+.rot[data-state='in'] { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .rot { transition-duration: 1ms; transform: none; }
+}
+.title { color: var(--blue-600); margin-top: var(--s-5); max-width: 12ch; }
+
+/* Lifted 50px off the foot of the plate. `top` and not a margin: this panel is
+   pinned and has to fit the screen (see the note on `--rotating` padding), and
+   with `align-self: end` a bottom margin grows the row, the grid and the plate
+   with it — 739 + 50 + 220 of frame padding is 1009 in a 900 viewport, which
+   puts the plate's own foot below the fold for the whole pin. An offset moves
+   the block and nothing else.
+
+   Independent of `Reveal`'s `up`, which animates `transform` — the two are
+   separate properties and compose without either needing to know about the
+   other. */
+.aside {
+  grid-column: 7 / span 5;
+  align-self: end;
+  position: relative;
+  top: -50px;
+}
+.copy { color: var(--blue-500); margin-top: var(--s-4); }
+
+/* Extra-large displays, matching the hero. The global `.frame` caps this at
+   --maxw (1440) and centres it, and from 1440 up globals.css zeroes every
+   wrapper's inline padding — so at 1920 the plate is a 1440 box with 240px of
+   bare ground either side. Releasing the cap puts the plate on a flat 120px
+   gutter instead, on the same lines as the hero copy above it.
+
+   Only the plate's own edges move: `.grid` keeps its --gut inset, so the copy
+   inside still sits 80px in from the plate rather than growing with it.
+
+   `.sec` is in the selector to out-specify the global `.frame`, which sets the
+   cap and the padding at the same single-class specificity. */
+@media (min-width: 1920px) {
+  .sec .frame {
+    max-width: none;
+    padding-inline: 120px;
+  }
+
+  /* The plate is 240px wider at this size, which leaves the type sitting low
+     in it — its top inset was ramping on 9.4vw and had already hit its 8.4rem
+     ceiling well before 1920. Only the top moves; the right, bottom and left
+     insets keep the comp's own ramp. */
+  .grid { padding-block-start: 8rem; }
+}
+
+@media (max-width: 1023px) {
+  .head, .aside { grid-column: 1 / -1; }
+  .title { max-width: 16ch; }
+  /* The lift belongs to the two-column layout, where this block sits beside the
+     rotating claim with a column of its own. Stacked it is directly underneath
+     it, and -50px puts the two into each other — measured, they overlapped by
+     5px at 900 and 10px at 390. */
+  .aside { top: 0; }
+}
+
+@media (max-width: 1023px) {
+  .possible { grid-column: 1 / -1; }
+}
+
+@media (max-width: 767px) {
+  /* A shorter hold per line — the same four swaps over less thumb. The index
+     is read off the real rect, so nothing else needs to know. */
+  .sec[data-rotating] { --hold: 34vh; }
+
+  /* A full screen, per the comp: the plate is the whole view, copy at the top
+     and the circuit band along its foot. `lvh` so the phone's collapsing URL
+     bar doesn't resize the plate mid-scroll, and `min-height` rather than
+     `height` so unusually long copy pushes the plate taller instead of
+     spilling out of a fixed box. */
+  .sec { min-height: 100lvh; display: grid; }
+  .frame { display: grid; }
+
+  /* The band is one number, reserved above and filled below.
+     
+     It stays absolutely positioned — out of flow — on purpose. As a grid row it
+     contributes its own max-content height (274px, the svg's 375x300 box at
+     343 wide), and a `1fr` row cannot override that while the plate is sized by
+     its content: the plate grows, the section overshoots the fold, and no
+     amount of `min-height: 0` breaks the circularity. Out of flow it costs
+     nothing, and `padding-bottom` keeps the copy off it. */
+  .panel { --band: 7rem; }
+  .grid { align-content: start; padding-bottom: var(--band); }
+
+  /* The comp's phone frame runs the heading much larger than `--t-h2` gives —
+     about a quarter of the plate against a seventh, breaking to four lines
+     rather than three. Scoped here rather than moved into the token, which
+     every other section's h2 also reads. */
+  .title { font-size: clamp(2.5rem, 13vw, 3.6rem); line-height: 1.02; max-width: 9ch; }
+
+  .flow { display: none; }
+  .panel .flowM {
+    display: block;
+    top: auto;
+    bottom: 0;
+    height: var(--band);
+    --flow-ink: var(--blue-400);
+    --flow-pulse: var(--cyan-500);
+    z-index: 0;
+  }
+}

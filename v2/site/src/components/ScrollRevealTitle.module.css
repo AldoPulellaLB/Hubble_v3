@@ -1,0 +1,8 @@
+/* Each character is its own inline box, which the browser is otherwise free to
+   break a line at — this keeps the word whole and lets the line wrap only at
+   the real spaces between words. */
+.word { white-space: nowrap; }
+
+/* Nothing here moves layout: only `color` animates, so the wipe stays off the
+   layout and paint paths that the rest of the page is competing for. */
+.char { display: inline; }

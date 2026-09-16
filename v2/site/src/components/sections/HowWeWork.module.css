@@ -1,0 +1,422 @@
+.sec {
+  position: relative;
+  background: var(--n-75);
+  padding-block: clamp(3.5rem, 6.9vw, 6.25rem) clamp(4rem, 8.3vw, 7.5rem);
+  overflow: hidden;
+}
+
+.inner { position: relative; z-index: 1; }
+
+/* Declared even though it carries nothing of its own: `Reveal` needs a
+   class to hang the entrance on, and a class used in the TSX but absent
+   from the stylesheet ships as the literal string "undefined". */
+.head { position: relative; }
+
+/* The comp sets this eyebrow in Blue/400 rather than the cyan every other
+   eyebrow on the page takes. Followed, because it is what `1797:618` draws —
+   but see the README's deviations list: #3164FF on this `--n-75` ground is
+   4.46:1, a whisker under AA for 13px label text. `--blue-500` is the same
+   family at 6.47:1 if it is ever wanted. */
+.eyebrow { --eyebrow-ink: var(--blue-400); }
+
+.title {
+  color: var(--blue-700);
+  margin-top: var(--s-5);
+  /* No `max-width`: the three lines are forced with `\n` in the content file,
+     which is the only thing `.t-h2`'s `text-wrap: balance` cannot override. A
+     measure here would fight them. */
+}
+
+/* ── Subheadings ─────────────────────────────────────────────────────────── */
+
+.subHead { margin-top: clamp(2.5rem, 4.4vw, 4rem); }
+.subTitle { color: var(--n-900); }
+
+/* The comp's step row to "Your options" is ~105px of air. It is the seam
+   between the two halves of the section, so it is bigger than either half's
+   own internal rhythm. */
+.optionsHead { margin-top: clamp(3.5rem, 7.3vw, 6.6rem); }
+
+/* ── Our process ─────────────────────────────────────────────────────────── */
+
+.processWrap { margin-top: clamp(1.25rem, 1.8vw, 1.625rem); }
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  align-items: stretch;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* `--sd` is this card's share of the stagger, and it is added to `Reveal`'s own
+   `--rd` rather than replacing it — a fixed delay only looks staggered when the
+   cards cross the fold one at a time, and five side by side cross in the same
+   frame. Declared once here and spent by the card, its icon and its rule. */
+.step {
+  --sd: calc(var(--rd, 0s) + var(--i) * 90ms);
+  /* The exit's own stagger: half the entrance's, and with no `--rd`, because
+     `Reveal`'s delay belongs to the arrival. */
+  --sx: calc(var(--i) * 45ms);
+  /* Which way the group is leaving, written by `Reveal`'s `data-out` below.
+     26px is also the entrance rest, so a first paint that has never intersected
+     starts from the same place it would if it had entered from the fold. */
+  --y: 26px;
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-4);
+  padding: var(--s-6);
+  /* The comp's 243. A floor and not a height: three lines of copy fit inside
+     it at this width and more than three do not, and the five cards stretch
+     to the tallest anyway. What it actually buys is the rule and the hover
+     plate, which are card-height — content-height alone made both 17px
+     shorter than the comp draws them. */
+  min-height: 243px;
+  border-radius: 25px;
+  text-align: center;
+  background: transparent;
+
+  opacity: 0;
+  transform: translate3d(0, var(--y), 0);
+  /* The *exit* transition. A transition is read off the style the element is
+     moving **to**, so this rule governs leaving and the `[data-in]` rule below
+     governs arriving — which is how the two directions get different durations
+     out of one declaration each, rather than a class that has to be toggled.
+     390/500 is ~62% of the entrance, the house's exit ratio.
+
+     Per-property delays throughout. The entrance is staggered; the hover is
+     not, and carrying the stagger onto `background-color` would make the fifth
+     card take 360ms to answer the pointer. */
+  transition:
+    opacity 390ms var(--ease-out) var(--sx),
+    transform 500ms var(--ease-out) var(--sx),
+    background-color 260ms var(--ease-out);
+}
+/* Leaving upward — the reader is scrolling down — so the row lifts away rather
+   than sinking back into a rest state it is never going to be seen in. Shorter
+   than the entrance's 26px: an exit only has to read as departure. */
+.processWrap[data-out='up'] .step { --y: -18px; }
+
+.processWrap[data-in] .step {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 620ms var(--ease-out) var(--sd),
+    transform 820ms var(--ease-out) var(--sd),
+    background-color 260ms var(--ease-out);
+}
+
+/* The rules between cards. Pseudo-elements and not `border-right`, because they
+   have to answer to a *neighbour's* state: a hovered card grows a plate, and a
+   rule drawn against its rounded edge reads as a seam. A card therefore drops
+   its rule when it is hovered or when the card after it is — which is exactly
+   what the comp draws, with card 2 shown hovered and only the 3|4 and 4|5 rules
+   remaining.
+
+   `scaleY` is the entrance and `opacity` is the hover, so the two never write
+   the same property and the hover needs no delay of its own. */
+.step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--n-300);
+  transform: scaleY(0);
+  transition:
+    transform 420ms var(--ease-out) var(--sx),
+    opacity 260ms linear;
+}
+.processWrap[data-in] .step:not(:last-child)::after {
+  transform: scaleY(1);
+  transition:
+    transform 700ms var(--ease-out) calc(var(--sd) + 240ms),
+    opacity 260ms linear;
+}
+
+.stepIcon {
+  display: block;
+  width: 48px;
+  height: 48px;
+  opacity: 0;
+  transform: scale(.72);
+  transition:
+    opacity 260ms var(--ease-out) var(--sx),
+    transform 380ms var(--ease-out) var(--sx);
+}
+/* A beat behind its own card on the way in, so the mark lands into a box that
+   has already arrived rather than riding in on it. On the way out it goes with
+   the card — a mark that outlives its own plate reads as a bug. */
+.processWrap[data-in] .stepIcon {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 420ms var(--ease-out) calc(var(--sd) + 160ms),
+    transform 620ms var(--ease-out) calc(var(--sd) + 160ms);
+}
+
+.stepName {
+  color: var(--n-900);
+  margin-inline-start: 0;   /* the shared heading rule's optical pull would
+                               decentre a centred line */
+  transition: color 260ms var(--ease-out);
+}
+
+.stepCopy {
+  color: var(--n-600);
+  line-height: 1.4;         /* the comp's, tighter than the body default */
+  max-width: 200px;
+}
+
+/* The roll-over plate. `#E7EEF9` is the comp's own value and is not in the
+   palette — a greyer blue than `--blue-300`, which is what lets it read as a
+   lift off `--n-75` rather than as a second colour. Scoped to real pointers so
+   it does not latch on a phone. */
+@media (hover: hover) {
+  .step:hover { background: #E7EEF9; }
+  .step:hover .stepName { color: var(--blue-700); }
+  .step:hover::after,
+  .step:has(+ .step:hover)::after { opacity: 0; }
+}
+
+/* ── Your options ────────────────────────────────────────────────────────── */
+
+.cards {
+  display: grid;
+  /* The comp's 439 : 831 of a 1280 row, expressed as shares so the gap comes
+     out of the pair rather than off the end. */
+  grid-template-columns: 439fr 831fr;
+  gap: 10px;
+  align-items: stretch;
+  list-style: none;
+  margin: clamp(1.5rem, 2.4vw, 2.125rem) 0 0;
+  padding: 0;
+}
+
+/* The observer's host. It carries nothing visual — but it needs a rule of its
+   own, not just the `[data-in]` / `[data-out]` ones below, so the class is
+   unambiguously exported and can never ship as the literal string "undefined". */
+.cardsWrap { display: block; }
+
+/* ── The options' entrance ───────────────────────────────────────────────────
+   Two layers, which is what stops it reading as two slabs sliding up. The plate
+   itself fades and rises as one object; its head, body and buttons then rise a
+   little further off the same `data-in`, a beat apart. The same arrangement as
+   the arbitrage split's foot — the block carries the fade, the parts carry the
+   order — and the reason it is one `Reveal` on the list rather than one per card
+   is that two cards side by side cross the fold in the same frame.
+
+   Only the plate fades. Fading the contents as well would double-composite
+   every glyph against a ground that is itself still fading, which reads as
+   muddy rather than as soft. */
+.card {
+  display: flex;
+  --sd: calc(var(--rd, 0s) + var(--i) * 110ms);
+  --sx: calc(var(--i) * 55ms);
+  --y: 32px;
+
+  opacity: 0;
+  transform: translate3d(0, var(--y), 0);
+  transition:
+    opacity 380ms var(--ease-out) var(--sx),
+    transform 500ms var(--ease-out) var(--sx);
+}
+.cardsWrap[data-out='up'] .card { --y: -22px; }
+
+.cardsWrap[data-in] .card {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 600ms var(--ease-out) var(--sd),
+    transform 780ms var(--ease-out) var(--sd);
+}
+
+/* The three parts, in reading order. 20px against the plate's 32 — enough to
+   arrive *after* the card rather than with it, not so much that the card looks
+   hollow on the way in. */
+.cardHead,
+.cardBody,
+.actions {
+  transform: translate3d(0, 20px, 0);
+  transition: transform 420ms var(--ease-out) var(--sx);
+}
+.cardsWrap[data-out='up'] .cardHead,
+.cardsWrap[data-out='up'] .cardBody,
+.cardsWrap[data-out='up'] .actions { transform: translate3d(0, -14px, 0); }
+
+.cardsWrap[data-in] .cardHead,
+.cardsWrap[data-in] .cardBody,
+.cardsWrap[data-in] .actions { transform: none; }
+.cardsWrap[data-in] .cardHead { transition: transform 700ms var(--ease-out) calc(var(--sd) + 120ms); }
+.cardsWrap[data-in] .cardBody { transition: transform 700ms var(--ease-out) calc(var(--sd) + 200ms); }
+.cardsWrap[data-in] .actions  { transition: transform 700ms var(--ease-out) calc(var(--sd) + 280ms); }
+
+.cardIn {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(1.5rem, 2.85vw, 2.5625rem);
+  width: 100%;
+  min-height: 487px;
+  padding: clamp(1.5rem, 3.1vw, 2.75rem);
+  border-radius: var(--r-card);
+}
+/* Two pale blues, neither in the palette: the comp separates the two cards by a
+   half-step of the same hue rather than by a border. */
+.card:first-child .cardIn { background: #D8EAFF; }
+.card:nth-child(2) .cardIn { background: #D8E3F8; }
+
+/* Layout only — its entrance transform is in the options' entrance block above. */
+.cardHead {
+  display: flex;
+  align-items: center;
+  gap: var(--s-6);
+}
+
+/* Drawn as text, not as the comp's exported SVG: it is a numeral in the page's
+   own typeface at the page's own weight, so it stays crisp and follows the type
+   scale. 90px puts the glyph height on the comp's 65. */
+.cardNum {
+  font-family: var(--font-heading);
+  font-size: clamp(3.25rem, 6.25vw, 5.625rem);
+  font-weight: 800;
+  /* Below 1 on purpose. Digits have no descender, so the line box's lower half
+     is empty — at `line-height: 1` that was 25px of phantom leading under the
+     numeral, which pushed the whole card 28px past the comp's 487. .72 is the
+     glyph's own share of the em, so the box hugs the figures. */
+  line-height: .72;
+  letter-spacing: -0.04em;
+  color: var(--blue-400);
+  flex: none;
+}
+
+.cardTitle {
+  color: var(--n-900);
+  line-height: 1.15;
+  max-width: 14rem;
+}
+
+/* Layout only — entrance transform above. */
+.cardBody { display: flex; flex-direction: column; }
+
+/* 14px is the comp's Body SM and there is no token for it — every other step on
+   the scale is 13 or 16, and 16 would make this read as a second paragraph
+   rather than as the card's label. */
+.kicker {
+  font-family: var(--font-body);
+  font-size: .875rem;
+  line-height: 1.55;
+  color: var(--blue-700);
+  margin-bottom: var(--s-3);
+}
+
+.copy { color: var(--n-800); max-width: 18.75rem; }
+
+.blocks {
+  display: grid;
+  grid-template-columns: 239fr 469fr;
+  gap: var(--s-6);
+}
+
+/* The pair of sub-columns in card 02. Same reason as `.head` — it is a real
+   grouping element and needs a real rule. */
+.block { display: block; }
+
+.blockTitle {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.6;
+  color: var(--n-800);
+}
+
+.blockCopy {
+  color: var(--n-800);
+  /* The comp breaks before the parenthesis. `pre-line` keeps that break a text
+     node, so the accessible name stays one sentence — a `<br>` contributes no
+     whitespace to accname computation and would run the words together. */
+  white-space: pre-line;
+}
+
+.blockCopy a {
+  color: var(--blue-700);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 200ms var(--ease-out);
+}
+.blockCopy a:hover { color: var(--blue-500); }
+
+.footnote {
+  color: var(--n-800);
+  font-weight: 700;
+  margin-top: var(--s-4);
+}
+
+/* Layout only — entrance transform above. */
+.actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+
+/* The comp's second button: translucent dark with a blur, which is `ghost`
+   re-skinned for a pale plate. A light plate takes a blue arrow — the rule the
+   Button variants already follow. */
+.quiet {
+  background: rgba(43, 43, 43, .15);
+  color: var(--n-900);
+  --chev-ink: var(--blue-400);
+  backdrop-filter: blur(4px);
+}
+.quiet:hover { color: var(--n-900); }
+
+/* ── Breakpoints ─────────────────────────────────────────────────────────── */
+
+/* The rules only describe a single row of five. Below that the cards wrap, and
+   a rule at the end of a row is a rule against nothing — the grid's own gap
+   separates them instead. */
+@media (max-width: 1119px) {
+  .steps {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--s-4);
+  }
+  .step:not(:last-child)::after { display: none; }
+}
+
+@media (max-width: 1023px) {
+  .cards { grid-template-columns: minmax(0, 1fr); }
+  .cardIn { min-height: 0; }
+  .copy { max-width: none; }
+}
+
+@media (max-width: 767px) {
+  .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .blocks { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 479px) {
+  .steps { grid-template-columns: minmax(0, 1fr); }
+  .cardHead { gap: var(--s-4); }
+
+  /* The 243 floor exists to give the rule and the hover plate the comp's
+     proportion, and in one column there is neither: every card is its own grid
+     row, so it already hugs its content, and the floor only adds 22-44px of
+     dead space to each of the five. */
+  .step { min-height: 0; }
+}
+
+/* The global rule in `globals.css` already cuts every duration to .01ms, and
+   `Reveal` skips its observer entirely under reduced motion — so nothing here
+   ever leaves its rest state. These rules make the rest state *be* the final
+   state anyway, because a value that only makes sense mid-animation is exactly
+   what that global rule cannot fix. */
+@media (prefers-reduced-motion: reduce) {
+  .step, .stepIcon, .card {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .step:not(:last-child)::after { transform: scaleY(1); transition: none; }
+  .cardHead, .cardBody, .actions { transform: none; transition: none; }
+}

@@ -1,0 +1,28 @@
+/* PixelCard — React Bits, trimmed.
+ *
+ * Upstream this file also carries the demo card's own look: a fixed 300x400,
+ * `aspect-ratio: 4/5`, a `#27272a` border, a 25px radius, `place-items: center`
+ * and a near-black radial `::before`. All of that is the library's sample card,
+ * not the effect, and every line of it fights the card it is wrapping here —
+ * so only the parts the canvas actually needs are kept.
+ *
+ * The canvas is absolutely positioned rather than being a centred grid item.
+ * That is what lets the card's own content sit in normal flow instead of
+ * needing `position: absolute`, as the upstream docs require.
+ */
+
+.pixel-card {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  user-select: none;
+}
+
+.pixel-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}

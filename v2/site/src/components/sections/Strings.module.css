@@ -1,0 +1,136 @@
+/* Ported from the package's `section.css`. Three kinds of change, all noted:
+   the page-level sizing becomes section-level, the raw hexes become tokens
+   (they are the same two colours — #F7F7F7 and #1748DF), and a handful of
+   selectors in the original repeated `.network-strings-viewport` inside
+   themselves, so they could never match. Those are corrected below; without
+   the fix the custom cursor and the label dot ordering are both dead. */
+
+/* The engine draws a full circle and derives its radius from the viewport it
+   is given — `min(w * .34, h * .40)` — with the hub at 61% of that height. The
+   comp shows only the dome: the hub sits on the band's bottom edge and the
+   lower half is cut away.
+
+   So the viewport is deliberately much taller than the band and hangs above
+   it, and the band clips. All three numbers come off one variable, because
+   they only hold the composition together as a set:
+
+     viewport height = band × 2.383   → radius lands at 0.288 × width
+     viewport top    = band × -0.4536 → hub lands exactly on the band's floor
+
+   The hub therefore meets the marquee's two strands directly below it — both
+   sit on the horizontal centre — so the current runs on out of the drawing.
+   Change one of these and re-check that join. */
+.sec {
+  --band: min(30.2vw, 435px);
+  position: relative;
+  height: var(--band);
+  /* The section carries the services ground, so the two read as one field. */
+  background: var(--n-75);
+  overflow: hidden;
+}
+
+.viewport {
+  position: absolute;
+  inset-inline: 0;
+  top: calc(var(--band) * -0.4536);
+  height: calc(var(--band) * 2.383);
+  cursor: none;
+  touch-action: pan-y;
+  user-select: none;
+}
+
+.viewport :global(.strings-canvas),
+.viewport :global(.labels-layer),
+.viewport :global(.fx-cursor) {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.viewport :global(.strings-canvas) { display: block; }
+.viewport :global(.labels-layer) { z-index: 3; pointer-events: none; }
+
+/* ── Keyword labels ─────────────────────────────────────────────────── */
+.viewport :global(.keyword-label) {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--blue-500);
+  font-family: var(--font-body);
+  font-size: clamp(12px, 1.05vw, 17px);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: .005em;
+  white-space: nowrap;
+  opacity: 0;
+  filter: blur(1.5px);
+  transition:
+    opacity 2.7s cubic-bezier(.22, .61, .36, 1),
+    filter 2.7s cubic-bezier(.22, .61, .36, 1),
+    transform 2.7s cubic-bezier(.22, .61, .36, 1);
+  will-change: opacity, transform, filter;
+  pointer-events: none;
+}
+
+.viewport :global(.keyword-label.is-visible) {
+  opacity: 1;
+  filter: blur(0);
+  pointer-events: auto;
+}
+
+.viewport :global(.keyword-label[data-side='right']) { transform: translate(0, -50%) translateY(5px); }
+.viewport :global(.keyword-label[data-side='right'].is-visible) { transform: translate(0, -50%); }
+.viewport :global(.keyword-label[data-side='left']) { transform: translate(-100%, -50%) translateY(5px); }
+.viewport :global(.keyword-label[data-side='left'].is-visible) { transform: translate(-100%, -50%); }
+
+.viewport :global(.keyword-label__dot) {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 6px;
+  border-radius: var(--r-full);
+  background: var(--blue-500);
+}
+
+/* The markup is always text-then-dot; the dot swaps to the leading edge on the
+   right of the circle so it always sits nearest the ring it points at. */
+.viewport :global(.keyword-label[data-side='right'] .keyword-label__dot) { order: 0; }
+.viewport :global(.keyword-label[data-side='right'] .keyword-label__text) { order: 1; }
+.viewport :global(.keyword-label[data-side='left'] .keyword-label__text) { order: 0; }
+.viewport :global(.keyword-label[data-side='left'] .keyword-label__dot) { order: 1; }
+
+/* ── Cursor ─────────────────────────────────────────────────────────── */
+.viewport :global(.fx-cursor) {
+  z-index: 6;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+.viewport:global(.is-pointer) :global(.fx-cursor) { opacity: 1; }
+
+.viewport :global(.fx-cursor__ring),
+.viewport :global(.fx-cursor__dot) {
+  position: absolute;
+  left: var(--cursor-x, 50%);
+  top: var(--cursor-y, 50%);
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+}
+
+.viewport :global(.fx-cursor__ring) {
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(23, 72, 223, .56);
+  transition: width 400ms ease, height 400ms ease, opacity 400ms ease;
+}
+.viewport :global(.fx-cursor__dot) {
+  width: 4px;
+  height: 4px;
+  background: var(--blue-500);
+}
+.viewport:global(.is-center-hover) :global(.fx-cursor__ring) {
+  width: 58px;
+  height: 58px;
+  opacity: .72;
+}

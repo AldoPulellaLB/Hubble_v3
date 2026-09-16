@@ -1,0 +1,66 @@
+{
+  "meta": {
+    "title": "High Voltage — Commercial & Industrial Energy",
+    "description": "Cost, risk and return, not just supply. Hubble designs the energy a business needs to do its job, then connects, manages and supports it so it keeps delivering."
+  },
+  "hero": {
+    "labels": [
+      "High Voltage / Business & industrial energy",
+      "Intelligent energy, at work"
+    ],
+    "scrollHint": "Scroll to explore",
+    "primary": {
+      "label": "Calculate your savings",
+      "href": "/calculate-your-savings"
+    },
+    "secondary": {
+      "label": "Explore",
+      "href": "#four-things"
+    },
+    "sequence": {
+      "frames": 259,
+      "dir": {
+        "desktop": "sequence/product",
+        "mobile": "sequence/product-mobile"
+      },
+      "poster": "/images/hero/product-poster.webp"
+    },
+    "_beats": "One beat is all the comp draws. The machinery takes any number — add an entry with its `frame` index (0-258) and the copy scrubs to it, the way the landing page runs three across 422 frames. `eyebrow` is empty on purpose: this comp puts the section label in `hero.labels` above, not over the heading, and a second copy of it there was the first thing that looked wrong.",
+    "beats": [
+      {
+        "frame": 0,
+        "eyebrow": "",
+        "title": "Energy as a\nbusiness lever.",
+        "copy": "Cost, risk and return not just supply. Hubble designs the energy a business needs to do its job, then connects, manages and supports it so it keeps delivering."
+      }
+    ]
+  },
+  "stakes": {
+    "eyebrow": "What Hubble makes possible",
+    "title": "Four things a business can't afford to leave to chance.",
+    "copy": "Before the racks and the enclosures, this is the work the system is bought to do. The hardware follows from it.",
+    "_items": "Add an `href` to an item and the whole row becomes a link — the ring and the row-slide are already built for it. None of the four has a destination yet.",
+    "items": [
+      {
+        "num": "01",
+        "label": "Cost",
+        "title": "The energy you're not using is costing you."
+      },
+      {
+        "num": "02",
+        "label": "Risk",
+        "title": "The production line doesn't stop because the grid did."
+      },
+      {
+        "num": "03",
+        "label": "Return",
+        "title": "Energy infrastructure that earns its keep."
+      },
+      {
+        "num": "04",
+        "label": "Control",
+        "title": "Control across every site, not just one."
+      }
+    ]
+  }
+}

@@ -1,0 +1,323 @@
+{
+  "hero": {
+    "eyebrow": "INTELLIGENT ENERGY, ALWAYS AT WORK",
+    "title": "Energy that works for you.",
+    "copy": "Across a hundred sites or at home, Hubble Energy is designed around what you need it to do, through an integrated system that responds, performs and keeps contributing long after installation.",
+    "primary": {
+      "label": "Calculate your savings",
+      "href": "/calculate-your-savings"
+    },
+    "secondary": {
+      "label": "Explore",
+      "href": "/solutions"
+    },
+    "scrollHint": "Scroll to explore",
+    "sequence": {
+      "frames": 422,
+      "poster": "/images/hero/poster.webp"
+    },
+    "beats": [
+      {
+        "frame": 0,
+        "eyebrow": "Intelligent energy always at work",
+        "title": "Energy that works for you.",
+        "copy": "From a hundred sites to a single home, Hubble Energy is designed around what you need it to do, through an integrated system that responds, performs and keeps contributing long after installation."
+      },
+      {
+        "frame": 144,
+        "eyebrow": "ONE SYSTEM INTELLIGENTLY CONNECTED",
+        "title": "Energy that works as one.",
+        "copy": "No part of the Hubble system works alone. Our storage, software and services run as one connected system, so that issues get caught and resolved before they ever become a problem."
+      },
+      {
+        "frame": 295,
+        "eyebrow": "BUILT FOR AFRICAN OPERATING REALITY",
+        "title": "Energy that works anywhere.",
+        "copy": "We design around actual loads, unstable grids, commercial pressures and changing needs across the African continent, with an active presence and back-up service on the ground."
+      }
+    ]
+  },
+  "statement": {
+    "eyebrow": "WHAT WE DO",
+    "asideEyebrow": "how we do it",
+    "title": "Intelligent energy does what you need it to.",
+    "possible": {
+      "eyebrow": "What Hubble energy makes possible:",
+      "lead": "WE KEEP",
+      "_lines": "The rotating line. Each gets an equal share of the pinned scroll, and the last holds until the section releases. A `\\n` breaks a line in two — the box reserves two lines either way, so a swap never shifts the layout.",
+      "lines": [
+        "THE POWER ON",
+        "COSTS DOWN",
+        "YOUR INVESTMENT\nWORKING",
+        "YOUR POWER CLEAN"
+      ]
+    },
+    "copy": "Generation, storage, hardware, software and Cloudlink built around your operational realities, energy profile and growth plans, protecting continuity and strengthening control."
+  },
+  "howWeWork": {
+    "eyebrow": "How we put intelligent energy to work",
+    "title": "Every business asks\nsomething different\nof energy.",
+    "process": {
+      "title": "Our process",
+      "steps": [
+        {
+          "icon": "insight",
+          "title": "Insight",
+          "copy": "Assess and understand your energy use, needs and goals"
+        },
+        {
+          "icon": "integration",
+          "title": "Integration",
+          "copy": "Design an integrated, end to end solution"
+        },
+        {
+          "icon": "innovation",
+          "title": "Innovation",
+          "copy": "Add value through proprietary software/ systems"
+        },
+        {
+          "icon": "installation",
+          "title": "Installation",
+          "copy": "Install and commission across a single or multiple sites"
+        },
+        {
+          "icon": "impact",
+          "title": "Impact",
+          "copy": "Monitor and manage the system to your commercial advantage"
+        }
+      ]
+    },
+    "options": {
+      "title": "Your options",
+      "items": [
+        {
+          "num": "01",
+          "title": "Product ecosystem",
+          "kicker": "Proven technology that’s built to perform",
+          "copy": "Proven, ready-to-deploy energy products for commercial, industrial, small business and home, each one part of the same intelligent system, so performance, monitoring and support come standard.",
+          "primary": {
+            "label": "See our products",
+            "href": "/products"
+          },
+          "secondary": {
+            "label": "Let’s talk",
+            "href": "/contact"
+          }
+        },
+        {
+          "num": "02",
+          "title": "Configured solutions",
+          "kicker": "Designed around what you need it to deliver",
+          "blocks": [
+            {
+              "title": "Turnkey projects",
+              "copy": "You own the hardware; we design, commission, service and support it.(See it in action: [Aspen](/projects))"
+            },
+            {
+              "title": "Funded partnerships",
+              "copy": "We finance the hardware through asset-based finance, .\nand deliver the same design, commissioning and support.\n(See it in action: [Idwala](/projects))"
+            }
+          ],
+          "footnote": "Both approaches allow you to benefit from energy arbitrage and wheeling.",
+          "primary": {
+            "label": "See our solutions",
+            "href": "/contact"
+          },
+          "secondary": {
+            "label": "Let’s talk",
+            "href": "/contact"
+          }
+        }
+      ]
+    }
+  },
+  "marquee": "Intelligent energy, always at work",
+  "cloudlink": {
+    "eyebrow": "CloudLink",
+    "title": "Energy that thinks for itself.",
+    "copy": "We built Cloudlink as the *connective intelligence* that makes the Hubble system visible, *responsive* and continuously sharper across single homes, individual systems, multiple sites and mixed technology environments.",
+    "cta": {
+      "label": "Explore CloudLink",
+      "href": "/products/cloudlink"
+    },
+    "apps": [
+      {
+        "label": "App Store",
+        "sub": "Download on the",
+        "platform": "ios",
+        "href": "https://apps.apple.com/gb/app/hubble-cloudlink/id6741428125"
+      },
+      {
+        "label": "Google Play",
+        "sub": "Get it on",
+        "platform": "android",
+        "href": "https://play.google.com/store/apps/details?id=com.hubble_energy.app"
+      }
+    ],
+    "tags": [
+      {
+        "label": "Fleet management",
+        "x": 60,
+        "y": 47
+      },
+      {
+        "label": "remote monitoring",
+        "x": 85,
+        "y": 32
+      },
+      {
+        "label": "Live Data",
+        "x": 84,
+        "y": 60,
+        "dx": 25
+      }
+    ]
+  },
+  "products": {
+    "eyebrow": "WHO WE DO IT FOR",
+    "title": "From scaled sites to single homes.",
+    "items": [
+      {
+        "name": "High voltage clients",
+        "kicker": "Commercial & industrial",
+        "copy": "Performance that’s always protected: The system reads your operation in real time and adjusts itself.",
+        "image": "/images/render/HiVoltage_off.png",
+        "imageOn": "/images/render/HiVoltage_on.png",
+        "primary": {
+          "label": "More about High Voltage",
+          "href": "/products/high-voltage"
+        },
+        "secondary": {
+          "label": "Talk to our team",
+          "href": "/contact"
+        }
+      },
+      {
+        "name": "Low voltage clients",
+        "kicker": "Homes & small businesses",
+        "copy": "Power that's always there: The system senses what your home needs and acts before you notice.",
+        "image": "/images/render/LowVoltage_off.png",
+        "imageOn": "/images/render/LowVoltage_on.png",
+        "primary": {
+          "label": "More about Low Voltage",
+          "href": "/products/low-voltage"
+        },
+        "secondary": {
+          "label": "Talk to our team",
+          "href": "/contact"
+        }
+      }
+    ],
+    "partners": {
+      "title": "Partnered Innovations",
+      "kicker": "For channel & EPC partners, engineers, investors",
+      "copy": "Intelligent energy with insight, integration, innovation and impact built in.",
+      "image": "/images/partners/partnered-innovations.webp",
+      "cta": {
+        "label": "Become a partner",
+        "href": "/partners/become-a-partner"
+      }
+    }
+  },
+  "stats": [
+    {
+      "value": "160 000",
+      "label": "Products installed Still performing out in the field and earning trust.  ",
+      "icon": "wrench",
+      "href": "/about/why-hubble"
+    },
+    {
+      "value": "10MWh",
+      "label": "Portfolio scale Working as one connected system, not thousands of separate ones.",
+      "icon": "bars",
+      "href": "/projects"
+    },
+    {
+      "value": "10 000",
+      "label": "Cycles on High Voltage  Still running at full capacity and built to outlast the job.",
+      "icon": "bolt",
+      "href": "/products/high-voltage"
+    },
+    {
+      "value": "04",
+      "label": "Branches across South Africa Present wherever Hubble is put to work, and growing.",
+      "icon": "africa",
+      "href": "/about/africa-presence"
+    }
+  ],
+  "projects": {
+    "eyebrow": "Hubble energy in action",
+    "title": "From field to factory",
+    "items": [
+      {
+        "name": "Cerebos Salt",
+        "sector": "Manufacturing",
+        "figure": "2.211 MWh",
+        "map": "/images/maps/cerebos.webp",
+        "href": "/projects/cerebos-salt",
+        "photo": "/images/projects/cerebos-salt.webp"
+      },
+      {
+        "name": "MalaMala Game Reserve",
+        "sector": "Hospitality",
+        "figure": "860MWh",
+        "map": "/images/maps/malamala.webp",
+        "href": "/projects/malamala",
+        "photo": "/images/projects/malamala.webp"
+      },
+      {
+        "name": "Bedfordview Frontier",
+        "sector": "Residential",
+        "figure": "430 kWh",
+        "map": "/images/maps/bedfordview.webp",
+        "href": "/projects/bedfordview-frontier",
+        "photo": "/images/projects/bedfordview-frontier.webp"
+      },
+      {
+        "name": "Rosenhof Dairy Farm",
+        "sector": "Agriculture",
+        "figure": "461 MWh",
+        "map": "/images/maps/rosenhof.webp",
+        "href": "/projects/rosenhof-dairy-farm",
+        "photo": "/images/projects/rosenhof-dairy.webp"
+      },
+      {
+        "name": "The Outpost, Kruger",
+        "sector": "Hospitality",
+        "figure": "256 MWh",
+        "map": "/images/maps/outpost.webp",
+        "href": "/projects/the-outpost",
+        "photo": "/images/projects/the-outpost.webp"
+      },
+      {
+        "name": "Kirkman's Kamp",
+        "sector": "Hospitality",
+        "figure": "412 MWh",
+        "map": "/images/maps/sabi-sands.webp",
+        "href": "/projects/kirkmans-kamp",
+        "photo": "/images/projects/kirkmans-kamp.webp"
+      },
+      {
+        "name": "Rattray's on MalaMala",
+        "sector": "Hospitality",
+        "figure": "204 MWh",
+        "map": "/images/maps/sabi-sands.webp",
+        "href": "/projects/rattrays",
+        "photo": "/images/projects/rattrays.webp"
+      }
+    ]
+  },
+  "cta": {
+    "eyebrow": "Calculate your savings",
+    "title": "What could your energy be doing instead?",
+    "copy": "Tell us what your energy needs to achieve. We will model the system, the commercial case and the payback around it.",
+    "primary": {
+      "label": "Calculate your savings",
+      "href": "/calculate-your-savings"
+    },
+    "secondary": {
+      "label": "Get In touch",
+      "href": "/contact"
+    }
+  }
+}

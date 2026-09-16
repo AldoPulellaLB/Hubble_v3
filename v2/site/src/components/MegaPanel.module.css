@@ -1,0 +1,444 @@
+/* ── The wide panel ──────────────────────────────────────────────────────────
+   Figma `1780:6513`: 1358 x 493 with 32 of padding, so the panel is the bar's
+   measure less its own 40px inset. Pinned to `.inner`'s edges rather than given
+   a width — `Nav` drops `position: relative` from an item carrying one of
+   these so it can span the bar instead of the trigger.
+
+   Every measure below is the comp's, at the comp's 1440. The columns are 286
+   wide with 74 between them and a hairline down the middle of that gap; the
+   promo is 229 and starts 16px *above* the columns. */
+.mega {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: var(--frame);
+  right: var(--frame);
+  z-index: 20;
+  pointer-events: none;
+}
+.open { pointer-events: auto; }
+
+/* The seam. The trigger's bottom edge and the panel's top are 6px apart and
+   that strip belongs to neither, so a fast diagonal would cross the header and
+   fire `mouseleave`. The simple dropdown bridges it the same way. */
+.mega::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  height: 10px;
+}
+
+/* ── The plate ──────────────────────────────────────────────────────────────
+   The white ground expands downward and the content follows it in — so the
+   `clip-path` is on the plate and nothing else. A `scaleY` would have been the
+   easy version and the wrong one: it squashes every child on the way, so the
+   type would stretch back into shape as it opened. A clip transforms nothing —
+   the columns are laid out at full size the whole time and stagger on their
+   own, independently.
+
+   `round var(--r-panel)` keeps the corners correct at every step of the
+   expansion. The shadow is clipped with the plate, which is right: the plate's
+   shadow should grow with the plate. */
+/* Two columns and two rows: the heading spans the top, and the three text
+   columns and the promo share the row under it. That shared row is what puts
+   the promo card's top edge on the column labels' — structurally, rather than
+   by an offset that has to be recalculated whenever the heading changes size.
+
+   The first build got this wrong in exactly that way: `.promo` was a sibling of
+   the heading's wrapper, so it began at the sheet's content top and a hand-
+   computed `-16px` put the card 56px above where it belonged. */
+.sheet {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 229px;
+  grid-template-rows: auto minmax(0, 1fr);
+  column-gap: 58px;
+  padding: 32px;
+  border-radius: var(--r-panel);
+  background: var(--white);
+  box-shadow: 0 24px 60px rgb(8 22 60 / .18);
+  clip-path: inset(0 0 100% 0 round var(--r-panel));
+  opacity: 0;
+  transition: clip-path var(--mega-out) var(--ease-out),
+              opacity 120ms linear var(--mega-out-op-delay, 80ms);
+}
+
+.open .sheet {
+  clip-path: inset(0 0 0 0 round var(--r-panel));
+  opacity: 1;
+  transition: clip-path var(--mega-in) var(--ease-out),
+              opacity 120ms linear;
+}
+
+/* 32 Sora SemiBold at 125% on the comp, 16 clear of the columns below it
+   (heading 32..72, columns from 88). */
+.title {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  margin: 0 0 16px;
+  font-family: var(--font-heading);
+  font-size: clamp(1.5rem, 2.2vw, 2rem);
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -.022em;
+  color: var(--n-900);
+}
+
+/* Three 286 columns with 74 between them. The hairline is drawn by the column
+   on its own leading edge and pushed out to the middle of that gap, so the run
+   of three has two rules and no outer ones. */
+.cols {
+  grid-column: 1;
+  grid-row: 2;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: 74px;
+  align-content: start;
+  /* Each column is its own height — 281 for the two-row first one against 373
+     for the four-row last. Grid would stretch them all to the tallest, which is
+     invisible until you notice the hairlines running past where the comp stops
+     them. */
+  align-items: start;
+}
+
+.col { position: relative; min-width: 0; }
+
+/* The comp's hairlines are 321.7 against a 373 column area — they stop short of
+   the floor rather than closing the columns off, which is 86% of it. */
+.col + .col::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  height: 86%;
+  left: -37px;
+  width: 1px;
+  background: var(--n-200);
+}
+
+/* 16 Regular, and the note 12 sitting 8 under it. */
+.colLabel {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--blue-500);
+}
+
+/* 8 under the label, then 24 of air before the first row — the comp opens a
+   real gap there and it is most of what makes the column read as a column
+   rather than a list with a caption. */
+.colNote {
+  margin: 8px 0 24px;
+  font-size: .75rem;
+  line-height: 1.2;
+  color: var(--n-700);
+}
+
+.list { margin: 0; padding: 0; list-style: none; }
+
+/* ── The rows ───────────────────────────────────────────────────────────────
+   The comp does NOT use one row height. Columns 1 and 2 run at 100 and column 3
+   at 63, and the reason is visible once you look: column 2's rows carry a chip,
+   so they need 100, and column 1 matches them so the two two-row columns line up
+   with each other. Column 3 has four rows and its own tighter rhythm.
+
+   So the height is selected on the row *count*, not hard-coded per column —
+   three or more rows means column 3's 63. Content is optically centred in
+   whichever it gets, exactly as the comp centres it. */
+.row {
+  position: relative;
+  /* So the plate's `z-index: -1` stays inside the row. Without a stacking
+     context here it would slide behind the sheet's white background and never
+     be seen. */
+  isolation: isolate;
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-inline: 8px;
+}
+
+.col:has(.list > :nth-child(3)) .row { min-height: 63px; }
+
+/* 8 above the rule and 8 below it, and the rule lives in that gap rather than
+   on the row's own edge — so the hover plate is the comp's 100, clear of the
+   rule, instead of swallowing it. */
+.row + .row { margin-top: 17px; }
+.row + .row::before {
+  content: '';
+  position: absolute;
+  top: -9px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--n-200);
+}
+
+/* Column 3 closes with a rule under its last row, which is what lands its
+   bottom edge level with the other two columns. Neither of the others has one:
+   column 1 simply ends, and column 2's last rule belongs to the footnote. */
+.col:has(.list > :nth-child(3)) .list { padding-bottom: 8px; border-block-end: 1px solid var(--n-200); }
+
+/* ── The hover plate ────────────────────────────────────────────────────────
+   The whole row, not an inset inside it — which is how the comp draws it, and
+   the only way it can also cover the chip, since the chip has to sit outside
+   the row's anchor.
+
+   It wipes in from the left rather than fading. A fade across a 286 x 100 plate
+   is a lot of area changing colour with nothing to read in it; a wipe has a
+   direction and tells you which row you are on. `clip-path` rather than
+   `scaleX` for the same reason the panel's own expansion uses it — a scale
+   distorts the corner radius as it grows, a clip does not. `round 10px` keeps
+   the corners true at every step.
+
+   280ms in, 180ms out: hover is high-frequency, so the exit is quick, and the
+   wipe runs back the way it came rather than snapping. */
+.row::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: 10px;
+  background: var(--blue-300);
+  clip-path: inset(0 100% 0 0 round 10px);
+  transition: clip-path 180ms var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .row:has(.rowLink:hover)::after {
+    clip-path: inset(0 0 0 0 round 10px);
+    transition-duration: 280ms;
+  }
+}
+.row:has(.rowLink:focus-visible)::after {
+  clip-path: inset(0 0 0 0 round 10px);
+  transition-duration: 280ms;
+}
+
+.rowLink {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 21px;
+  align-items: center;
+  column-gap: var(--s-4);
+  width: 100%;
+  color: inherit;
+  text-decoration: none;
+}
+
+.rowTitle {
+  grid-column: 1;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--n-900);
+}
+
+/* 4 under the title on the comp — tight, because the pair is one block. */
+.rowCopy {
+  grid-column: 1;
+  margin-top: 4px;
+  font-size: .75rem;
+  line-height: 1.2;
+  color: var(--n-700);
+  white-space: pre-line;
+}
+
+.rowArrow { grid-column: 2; grid-row: 1 / -1; align-self: center; color: var(--blue-500); }
+
+/* 28 tall, radius 4, 11 of inset — its own target, so a sibling of the row's
+   link rather than inside it. An anchor within an anchor is invalid HTML and
+   breaks hydration. */
+/* Under the copy and on the title's own left edge — the row's padding puts it
+   there, since the chip sits outside the row's anchor rather than in it. */
+.chip {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin-top: var(--s-2);
+  min-height: 28px;
+  padding: 0 11px;
+  border: 1px solid var(--blue-300);
+  border-radius: 4px;
+  font-size: .75rem;
+  line-height: 1.2;
+  color: var(--blue-500);
+  text-decoration: none;
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .chip:hover { background: var(--blue-200); }
+}
+.chipArrow { color: var(--blue-500); }
+
+/* Radius 12, 20 of padding, a 24 round badge and 8 to the copy — all the
+   comp's. It sits 8 under the last rule, like a row would. */
+.footnote {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 17px 0 0;
+  /* 23 and 20 — the comp's Info frame is 74 tall around 28 of copy, which is a
+     hair more vertical padding than horizontal. */
+  padding: 23px 20px;
+  border-radius: 12px;
+  background: var(--blue-200);
+  font-size: .75rem;
+  line-height: 1.2;
+  color: var(--n-900);
+}
+.footnote::before {
+  content: '';
+  position: absolute;
+  top: -9px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--n-200);
+}
+
+.bolt {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--r-full);
+  background: var(--white);
+  color: var(--blue-700);
+}
+
+/* ── The promo ──────────────────────────────────────────────────────────────
+   229 wide, sharing the columns' grid row so the card's top edge lands on the
+   column labels' — Aldo's call, and it reads better than the comp's own 16px
+   lift. The button is pushed to the panel's floor with `margin-top: auto`, so
+   both ends are level with the columns. */
+.promo {
+  grid-column: 2;
+  grid-row: 2;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Square on the comp. The gradient is CSS and the person is a cut-out with its
+   own alpha, rather than one flattened bitmap — so the card keeps its radius,
+   the gradient never resamples, and the photograph can be replaced on its own.
+   `overflow: hidden` is what lets the figure be sized past the card's edge and
+   bleed, which is how the comp crops it. */
+.promoCard {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 1 / 1;
+  padding: 22px 20px 0;
+  border-radius: 16px;
+  background: linear-gradient(158deg, #2E7BE0 0%, #1A5FD8 34%, #1447C4 68%, #0F3AAE 100%);
+}
+
+/* Narrow on purpose: the comp breaks this over three lines and the break is
+   the composition — it clears the figure's head. */
+/* The measure lives here and the padding lives on the card, which is not a
+   preference: with `box-sizing: border-box` the two on one element fight, and
+   40px of padding inside a 105px max-width left a 65px content box — narrow
+   enough that "How can" (72px) broke, and the heading came out one word per
+   line. 5.2em fits "How can" and refuses "How can we", which is the comp's
+   three-line break. */
+.promoTitle {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  max-width: 5.2em;
+  font-family: var(--font-heading);
+  font-size: clamp(1rem, 1.15vw, 1.0625rem);
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--white);
+}
+
+/* Sized by height and anchored to the floor, so the figure fills the card the
+   way the comp has it whatever the card's width resolves to. Sizing by width
+   left it floating with a gap under the elbow. */
+.promoImg {
+  position: absolute;
+  right: -4%;
+  bottom: 0;
+  width: auto;
+  height: 97%;
+  object-fit: contain;
+  object-position: bottom right;
+}
+
+.promoCopy {
+  margin: 12px 0 0;
+  font-size: .75rem;
+  line-height: 1.5;
+  color: var(--n-700);
+  white-space: pre-line;
+}
+
+/* 45.3 and radius 8 on the comp, pushed to the panel's floor. */
+.promoCta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-3);
+  margin-top: auto;
+  min-height: 45px;
+  padding-inline: var(--s-5);
+  border-radius: 8px;
+  background: var(--blue-700);
+  font-size: .75rem;
+  color: var(--white);
+  text-decoration: none;
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  .promoCta:hover { background: var(--blue-500); }
+}
+.promoArrow { color: var(--white); }
+
+/* ── The choreography ───────────────────────────────────────────────────────
+   The plate expands, then the content arrives behind it, staggered. `--c` is
+   the column's index and the only thing its delay is built from.
+
+   In: plate 380ms, content 300ms starting at 160 + i x 60 — so the last column
+   lands at ~640ms, and the plate is already two thirds open before the first
+   column moves. Deliberately slower than the 420ms this ran at first; a
+   mega-nav is a considered surface and the expansion is the point.
+
+   Out: 200ms, everything at once, no stagger and no delay. Opening is an offer
+   and can be choreographed; closing is the reader saying they are done, and a
+   staggered exit makes them watch a menu unbuild itself. */
+.mega { --mega-in: 380ms; --mega-out: 200ms; }
+
+.col, .promo {
+  opacity: 0;
+  transform: translate3d(0, 12px, 0);
+  transition: opacity var(--mega-out) var(--ease-out),
+              transform var(--mega-out) var(--ease-out);
+}
+
+.open .col,
+.open .promo {
+  opacity: 1;
+  transform: none;
+  transition: opacity 300ms var(--ease-out), transform 300ms var(--ease-out);
+  transition-delay: calc(160ms + var(--c, 0) * 60ms);
+}
+
+/* Matched to `Nav.module.css`, which drops `.items` — the whole pill row, and
+   with it every dropdown — at this same width. Below here the burger sheet is
+   the navigation, so the panel has nothing to hang off. Written as its own rule
+   rather than left implicit, because a mega panel that outlived its trigger row
+   would be a 1500px sheet anchored to nothing. */
+@media (max-width: 1279px) {
+  .mega { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet, .col, .promo { transition-duration: 1ms; transform: none; }
+  /* The plate still appears, it just stops travelling. */
+  .row::after { transition-duration: 1ms; }
+  .sheet, .open .sheet { clip-path: none; }
+  .open .col, .open .promo { transition-delay: 0ms; }
+}

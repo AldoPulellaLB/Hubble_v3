@@ -1,0 +1,242 @@
+/* The contact sheet.
+ *
+ * Light where the calculator's ground is grey: this is a form, and a form
+ * wants the plainest possible surface so the fields are the only thing with
+ * edges. White plate, one neutral ramp, and the brand blue kept for exactly
+ * two things — the topic you picked and the button that sends.
+ *
+ * The slide and the site's knock-back live in SavingsStage.module.css; this
+ * file is the sheet's own inside.
+ */
+
+.panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  /* Roughly the reference's 566 of a 1773 frame, but as a share with a cap so
+     it does not become a corridor on an ultrawide or a squeeze at 1024. */
+  width: min(34rem, 92vw);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  background: var(--white);
+  border-radius: var(--r-panel) 0 0 var(--r-panel);
+  /* Cast to the left, since the sheet sits against the right edge and the
+     light on this site reads as coming from the top-left. */
+  box-shadow: -30px 0 60px -20px rgba(0, 16, 73, .28);
+  color: var(--n-900);
+}
+
+/* ── Head ─────────────────────────────────────────────────── */
+.head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: clamp(1.25rem, 3vh, 2rem) clamp(1.25rem, 2.4vw, 2rem) clamp(.75rem, 1.6vh, 1.1rem);
+  border-bottom: 1px solid var(--n-200);
+}
+.eyebrow {
+  font-size: var(--t-xs);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--cyan-ink);
+}
+.title {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: clamp(1.5rem, 3.4vh, 2.15rem);
+  line-height: 1.05;
+  letter-spacing: -.035em;
+  margin-top: .35rem;
+}
+
+.close {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--r-full);
+  border: 1px solid var(--n-300);
+  color: var(--n-900);
+  transition: background-color 180ms var(--ease-out), border-color 180ms var(--ease-out);
+}
+.close:hover { background: var(--n-75); border-color: var(--n-500); }
+
+/* ── The form ─────────────────────────────────────────────── */
+/* The one scroller on the sheet. The head stays put so the way out is always
+   on screen — a long form that scrolls its own close button away is a trap. */
+.form {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: grid;
+  align-content: start;
+  gap: clamp(1rem, 2.4vh, 1.6rem);
+  padding: clamp(1rem, 2.4vh, 1.6rem) clamp(1.25rem, 2.4vw, 2rem) clamp(1.5rem, 3vh, 2.25rem);
+}
+
+/* `fieldset` carries the grouping for a screen reader; the border and padding
+   a UA puts on it are not wanted. */
+.group { display: grid; gap: .6rem; border: 0; padding: 0; margin: 0; min-width: 0; }
+.legend {
+  padding: 0;
+  font-size: var(--t-xs);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--n-500);
+}
+
+/* ── Topic ────────────────────────────────────────────────── */
+.topics { display: flex; flex-wrap: wrap; gap: .4rem; }
+
+/* The radio itself is the label's own control — clicking anywhere on the pill
+   works without a `for`, and it stays a real radio for the keyboard: arrow
+   keys move through the group and the focus ring lands on the pill. */
+.topic {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  padding: .5rem .85rem;
+  border-radius: var(--r-btn);
+  border: 1px solid var(--n-200);
+  background: var(--n-75);
+  font-size: var(--t-sm);
+  color: var(--n-700);
+  cursor: pointer;
+  transition: border-color 200ms var(--ease-out), color 240ms var(--ease-out);
+}
+.topic input {
+  /* Off the screen, not `display: none` — a hidden-by-display radio is not
+     focusable and drops out of the arrow-key group. */
+  position: absolute;
+  width: 1px; height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+.topic span { position: relative; z-index: 1; }
+.topic:hover { border-color: var(--n-400); }
+
+/* The chosen pill, on the same mechanism as the calculator's cards: the fill
+   is a pseudo-element because a gradient cannot be transitioned. */
+.topic::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(158deg, var(--blue-400) 0%, var(--blue-500) 58%, var(--blue-600) 100%);
+  opacity: 0;
+  transform: scaleX(.35);
+  transform-origin: left center;
+  transition: opacity 150ms var(--ease-out), transform 1ms linear 150ms;
+}
+.topic[data-sel]::before {
+  opacity: 1;
+  transform: scaleX(1);
+  transition: opacity 200ms var(--ease-out), transform 440ms var(--ease-out);
+}
+.topic[data-sel] { border-color: transparent; color: var(--white); }
+.topic:focus-within { outline: 2px solid var(--cyan-400); outline-offset: 3px; }
+
+/* ── Fields ───────────────────────────────────────────────── */
+.field { display: grid; gap: .3rem; min-width: 0; margin: 0; }
+.two {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .6rem;
+}
+
+.lab {
+  display: flex;
+  align-items: baseline;
+  gap: .4rem;
+  font-size: var(--t-sm);
+  font-weight: 500;
+  color: var(--n-700);
+}
+.opt { font-size: var(--t-xs); font-weight: 400; color: var(--n-400); }
+
+.input, .textarea {
+  width: 100%;
+  min-width: 0;
+  padding: .65rem .8rem;
+  border-radius: var(--r-btn);
+  border: 1px solid var(--n-300);
+  background: var(--white);
+  font-family: var(--font-body);
+  /* 16px, so iOS does not zoom the page on focus. */
+  font-size: 1rem;
+  color: var(--n-900);
+  transition: border-color 180ms var(--ease-out), box-shadow 180ms var(--ease-out);
+}
+.textarea { resize: vertical; min-height: 6rem; line-height: 1.5; }
+.input::placeholder, .textarea::placeholder { color: var(--n-400); }
+
+.input:hover, .textarea:hover { border-color: var(--n-400); }
+.input:focus, .textarea:focus {
+  outline: none;
+  border-color: var(--blue-500);
+  box-shadow: 0 0 0 3px var(--blue-200);
+}
+
+/* `:user-invalid`, not `:invalid` — it matches only after the reader has
+   actually interacted with the field and left it wrong, which is the whole
+   behaviour wanted here.
+
+   The obvious `:not(:placeholder-shown):invalid` does not work, and fails in
+   the direction that looks fine in a screenshot of a filled form: it silently
+   depends on every field having a placeholder, because `:placeholder-shown`
+   cannot match where there is no placeholder to show. Without one,
+   `:not(:placeholder-shown)` is always true and every required field is red
+   before it is touched. Only the textarea here has a placeholder. */
+.input:user-invalid,
+.textarea:user-invalid {
+  border-color: #C4443A;
+  box-shadow: 0 0 0 3px rgba(196, 68, 58, .12);
+}
+
+/* ── Foot ─────────────────────────────────────────────────── */
+.foot {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .75rem 1rem;
+  padding-top: .35rem;
+}
+.fine { font-size: var(--t-xs); line-height: 1.5; color: var(--n-500); max-width: 22ch; }
+
+/* ── Sent ─────────────────────────────────────────────────── */
+.done {
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  gap: .6rem;
+  padding: clamp(1.5rem, 4vh, 3rem) clamp(1.25rem, 2.4vw, 2rem);
+}
+.doneMark {
+  display: grid;
+  place-items: center;
+  width: 3rem; height: 3rem;
+  border-radius: var(--r-full);
+  background: var(--blue-200);
+  color: var(--blue-600);
+}
+.doneMark svg { width: 24px; height: 24px; }
+.doneTitle {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: clamp(1.15rem, 2.6vh, 1.5rem);
+  letter-spacing: -.025em;
+  margin-top: .4rem;
+}
+.doneBody { font-size: var(--t-sm); line-height: 1.6; color: var(--n-600); max-width: 34ch; }
+.doneBody a { color: var(--blue-600); text-decoration: underline; text-underline-offset: 2px; }
+
+@media (max-width: 560px) {
+  /* Two columns of a 92vw sheet is a 150px field. */
+  .two { grid-template-columns: minmax(0, 1fr); }
+  .panel { border-radius: var(--r-panel) var(--r-panel) 0 0; width: 100vw; top: auto; height: 92dvh; }
+}

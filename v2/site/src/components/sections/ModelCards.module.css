@@ -1,0 +1,157 @@
+.sec {
+  position: relative;
+  background: var(--n-75);
+  --eyebrow-ink: var(--blue-400);
+}
+
+.inner { padding-block: clamp(3rem, 4.72vw, 4.25rem) clamp(3.5rem, 4.79vw, 4.31rem); }
+
+.title { margin-top: var(--s-5); color: var(--blue-700); max-width: 20ch; }
+
+/* Four equal cards, no gap. The hairlines and the paired numerals do the
+   separating — a gap here would turn a continuous band into four tiles. */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: clamp(2.5rem, 7.24vw, 6.5rem);
+}
+
+.cell { display: flex; }
+
+.card {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  padding: clamp(1rem, 1.67vw, 1.5rem);
+  border-radius: var(--r-card);
+  background: transparent;
+  /* The plate is a colour change, so it takes the symmetric curve. On an expo
+     `--ease-out` a colour covers most of its distance in the first 100ms and
+     reads as a snap with a long invisible tail — the same reason the landing
+     page's stat cards move their ground on this curve. */
+  transition: background-color 560ms var(--ease-in-out);
+}
+
+/* The hairline between cards. Drawn by the card on its own left edge, so the
+   run of four has three of them and no outer rules. It is hidden under a
+   hovered plate and under the plate of the card *after* the hovered one, which
+   is what lets the plate read as a single unbroken surface. */
+.cell + .cell .card::before {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  width: 1px;
+  background: #CCCCCC;
+  transition: opacity var(--dur-std) var(--ease-out);
+}
+
+/* One numeral, at the card's leading edge. `min-height` is the comp's own row
+   height and is what keeps the four titles on a line with each other whatever
+   the numeral does. */
+.nums {
+  display: flex;
+  align-items: center;
+  min-height: 31px;
+  color: var(--n-900);
+}
+.numeral { transition: color 560ms var(--ease-in-out); }
+
+/* The numerals are decorative — a paired label, not a heading — so they are
+   hidden from assistive tech and the ordinal is restored inside the real
+   heading instead, where it belongs. */
+.srNum {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.cardTitle {
+  margin-top: var(--s-4);
+  color: var(--n-900);
+  transition: color 560ms var(--ease-in-out);
+}
+
+.body {
+  margin-top: var(--s-4);
+  color: var(--n-600);
+  font-size: var(--t-body);
+  line-height: 1.4;
+  text-wrap: pretty;
+  transition: color 560ms var(--ease-in-out);
+}
+
+/* The ring sits on the card's floor whatever the copy above it does, so the
+   four rings line up across the band even when one title runs to two lines. */
+.foot {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: auto;
+  padding-top: clamp(1rem, 1.6vw, 1.4375rem);
+}
+
+/* At rest the ring is the arrow alone — the comp draws the disc with no fill
+   and no border, so only the mark reads. The plate is what gives it a body. */
+.ring {
+  border: 0;
+  background: transparent;
+  color: var(--blue-500);
+}
+
+/* ── The hovered card ──────────────────────────────────────────────────────
+   Gated on a real pointer: `:hover` latches on touch, and a tapped card would
+   otherwise stay stuck open. The same gate the landing page's project cards
+   and logo cube use. */
+@media (hover: hover) and (pointer: fine) {
+  .card:hover { background: #E0E4F3; }
+  .card:hover::before,
+  .cell:hover + .cell .card::before { opacity: 0; }
+
+  .card:hover .cardTitle,
+  .card:hover .body { color: var(--blue-700); }
+
+  /* Takes the plate's ink with the title and the body. It used to go white and
+     all but vanish, which only worked while there were two of them — the pair
+     was the effect, and with one numeral left a disappearing one would just
+     read as a card that loses its number. */
+  .card:hover .numeral { color: var(--blue-700); }
+
+  .card:hover .ring { background: var(--white); color: var(--blue-500); }
+}
+
+/* Keyboard users get the same state — the card is only focusable when the
+   content file has given it an href, and then it must show what hover shows. */
+.card:focus-visible { background: #E0E4F3; }
+.card:focus-visible .cardTitle,
+.card:focus-visible .body,
+.card:focus-visible .numeral { color: var(--blue-700); }
+.card:focus-visible .ring { background: var(--white); }
+
+@media (min-width: 1920px) {
+  .sec .inner { max-width: none; padding-inline: 120px; }
+}
+
+@media (max-width: 1023px) {
+  /* Two by two. Four cards across a tablet leaves each one narrower than its
+     own title. */
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* With two columns the hairline belongs on the left of the right-hand card
+     only, and a horizontal rule separates the rows. */
+  .cell + .cell .card::before { display: none; }
+  .cell:nth-child(2n) .card { border-inline-start: 1px solid #CCCCCC; }
+  .cell:nth-child(n + 3) .card { border-block-start: 1px solid #CCCCCC; }
+  .title { max-width: 24ch; }
+}
+
+@media (max-width: 599px) {
+  .grid { grid-template-columns: minmax(0, 1fr); }
+  .cell:nth-child(2n) .card { border-inline-start: 0; }
+  .cell + .cell .card { border-block-start: 1px solid #CCCCCC; }
+  .foot { padding-top: var(--s-6); }
+}

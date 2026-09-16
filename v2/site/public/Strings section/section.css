@@ -1,0 +1,156 @@
+:root {
+  --page: #F7F7F7;
+  --blue: #1748DF;
+}
+
+* { box-sizing: border-box; }
+.network-strings-section {
+  width: 100vw;
+  height: 100vh;
+  min-height: 620px;
+  display: grid;
+  place-items: center;
+  background: var(--page);
+}
+
+.network-strings-viewport {
+  position: relative;
+  width: 100%;
+  height: min(92vh, 980px);
+  min-height: 590px;
+  overflow: hidden;
+  cursor: none;
+  touch-action: pan-y;
+  user-select: none;
+}
+
+.network-strings-viewport .strings-canvas,
+.network-strings-viewport .labels-layer,
+.network-strings-viewport .network-strings-viewport .fx-cursor {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.network-strings-viewport .strings-canvas { display: block; }
+.network-strings-viewport .labels-layer { z-index: 3; pointer-events: none; }
+
+.network-strings-viewport .keyword-label {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--blue);
+  font-size: clamp(12px, 1.05vw, 17px);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.005em;
+  white-space: nowrap;
+  opacity: 0;
+  filter: blur(1.5px);
+  transition:
+    opacity 2.7s cubic-bezier(.22,.61,.36,1),
+    filter 2.7s cubic-bezier(.22,.61,.36,1),
+    transform 2.7s cubic-bezier(.22,.61,.36,1);
+  will-change: opacity, transform, filter;
+  pointer-events: none;
+}
+
+.network-strings-viewport .keyword-label.is-visible {
+  opacity: 1;
+  filter: blur(0);
+  pointer-events: auto;
+}
+
+.network-strings-viewport .keyword-label[data-side="right"] {
+  transform: translate(0, -50%) translateY(5px);
+}
+.network-strings-viewport .keyword-label[data-side="right"].is-visible {
+  transform: translate(0, -50%) translateY(0);
+}
+
+.network-strings-viewport .keyword-label[data-side="left"] {
+  flex-direction: row;
+  transform: translate(-100%, -50%) translateY(5px);
+}
+.network-strings-viewport .keyword-label[data-side="left"].is-visible {
+  transform: translate(-100%, -50%) translateY(0);
+}
+
+.network-strings-viewport .keyword-label__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  flex: 0 0 6px;
+  background: var(--blue);
+}
+
+/* right side of circle => dot on LEFT of text */
+.keyword-label[data-side="right"] .network-strings-viewport .keyword-label__dot { order: 0; }
+.network-strings-viewport .keyword-label[data-side="right"] .keyword-label__text { order: 1; }
+
+/* left side of circle => dot on RIGHT of text */
+.network-strings-viewport .keyword-label[data-side="left"] .keyword-label__text { order: 0; }
+.keyword-label[data-side="left"] .network-strings-viewport .keyword-label__dot { order: 1; }
+
+.network-strings-viewport .fx-cursor {
+  z-index: 6;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+.network-strings-viewport.is-pointer .network-strings-viewport .fx-cursor { opacity: 1; }
+
+.network-strings-viewport .fx-cursor__ring,
+.network-strings-viewport .network-strings-viewport .fx-cursor__dot {
+  position: absolute;
+  left: var(--cursor-x, 50%);
+  top: var(--cursor-y, 50%);
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+}
+
+.network-strings-viewport .fx-cursor__ring {
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(23,72,223,.56);
+  transition: width 400ms ease, height 400ms ease, opacity 400ms ease;
+}
+.network-strings-viewport .fx-cursor__dot {
+  width: 4px;
+  height: 4px;
+  background: var(--blue);
+}
+.network-strings-viewport.is-center-hover .network-strings-viewport .fx-cursor__ring {
+  width: 58px;
+  height: 58px;
+  opacity: .72;
+}
+
+@media (max-width: 760px) {
+  .network-strings-section { min-height: 540px; }
+  .network-strings-viewport {
+    width: 100vw;
+    height: 88vh;
+    min-height: 540px;
+  }
+  .network-strings-viewport .keyword-label {
+    font-size: 12px;
+    gap: 6px;
+  }
+  .network-strings-viewport .keyword-label__dot {
+    width: 5px;
+    height: 5px;
+    flex-basis: 5px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .keyword-label,
+  .fx-cursor,
+  .network-strings-viewport .fx-cursor__ring { transition-duration: .01ms; }
+}
+
+
+.network-strings-section__inner { width: min(96vw, 1700px); height: 100%; display: grid; place-items: center; margin: 0 auto; }

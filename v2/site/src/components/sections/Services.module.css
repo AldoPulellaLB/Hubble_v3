@@ -1,0 +1,110 @@
+.sec {
+  position: relative;
+  background: var(--n-75);
+  /* The oversized foot this used to carry was headroom for the radial fan
+     that sat under the last two rows. With the drawing gone it is ordinary
+     section padding again. */
+  padding-block: clamp(3.5rem, 6.9vw, 6.25rem) clamp(4rem, 8.3vw, 7.5rem);
+  overflow: hidden;
+}
+
+
+.inner { position: relative; z-index: 1; }
+
+.title { color: var(--blue-700); margin-top: var(--s-5); max-width: 16ch; }
+
+.list { margin-top: clamp(2.5rem, 4.4vw, 4rem); }
+.rowWrap { border-bottom: 1px solid var(--n-200); }
+.rowWrap:last-child { border-bottom: 0; }
+
+.row {
+  display: grid;
+  grid-template-columns: 13.9% 35% 1fr auto;
+  align-items: center;
+  gap: var(--s-6);
+  padding-block: clamp(1.25rem, 1.95vw, 1.75rem);
+  transition: transform 420ms var(--ease-out);
+}
+.row:hover { transform: translateX(10px); }
+
+.num {
+  color: var(--blue-700);
+  font-size: var(--t-num-lg);
+  line-height: 1;
+  letter-spacing: -0.05em;
+  margin-inline-start: -0.05em;
+  align-self: start;
+
+  /* The numeral rises further than the row it sits in and lands a beat later,
+     so 01–05 reads as its own count-in rather than as part of the row's block.
+     It travels on top of the row's own 28px, which is the point — the number
+     arrives last.
+
+     Driven by the `data-in` the row's Reveal sets. Reveal's `.in` class is
+     hashed into Reveal.module.css and cannot be named from here, and nesting a
+     second Reveal around the numeral would make the wrapper the grid item and
+     take `grid-area: num` with it. */
+  opacity: 0;
+  transform: translate3d(0, 48px, 0);
+  transition: opacity 760ms var(--ease-out), transform 900ms var(--ease-out);
+  /* `--rd` is the row's own stagger, set inline by Reveal — inheriting it here
+     keeps the numerals counting in 01 → 05 even when the whole list crosses the
+     threshold in one observer batch, which is what a flick or an anchor jump
+     does. The 120ms on top is what puts the number behind its row. */
+  transition-delay: calc(var(--rd, 0s) + 120ms);
+}
+
+.rowWrap[data-in] .num { opacity: 1; transform: none; }
+
+.names { display: block; }
+.name { display: block; color: var(--n-900); }
+.promise {
+  display: block;
+  margin-top: .3rem;
+  font-size: var(--t-sm);
+  color: var(--blue-500);
+}
+
+.body { color: var(--n-600); max-width: 46ch; }
+
+/* The ring is decorative here — the row itself is the link. */
+.arrow { justify-self: end; }
+.row:hover .arrow { background: var(--blue-500); border-color: var(--blue-500); color: var(--white); }
+
+/* Extra-large displays, matching the hero and the Statement plate. The global
+   `wrap` class caps this at --maxw (1440) and centres it, and from 1440 up
+   globals.css zeroes every wrapper's inline padding — so at 1920 the rows are a
+   1440 box with 240px of bare ground either side. Releasing the cap puts them on
+   a flat 120px gutter, on the same lines as the sections above.
+
+   `.sec` is in the selector to out-specify the global `.wrap`, which sets the
+   cap and the padding at the same single-class specificity. */
+@media (min-width: 1920px) {
+  .sec .inner {
+    max-width: none;
+    padding-inline: 120px;
+  }
+}
+
+@media (max-width: 1023px) {
+  .row {
+    grid-template-columns: 4.5rem 1fr auto;
+    grid-template-areas: 'num names arrow' 'num body body';
+    align-items: start;
+    row-gap: var(--s-3);
+  }
+  .num { grid-area: num; font-size: clamp(2rem, 7vw, 2.75rem); }
+  .names { grid-area: names; }
+  .body { grid-area: body; }
+  .arrow { grid-area: arrow; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .num { opacity: 1; transform: none; transition: none; }
+}
+
+@media (max-width: 640px) {
+  .arrow { display: none; }
+  .row { grid-template-columns: 3.5rem 1fr; grid-template-areas: 'num names' 'num body'; }
+  .row:hover { transform: none; }
+}

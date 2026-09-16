@@ -1,0 +1,288 @@
+.sec {
+  --p: 0;
+  position: relative;
+  background: var(--white);
+  /* The deepest step of the stagger in Projects.tsx — keep the two in step. */
+  --stagger-max: 130px;
+  /* How far the hover shadow reaches past the card: 30px down, 70px of blur,
+     and a few px over so subpixel rounding never grazes the rail's clip. */
+  --shadow-reach: 112px;
+
+  /* Nothing at the foot: the rail's own bottom padding carries the whitespace
+     below the row, because it has to be inside the rail to keep the shadow out
+     of the clip. See the note there. Mobile puts it back on the section. */
+  padding-block: clamp(3rem, 5.5vw, 5rem) 0;
+}
+.title { color: var(--blue-700); margin-top: var(--s-5); max-width: 10ch; }
+
+/* Projects.tsx renders `wrapIn ${s.head}`, but no `.head` rule existed — so the
+   class list came through as the literal string "undefined". Declaring it both
+   clears that and gives the extra-large override something to hold. */
+.head { position: relative; }
+
+/* Extra-large displays, matching the sections above. The global `wrapIn` caps
+   this at --maxw (1440) and centres it, and from 1440 up globals.css zeroes
+   every wrapper's inline padding — so at 2560 the heading sits 560px in from the
+   edge. Full width on a flat 120px gutter puts it on the page's own line. */
+@media (min-width: 1920px) {
+  .sec .head {
+    max-width: none;
+    padding-inline: 120px;
+  }
+}
+
+.rail {
+  margin-top: clamp(2rem, 3.5vw, 3rem);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x proximity;
+  /* Without this, snapping pulls the first card past the rail's inset. */
+  scroll-padding-inline-start: var(--gut-wide);
+  scrollbar-width: none;
+  /* A horizontal scroller has to clip vertically — `overflow-y: hidden` is the
+     price of `overflow-x: auto` — and it clips at the padding box. The deepest
+     stagger step drops a card --stagger-max past the foot of the track, and its
+     hover shadow reaches --shadow-reach below that. Both have to be padding
+     *here*: margin on the section below is outside the clip and does nothing.
+     The result is a shade more room than the old rail-plus-section pair, and
+     it reads the same, since all of it is empty either way. */
+  padding-block: 0 calc(var(--stagger-max) + var(--shadow-reach));
+  cursor: grab;
+}
+.rail::-webkit-scrollbar { display: none; }
+.dragging { cursor: grabbing; scroll-snap-type: none; }
+/* Held on the rail only while the auto-advance tween is running. Snap has
+   to be off for it: `x proximity` re-evaluates on every rest, and a tween
+   writing a new offset each frame hands it a rest to argue with. The tween
+   lands on a snap position anyway, so it goes straight back on afterwards. */
+.gliding { scroll-snap-type: none; }
+
+.track {
+  display: flex;
+  gap: clamp(1.5rem, 2.8vw, 2.5rem);
+  width: max-content;
+  /* The gutter is wider than the shadow's reach at full size, so it already
+     clears the last card's; below that, the end padding holds the floor. */
+  padding-inline: var(--gut-wide) max(var(--gut-wide), var(--shadow-reach));
+  /* Enough for the shadow's upward reach (blur less offset) on the card that
+     takes the zero step of the stagger. */
+  padding-top: clamp(2.5rem, 4vw, 3.5rem);
+}
+
+.cell {
+  position: relative;
+  z-index: 1;
+  scroll-snap-align: start;
+  /* The comp's stagger, eased slightly by page scroll so the row breathes. */
+  transform: translateY(calc(var(--offset) * (1 - var(--p) * 0.35)));
+  transition: transform 120ms linear;
+}
+
+/* ── Motion ─────────────────────────────────────────────────────────────
+   `--reveal` is how far the map plate travels: it ends with only its bottom
+   sliver left in the top band of the card, so the photograph beneath is what
+   the reader is looking at.
+
+   The slide takes a curve with a touch of overshoot — it settles rather than
+   stopping dead, which is what makes it read as a physical panel rather than
+   a fade in disguise. Coming back is faster and lands flat: by then the
+   reader has already decided to leave, and an overshoot on the way out would
+   bounce the map plate down past its own frame. */
+.card {
+  --reveal: 74%;
+  --slide-in: 900ms;
+  --slide-out: 640ms;
+  --slide-ease: cubic-bezier(.2, 1.05, .3, 1);
+
+  position: relative;
+  display: block;
+  width: clamp(16rem, 30.2vw, 27.2rem);
+  aspect-ratio: 435 / 490;
+}
+
+/* The one surface. It clips the plate's travel and the photograph's scale to
+   the card's radius; `box-shadow` is painted outside the border box, so the
+   clipping doesn't touch it. */
+.surface {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r-panel);
+  overflow: hidden;
+  background: var(--blue-500);
+  box-shadow: 30px 30px 70px 0 rgba(0, 16, 73, 0);
+  transition: box-shadow var(--slide-out) var(--ease-out);
+}
+
+/* The floor. It rests slightly over-scaled and eases back to true as it is
+   uncovered — a slow, long move under a fast one, so the reveal has depth
+   rather than a single flat velocity. */
+.photo {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.08);
+  transition: transform 1900ms var(--ease-out);
+}
+
+/* Keeps the figure and the ring legible against whatever the photograph is
+   doing down there. Only needed once the photograph is showing.
+
+   It cannot take --ease-out like everything else here. The plate travels up,
+   so the foot of the card — where this gradient is densest — is the first
+   thing uncovered, and --ease-out is steep enough at the front to be most of
+   the way done by then: the wash would be waiting at full strength the moment
+   it came into view, which reads as a hard cut. A symmetric curve holds it
+   back until there is photograph to darken. */
+.scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  opacity: 0;
+  background: linear-gradient(
+    to top,
+    rgba(4, 20, 84, .58) 0%,
+    rgba(4, 20, 84, .34) 14%,
+    rgba(4, 20, 84, .06) 38%,
+    rgba(4, 20, 84, 0) 56%
+  );
+  transition: opacity 420ms var(--ease-out);
+}
+
+/* The map plate: the brand-blue ground plus the road network, as one moving
+   panel. `isolation` keeps the map's screen blend from reaching the
+   photograph underneath it. */
+.plate {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  isolation: isolate;
+  background: var(--blue-500);
+  transform: translateY(0);
+  transition: transform var(--slide-out) var(--ease-out);
+}
+
+/* The maps ship dark with light roads. Screened over the brand blue they read
+   as the comp's blue plate with the road network lifted out of it. */
+.map {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  mix-blend-mode: screen;
+  opacity: .55;
+}
+
+.chip {
+  position: absolute;
+  top: 1.75rem;
+  left: 1.9rem;
+  z-index: 4;
+  padding: .5rem 1rem;
+  border-radius: var(--r-full);
+  background: rgba(4, 20, 84, .55);
+  backdrop-filter: blur(6px);
+  font-size: var(--t-xs);
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--white);
+  transition: background-color 640ms var(--ease-out);
+}
+
+/* ── The title's travel ─────────────────────────────────────────────────
+   The title rides up with the plate, but not as far: it rests low on the map
+   and ends tucked just under the sliver the plate leaves behind. Rather than
+   two positions and an un-animatable swap, the title lives in a band that
+   spans the two: `top` is where it must end up, `bottom` is where it rests.
+
+   The lift is then height-agnostic, which matters because these titles run to
+   one or two lines. Sliding the band up by its own height and the title back
+   down by *its* own height nets exactly (band − title) — bottom-aligned
+   becomes top-aligned, whatever either height happens to be. Both halves must
+   share one duration and curve or the two cancel unevenly and the title
+   wanders mid-flight. */
+.nameBand {
+  position: absolute;
+  left: 1.9rem;
+  right: 5.5rem;
+  /* Clears the plate's remaining sliver: 100% − --reveal, plus a gutter. */
+  top: calc(100% - var(--reveal) + 1.5rem);
+  bottom: 4.4rem;
+  z-index: 3;
+  display: flex;
+  align-items: flex-end;
+  transform: translateY(0);
+  transition: transform var(--slide-out) var(--ease-out);
+}
+.name {
+  display: block;
+  color: var(--white);
+  transform: translateY(0);
+  transition: transform var(--slide-out) var(--ease-out);
+}
+
+/* Anchored, both of them — the reveal happens behind and above these. */
+.figure {
+  position: absolute;
+  left: 1.9rem;
+  bottom: 1.9rem;
+  z-index: 3;
+  color: rgba(255, 255, 255, .88);
+  font-size: var(--t-body);
+}
+
+.go { position: absolute; right: 1.6rem; bottom: 1.6rem; z-index: 3; }
+
+/* ── Hover ──────────────────────────────────────────────────────────────
+   Gated on a real pointer: `:hover` latches on touch, which would leave a
+   tapped card stuck half-open with no way back. Touch devices get the resting
+   map card, which is why the ring is part of it rather than a reward for
+   hovering. */
+@media (hover: hover) and (pointer: fine) {
+  .card:hover .plate {
+    transform: translateY(calc(var(--reveal) * -1));
+    transition: transform var(--slide-in) var(--slide-ease);
+  }
+
+  /* With the plate, on the same curve, so the two read as one panel moving. */
+  .card:hover .nameBand {
+    transform: translateY(-100%);
+    transition: transform var(--slide-in) var(--slide-ease);
+  }
+  .card:hover .name {
+    transform: translateY(100%);
+    transition: transform var(--slide-in) var(--slide-ease);
+  }
+
+  .card:hover .photo { transform: scale(1); }
+
+  /* The shadow leads by a hair — the card lifts, then opens. */
+  .card:hover .surface {
+    box-shadow: 30px 30px 70px 0 rgba(0, 16, 73, .25);
+    transition: box-shadow 700ms var(--ease-out);
+  }
+
+  /* Trails the plate by a third of its travel, then takes almost as long
+     again to arrive — the wash should be the last thing to settle, well after
+     the photograph is out. */
+  .card:hover .scrim {
+    opacity: 1;
+    transition: opacity 820ms cubic-bezier(.45, 0, .55, 1) 300ms;
+  }
+
+  .card:hover .chip { background: rgba(4, 20, 84, .78); }
+
+  /* A hovering card and its shadow pass in front of their neighbours. */
+  .cell:hover { z-index: 2; }
+}
+
+@media (max-width: 767px) {
+  .cell { transform: none; }
+  /* No stagger and no hover here, so neither needs its room back. */
+  .sec { padding-bottom: clamp(3rem, 6vw, 5.5rem); }
+  .rail { padding-bottom: 2rem; }
+  .track { padding-inline: var(--gut-wide); }
+  .card { width: 78vw; }
+}

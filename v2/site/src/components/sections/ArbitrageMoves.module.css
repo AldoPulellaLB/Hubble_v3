@@ -1,0 +1,164 @@
+/* ── Why this section does not use `.frame` ──────────────────────────────────
+   Everywhere else on the page the content sits in a `.frame`/`.wrap` wrapper,
+   which globals.css caps at --maxw and — from 1440 up — strips of its gutter.
+   That is right where the content is the composition.
+
+   Here the *drawing* is the composition. The serpentine's waypoints are
+   absolute positions in the comp's 1440 box, and the three moves have to land
+   in the bays it leaves. So the content and the svg share one box — capped at
+   1440, centred, and with no inline padding at any width — and every horizontal
+   measure inside it is a percentage of that box. Content and route then scale
+   by exactly the same factor and stay locked together at every width.
+
+   The consequence, and it is deliberate: this section is NOT released onto the
+   120px gutter at 1920 the way its neighbours are. Releasing it would slide the
+   moves outboard of a route that cannot follow them without going elliptical
+   (see the projection note in the .tsx). The blue ground is still full-bleed, so
+   the band reads full width; only its content stays on the comp's measure.
+
+   ── Why every vertical value is a clamp on vw ────────────────────────────────
+   The svg is stretched with `preserveAspectRatio="none"`, so the corner radii
+   stay circular only while the vertical scale equals the horizontal one. The
+   heights below track the width up to 1440 and freeze there, which is what
+   keeps the two equal. A fixed px or rem in this file breaks that. */
+.sec {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: var(--blue-700);
+  --eyebrow-ink: var(--cyan-600);
+  /* The charge is held at zero until the third move is on screen. `FlowLines`
+     multiplies its scrubbed pulse opacity by this and carries the transition,
+     so the release is a fade rather than a switch. Declared on the section so
+     the desktop route and the phone rail read one flag. */
+  --pulse-gate: 0;
+}
+.sec[data-live] { --pulse-gate: 1; }
+
+/* The route's own box: the same 1440 cap and centring the content has, so an
+   x of 973 means the same pixel in both. `overflow: visible` on the svg itself
+   (set in FlowLines.module.css) is what lets the two tails draw past 1440 and
+   be cut by the section instead of by the box. */
+.flowWrap {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  max-width: var(--maxw);
+  margin-inline: auto;
+  pointer-events: none;
+}
+
+.flow {
+  --flow-ink: var(--blue-400);
+  /* The comp inks the heavy segments in each route's own hue. Brightening them
+     to the shared cyan is the landing page's language — the charge reads as
+     travelling rather than as a thicker piece of cable. */
+  --flow-pulse: var(--cyan-400);
+}
+
+/* The phone's rail. Off until the breakpoint asks for it. */
+.flowM { display: none; }
+
+.inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: var(--maxw);
+  margin-inline: auto;
+  /* 81 to the eyebrow's cap line, 22 below the last row — the comp's own. */
+  padding-block: clamp(3.4rem, 5.625vw, 5.0625rem) clamp(.9rem, 1.53vw, 1.375rem);
+}
+
+/* 63 of 1440. */
+.head { margin-inline-start: 4.375%; }
+
+/* `text-wrap: wrap`, not the `balance` the shared heading rule sets: the comp
+   breaks this "Three moves, made / automatically", a long line over a short
+   one, and balance can only distribute evenly — those breaks are unreachable
+   while it is on. The measure places them instead, and is a `min()` so it is
+   proportional below 1440 and pinned at the comp's value above it. */
+.title {
+  margin-top: var(--s-5);
+  max-width: min(620px, 43vw);
+  color: var(--blue-200);
+  text-wrap: wrap;
+}
+
+/* Three rows of 474 on the comp — 1422 of the section's 1742. The rows carry
+   the height; the moves sit at the top of their own row. */
+.moves {
+  display: grid;
+  grid-auto-rows: clamp(300px, 32.917vw, 474px);
+  margin-top: clamp(2.4rem, 4.11vw, 3.7rem);
+}
+
+.move { align-self: start; }
+
+/* 43 / 973 of 1440, at 448 / 427 wide. */
+.left  { margin-inline-start: 2.986%; width: 31.11%; }
+.right { margin-inline-start: 67.57%; width: 29.65%; }
+
+/* The heading leads and the copy follows a beat behind. Both inherit `Reveal`'s
+   own `--rd` in their delay rather than carrying a fixed one — that is what
+   keeps the pair in order when a fast scroll or an anchor jump puts the whole
+   row across the observer's threshold in a single batch. */
+.moveTitle,
+.moveCopy {
+  transform: translate3d(0, 40px, 0);
+  transition: transform 860ms var(--ease-out);
+  transition-delay: var(--rd, 0s);
+}
+
+.move[data-in] .moveTitle,
+.move[data-in] .moveCopy { transform: none; }
+
+.moveTitle { color: var(--white); }
+
+/* 345.6 on the comp for all three, whichever side they sit on — so it is
+   written once against the section's own measure rather than as a share of two
+   different move widths. */
+.moveCopy {
+  margin-top: var(--s-4);
+  max-width: min(345.6px, 24vw);
+  color: var(--white);
+  font-size: var(--t-body);
+  line-height: 1.2;
+  text-wrap: pretty;
+  transition-delay: calc(var(--rd, 0s) + 110ms);
+}
+
+/* The draw's far-end landmark. No box of its own — it only has to sit on the
+   section's floor so `betweenProgress` has something there to measure. */
+.end { display: block; height: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .moveTitle, .moveCopy { transform: none; }
+}
+
+@media (max-width: 1023px) {
+  /* One column on a real gutter, and the rail replaces the serpentine. The
+     percentage placement goes with it — below this width it would be putting
+     content 11px off the glass. */
+  .flowWrap { display: none; }
+  .flowM {
+    display: block;
+    z-index: 0;
+    --flow-ink: var(--blue-400);
+    --flow-pulse: var(--cyan-400);
+  }
+
+  .inner { padding-inline: var(--frame); padding-block: clamp(3.5rem, 9vw, 5rem); }
+  .head { margin-inline-start: 0; }
+  .title { max-width: 20ch; }
+
+  .moves {
+    grid-auto-rows: auto;
+    row-gap: clamp(2.5rem, 7vw, 4rem);
+    margin-top: clamp(2.5rem, 7vw, 4rem);
+    /* Clear of the rail, which runs down the left of the column. */
+    padding-inline-start: clamp(3.5rem, 9vw, 5rem);
+  }
+  .left, .right { margin-inline-start: 0; width: auto; }
+  .moveCopy { max-width: 46ch; }
+}

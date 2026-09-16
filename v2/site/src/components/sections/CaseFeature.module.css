@@ -1,0 +1,115 @@
+/* 731 tall on the comp — 50.76vw, floored so the copy and the two controls
+   still have room on a laptop, capped so it doesn't become a second hero.
+   The black ground is the section's own and it is also what the wash resolves
+   to, so the hand-off to the CTA below is seamless. */
+.sec {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: flex-start;
+  min-height: clamp(560px, 50.76vw, 780px);
+  background: var(--black);
+  overflow: hidden;
+  --eyebrow-ink: var(--cyan-600);
+}
+
+.media {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+/* ── Matching the comp's crop ────────────────────────────────────────────────
+   The comp places this photograph in a 1693.4 x 1270.1 box over a 1442 x 731
+   section, offset (-137.4, -337.1). The box is the source's own aspect exactly,
+   so there is no crop inside it — the section's edges do all the cutting, and
+   what the reader sees is x 8.11%..93.27% and y 26.54%..84.09% of the image.
+
+   `object-fit: cover` alone cannot reproduce that: on this box it fills the
+   width and shows 100% of it, which is a wider, flatter crop than the comp's
+   85%. `--zoom` is 1/0.8516 — the factor that takes the visible width back to
+   the comp's — and `object-position` is solved for what is left: with the zoom
+   scaling about the centre, a 66% y lands the visible window's centre on the
+   comp's 55.3%.
+
+   This is not cosmetic. The copy sits over the upper left, and the comp's crop
+   is what puts dark scrub behind it rather than pale ground.
+
+   Rests overscaled and eases to true as the section arrives. 1900ms, the same
+   duration the landing page's project photographs take — long enough that the
+   settle is felt rather than watched. The entrance is a multiplier on `--zoom`
+   rather than a value of its own, so the crop is preserved at both ends. */
+.img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 66%;
+  --zoom: 1.174;
+  transform: scale(calc(var(--zoom) * 1.06));
+  transition: transform 1900ms var(--ease-out);
+}
+.media[data-in] .img { transform: scale(var(--zoom)); }
+
+/* One ramp, 52% to solid. It must reach *solid* at the bottom edge — any
+   transparency left over shows as a seam against the black section below. */
+.scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgb(0 0 0 / .52) 0%, rgb(0 0 0 / 1) 100%);
+  pointer-events: none;
+}
+
+.inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+  padding-block: clamp(3rem, 5.8vw, 5.22rem) clamp(2.5rem, 4.7vw, 4.25rem);
+}
+
+.head { max-width: 36rem; }
+
+.title { margin-top: var(--s-5); color: var(--white); }
+
+/* 20 at 160% — a standfirst, not body copy. The one place on the page that
+   steps the body size up rather than down. */
+.copy {
+  margin-top: var(--s-5);
+  max-width: 33rem;
+  color: var(--white);
+  font-size: var(--t-lead-lg);
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+
+/* The controls sit on the section's floor rather than following the copy —
+   which is what opens the comp's gap between the two and lets the photograph
+   carry the middle of the frame. */
+.actions {
+  display: flex;
+  align-items: center;
+  margin-top: auto;
+  padding-top: clamp(2.5rem, 6vw, 5.4rem);
+}
+
+.more {
+  flex: 0 1 78.5%;
+  min-width: 0;
+  margin-inline-start: auto;
+  color: var(--white);
+}
+
+@media (min-width: 1920px) {
+  .sec .inner { max-width: none; padding-inline: 120px; }
+}
+
+@media (max-width: 767px) {
+  .sec { min-height: 0; }
+  .inner { padding-block: clamp(3rem, 12vw, 4rem) clamp(2.5rem, 10vw, 3.5rem); }
+  .head { max-width: none; }
+  .copy { max-width: none; }
+  .actions { display: grid; gap: var(--s-5); justify-items: start; padding-top: clamp(2.5rem, 14vw, 4rem); }
+  .more { flex: none; margin-inline-start: 0; }
+}

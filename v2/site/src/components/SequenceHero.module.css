@@ -1,0 +1,171 @@
+.section {
+  position: relative;
+  /* 3.5 viewports of travel drives the sequence */
+  height: 350lvh;
+  background: var(--ink-black);
+}
+@supports not (height: 100lvh) { .section { height: 350vh; } }
+
+.pin { position: sticky; top: 0; height: 100lvh; overflow: hidden; }
+@supports not (height: 100lvh) { .pin { height: 100vh; } }
+
+.scene { position: absolute; inset: 0; }
+.canvas, .poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+
+/* A flat wash over the whole render, knocking its brightness back so the copy
+   holds against it. Ordered before .scrim in the markup — both are absolute
+   siblings with no z-index of their own, so paint order is DOM order and the
+   scrim's ramp lands on top of this. */
+.tint {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 8, 35, 0.25);
+}
+
+/* Not a vignette any more — the three near-black ramps that darkened the left,
+   the floor and the head of the render are gone. What is left is a single band
+   at the foot of the hero, fading into the brand blue so the section hands over
+   to what follows instead of ending on a cut. Bottom-anchored and fixed at
+   500px, so it is a constant depth of ground rather than a share of the
+   viewport. */
+.scrim {
+  position: absolute;
+  inset: auto 0 0;
+  height: 500px;
+  background: linear-gradient(180deg, rgba(8, 50, 180, 0.00) 53.14%, #0832B4 97.15%);
+}
+
+/* The comp's row under the nav — a section label at the left, a standing line
+   at the right. Absolute rather than in `.content`'s column, because `.content`
+   justifies to the *end* to hold the copy at the foot of the pin; a first child
+   there would be pushed down with it. */
+.labels {
+  position: absolute;
+  inset-inline: 0;
+  top: calc(var(--nav-h) + 1.75rem);
+  z-index: 3;
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s-6);
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--t-xs);
+  font-weight: 600;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  color: rgba(255,255,255,.72);
+  pointer-events: none;
+}
+
+.content {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-start;
+  padding-block: calc(var(--nav-h) + 3rem) clamp(6rem, 12vh, 9rem);
+}
+
+.copy { max-width: min(46rem, 52vw); animation: beat 760ms var(--ease-out) both; }
+/* --cyan-400 (#66D7FF), a step lighter than the --cyan-600 eyebrows use
+   elsewhere: this one sits on the render rather than on a flat ground. */
+.eyebrow { color: var(--cyan-400); }
+.title { color: var(--white); max-width: 11ch; margin-top: var(--s-4); }
+/* Medium rather than the 400 `.t-lead` inherits from body: this lead sits on
+   the render rather than on a flat ground, and the extra weight is what holds
+   it against the bright frames the sequence passes through. */
+.lead { color: rgba(255,255,255,.78); max-width: 44ch; margin-top: var(--s-5); font-weight: 500; }
+
+@keyframes beat {
+  from { opacity: 0; transform: translate3d(0, 18px, 0); filter: blur(8px); }
+  to   { opacity: 1; transform: none; filter: none; }
+}
+
+.actions { display: flex; flex-wrap: wrap; gap: .625rem; margin-top: clamp(2rem, 4vh, 3.25rem); }
+
+/* ── Scroll HUD ─────────────────────────────────────────────── */
+.hud {
+  position: absolute;
+  inset-inline: 0;
+  bottom: clamp(1.75rem, 4vh, 3rem);
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1.5rem;
+  font-size: var(--t-xs);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.72);
+}
+.track { flex: 0 1 24rem; height: 1px; background: rgba(255,255,255,.22); overflow: hidden; }
+.fill {
+  display: block; height: 100%; width: 100%;
+  background: var(--white);
+  transform-origin: left center;
+  transition: transform 120ms linear;
+}
+.hint { white-space: nowrap; }
+.caret { display: grid; place-items: center; color: rgba(255,255,255,.8); animation: nudge 2.4s var(--ease-in-out) infinite; }
+
+@keyframes nudge {
+  0%, 72%, 100% { transform: translateY(0); opacity: .8; }
+  84% { transform: translateY(3px); opacity: 1; }
+}
+
+/* ── Loader ─────────────────────────────────────────────────── */
+.loader {
+  position: absolute; inset: 0; z-index: 4;
+  display: grid; place-content: center; gap: .75rem;
+  background: var(--ink-black);
+}
+.loaderBar { display: block; width: min(46vw, 320px); height: 2px; background: rgba(255,255,255,.14); overflow: hidden; }
+.loaderFill { display: block; height: 100%; background: var(--cyan-400); transform-origin: left; transition: transform 200ms linear; }
+.loaderText {
+  font-size: var(--t-xs); letter-spacing: .12em; text-transform: uppercase;
+  color: rgba(255,255,255,.45); text-align: center;
+}
+
+/* Extra-large displays. The global `wrap` class caps this block at --maxw
+   (1440) and gutters it with --gut (80 at its ceiling), which from 1920 up
+   leaves the copy 320px in from the edge — 240 of dead margin from the cap
+   plus the gutter — and a widening band of empty ground either side of it.
+   The hero is the page's one full-bleed composition, with the render already
+   running edge to edge behind the type, so at this size the block is released
+   from the cap and sits on a flat 120px gutter instead.
+
+   `.section` is in the selector only to out-specify `.wrap`: both are single
+   class selectors, so without it the winner depends on stylesheet order
+   between globals.css and this module.
+
+   `.hud` is included so the scroll hint stays on the same left and right lines
+   as the copy — left behind in the 1440 frame it reads as misaligned. */
+@media (min-width: 1920px) {
+  .section .content,
+  .section .hud {
+    max-width: none;
+    padding-inline: 120px;
+  }
+}
+
+@media (max-width: 1023px) {
+  .copy { max-width: 100%; }
+  .title { max-width: 14ch; }
+}
+@media (max-width: 767px) {
+  .section { height: 300lvh; }
+  .hint, .track { display: none; }
+  .lead { color: rgba(255,255,255,.82); }
+}
+@media (max-height: 720px) {
+  .lead { display: none; }
+  .content { padding-block: calc(var(--nav-h) + 2rem) 6rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .section { height: 100lvh; }
+  .copy { animation: none; }
+  .caret { animation: none; }
+}

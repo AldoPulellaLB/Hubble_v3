@@ -1,0 +1,129 @@
+/* The hero closes on a 400px fade into `--blue-700`, so this section opens on
+   the same value: no seam, the ground simply continues and the white plate
+   arrives on top of it.
+
+   84 / 88 either side of the plate on the comp. Kept as the comp's own numbers
+   rather than borrowed from the landing page's statement, which runs 100 / 120
+   — this plate is 483 tall against that one's 810 and wants the tighter frame. */
+.sec { position: relative; background: var(--blue-700); }
+.frame { padding-block: clamp(3rem, 5.83vw, 5.25rem) clamp(3.25rem, 6.11vw, 5.5rem); }
+
+.panel {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--r-panel);
+  background: var(--white);
+  --eyebrow-ink: var(--blue-400);
+  isolation: isolate;
+}
+
+.flow {
+  /* Re-inked for a light ground: the comp's own two inks, and on white they
+     carry most of their weight — hence the high per-route opacities rather
+     than the faint values the dark sections use. */
+  --flow-ink: var(--blue-400);
+  --flow-pulse: var(--cyan-600);
+  z-index: 0;
+}
+
+/* The phone's band. Off until the breakpoint asks for it. */
+.flowM { display: none; }
+
+.grid {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s-10);
+  /* 80 in from the plate's edge on the comp — `--gut` rather than a flat value,
+     because it is the page's own gutter ramp: it tops out at exactly 80 and
+     still gives way on narrow screens, where a fixed 80 would be a fifth of
+     the width.
+
+     59.5 above the eyebrow, 194 below the copy. The plate is 483 tall on the
+     comp against 289 of content, because its lower 200 is the traces' run —
+     nothing else holds that open, so the padding has to. */
+  padding: clamp(2.5rem, 4.13vw, 3.72rem) var(--gut) clamp(4rem, 13.47vw, 12.125rem);
+}
+
+.head { flex: 0 1 auto; max-width: 36rem; }
+
+/* The comp breaks this "Your bill doesn't / have to follow / energy that
+   moves.", and no measure can produce it: the widest of those three lines
+   ("energy that moves.", ~580) is wider than the line a measure would have to
+   forbid to get the first break ("Your bill doesn't have", ~572). So the breaks
+   are hard ones, written as `\n` in the content file — which is what the
+   newline support in ScrollRevealTitle exists for. `text-wrap: wrap` rather
+   than the shared rule's `balance`, which has nothing left to balance and
+   would only interfere with the segments. */
+.title {
+  margin-top: var(--s-5);
+  color: var(--blue-700);
+  text-wrap: wrap;
+}
+
+/* 32 down from the top of the heading block on the comp, so the copy's first
+   line sits with the heading's second rather than its first. */
+.aside { flex: 0 1 29.8rem; min-width: 0; padding-top: 2rem; }
+
+.copy + .copy { margin-top: var(--s-4); }
+
+.copy {
+  max-width: 418px;
+  color: var(--n-600);
+  font-size: var(--t-body);
+  line-height: 1.4;
+  text-wrap: pretty;
+}
+
+/* Extra-large displays, matching the sections around it. The global `.frame`
+   caps this at --maxw (1440) and centres it, and from 1440 up globals.css
+   zeroes every wrapper's inline padding — so at 1920 the plate would be a 1440
+   box with 240px of bare ground either side. Releasing the cap puts it on a
+   flat 120px gutter instead, on the same line as the hero copy above it.
+
+   Only the plate's own edges move: `.grid` keeps its --gut inset, so the copy
+   inside still sits 80 in from the plate rather than growing with it.
+
+   `.sec` is in the selector to out-specify the global `.frame`, which sets the
+   cap and the padding at the same single-class specificity. */
+@media (min-width: 1920px) {
+  .sec .frame {
+    max-width: none;
+    padding-inline: 120px;
+  }
+}
+
+@media (max-width: 1023px) {
+  .grid { flex-direction: column; }
+  .head { max-width: none; }
+  .title { max-width: 22ch; }
+  .aside { flex: none; padding-top: 0; }
+  .copy { max-width: 48ch; }
+}
+
+@media (max-width: 767px) {
+  /* The band is one number, reserved above and filled below. It stays
+     absolutely positioned — out of flow — on purpose: as a grid row it
+     contributes the svg's own max-content height and the plate then grows to
+     fit it. `padding-bottom` keeps the copy off it. */
+  .panel { --band: 7rem; }
+  .grid { padding-bottom: calc(var(--band) + var(--s-4)); }
+
+  /* Sized so the widest of the three hard-broken segments — "energy that
+     moves." — still fits the plate's 301px of inner width on a 375 phone. A
+     step larger and that one segment wraps, which reads as a stray fourth
+     line rather than as the comp's three. */
+  .title { font-size: clamp(1.75rem, 8.4vw, 2.5rem); }
+
+  .flow { display: none; }
+  .panel .flowM {
+    display: block;
+    top: auto;
+    bottom: 0;
+    height: var(--band);
+    --flow-ink: var(--blue-400);
+    --flow-pulse: var(--cyan-600);
+    z-index: 0;
+  }
+}

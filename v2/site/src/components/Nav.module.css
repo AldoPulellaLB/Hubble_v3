@@ -1,0 +1,378 @@
+.bar {
+  position: fixed;
+  inset-inline: 0;
+  top: 0;
+  z-index: 100;
+  padding-block: 19px;
+  transition: transform 420ms var(--ease-out), background-color 300ms linear;
+  /* Coming back is held off briefly so the bar isn't sliding down through
+     content the reader is still moving. Leaving stays immediate. */
+  transition-delay: 180ms, 0ms;
+}
+.bar.away {
+  transform: translateY(calc(-100% - 8px));
+  transition-delay: 0ms, 0ms;
+}
+/* Past the hero the pills sit on light ground; a scrim keeps their edges. */
+/* The bar used to carry a black scrim once it left the hero. It is gone: the
+   light palette below does the separating now, and the scrim read as a shadow
+   hanging off the top of the page. */
+
+/* Full-bleed, unlike the page's sections — the bar spans the viewport and
+   only its 40px inset is shared with the panels below it. Deliberately not
+   `.frame`, whose 1440 cap would centre the bar and pull the logo and the
+   right-hand cluster inward on wide screens. */
+/* `--r-nav` is the nav family's radius. The page's buttons stay on --r-btn;
+   every Figma node for the bar specifies 8. */
+.inner {
+  /* The positioning context for a mega panel, which spans the bar rather than
+     its trigger — see `.item:has()` below. */
+  position: relative;
+  --r-nav: 8px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  width: 100%;
+  padding-inline: var(--frame);
+}
+
+/* The asset is the whole lockup — plate, radius and wordmark — drawn at
+   exactly 95 × 50, which is the bar's own height. So these elements supply no
+   background and no radius of their own; adding either would sit behind the
+   plate at a different corner radius and show as a fringe. The radius is only
+   so the focus ring and the face clip follow the plate's shape. */
+.logo {
+  --logo-w: 95px;
+  display: block;
+  width: var(--logo-w);
+  height: var(--nav-h);
+  border-radius: var(--r-nav);
+  flex: none;
+  /* The stage the cube turns inside. Shallow enough to read as a solid object
+     rather than a fisheye. */
+  perspective: 520px;
+}
+
+/* A real cube edge, not a flip.
+   
+   The two faces meet along the plate's right edge, so each sits half the
+   plate's width out from the cube's centre and the cube turns about that
+   centre. `translateZ(-w/2)` on the cube pulls that centre back behind the
+   bar, which is what leaves the resting face at z = 0 — without it the front
+   face floats toward the viewer and perspective scales it up, so the logo
+   would sit visibly larger than its neighbours before you ever hovered. */
+.cube {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transform: translateZ(calc(var(--logo-w) / -2)) rotateY(0deg);
+  transition: transform 760ms cubic-bezier(.62, .02, .29, 1);
+}
+
+.face {
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  backface-visibility: hidden;
+}
+.faceFront { transform: translateZ(calc(var(--logo-w) / 2)); }
+.faceSide { transform: rotateY(90deg) translateZ(calc(var(--logo-w) / 2)); }
+.face img { display: block; width: 100%; height: 100%; }
+
+/* Pointer-driven, so it is gated on a real pointer rather than on width alone
+   — a touch device has no hover to leave, and would latch the cube half-turned
+   after a tap. Keyboard focus gets the same reveal. */
+@media (min-width: 768px) and (hover: hover) and (pointer: fine) {
+  .logo:hover .cube,
+  .logo:focus-visible .cube {
+    transform: translateZ(calc(var(--logo-w) / -2)) rotateY(-90deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cube { transition: none; }
+}
+
+/* The row between the logo and the account button is the bar's elastic: it
+   takes every pixel the fixed elements leave, and each pill takes an equal
+   share of it. Every gap in the bar is the same 6px, so the rhythm runs
+   unbroken from the logo through to the login button. */
+.items {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.item { position: relative; flex: 1 1 0; min-width: 0; }
+
+/* An item holding a mega panel gives up being a positioning context, so the
+   panel anchors to `.inner` and spans the bar. The alternative — moving the
+   panel out of the `<li>` — would put it outside the element the hover
+   handlers are on, and it would close itself the moment the pointer arrived. */
+.item:has(> [data-mega]) { position: static; }
+
+.link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Label and caret are centred together as a pair, not pushed to opposite
+     ends — the pill is elastic, so the spare width falls outside them. */
+  gap: 10px;
+  width: 100%;
+  height: var(--nav-h);
+  padding: 10px;
+  border-radius: var(--r-nav);
+  /* .4, not .2 — the pills sit over the hero's render and the deeper plate is
+     what holds their edges against it. `--r-nav` is already the 8 asked for and
+     the 6px backdrop blur below was already here. */
+  background: rgba(0, 0, 0, .4);
+  color: var(--white);
+  font-size: var(--t-nav);
+  font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  backdrop-filter: blur(6px);
+  transition: background-color var(--dur-std) var(--ease-out);
+}
+/* A step deeper than the new .4 rest, not shallower — at the old .2 rest this
+   was .34, and raising the rest without raising this would have made a hovered
+   pill *paler* than a resting one. */
+.link:hover { background: rgba(0, 0, 0, .55); }
+.caret { flex: none; color: var(--blue-400); transition: transform var(--dur-std) var(--ease-out); }
+.item:hover .caret { transform: rotate(180deg); }
+
+/* ── Dropdown ───────────────────────────────────────────────── */
+.panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  /* At least as wide as the trigger above it — the panel's containing block is
+     the `<li>`, so `100%` is the pill's own width, and the pills are elastic
+     (`flex: 1 1 0`) so that width moves with the viewport. `max-content` still
+     lets a long label push the panel wider than its pill; `min-width` beats
+     `max-width` in CSS when they conflict, so a pill wider than the 320 cap
+     still wins and the panel never ends up narrower than what opened it. */
+  width: max-content;
+  min-width: 100%;
+  max-width: 320px;
+  padding: 10px 5px;
+  border-radius: var(--r-nav);
+  /* Matched to the pills above them: .4 and a 6px blur, so the trigger and the
+     plate it opens are one surface rather than two densities. `--r-nav` is the
+     8 already. The blur drops from 7.5 to 6 for the same reason — it was the
+     one value that made the panel read as a separate material. */
+  background: rgba(0, 0, 0, .4);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+  transition: opacity 200ms var(--ease-out), transform 260ms var(--ease-out);
+}
+
+/* The seam. `top: calc(100% + 6px)` leaves 6px between the trigger's bottom
+   edge and the plate's top that belongs to neither of them — the header is
+   what is under the pointer there. Crossing it fired `mouseleave` on the item
+   and shut the menu before the pointer ever reached it.
+
+   This is that 6px, made part of the panel: invisible, but a descendant, so
+   the pointer never leaves the item on the way down. It inherits the panel's
+   `pointer-events`, so it only exists while the menu is open. */
+.panel::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  height: 10px;
+}
+.panelOpen { opacity: 1; transform: none; pointer-events: auto; }
+
+.panel ul { display: contents; }
+
+.sub {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 34px;
+  padding: 6px 15px;
+  border-radius: 4px;
+  color: var(--blue-200);
+  font-size: 12px;
+  line-height: 1.2;
+  transition: background-color var(--dur-fast) linear;
+}
+.subLabel { min-width: 0; }
+/* The row fills brand blue and the arrow turns cyan — the comp's hover state. */
+.sub:hover { background: var(--blue-400); }
+.subArrow { flex: none; color: var(--blue-200); transition: color var(--dur-fast) linear; }
+.sub:hover .subArrow { color: var(--cyan-600); }
+
+/* ── Right cluster ──────────────────────────────────────────── */
+/* No auto margin: the elastic pills already push this cluster to the right
+   edge, and an auto margin here would open a gap that breaks the rhythm. */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: none;
+}
+.actions :global(a), .actions :global(button) { min-height: var(--nav-h); }
+/* Class-on-class, for the same reason as the hide rules below: these two are
+   Button components, and a bare `.calc` loses the tie against Button's own
+   `.btn` font-size depending on which module the bundler emits first. */
+.actions .calc,
+.actions .touch {
+  font-size: var(--t-nav);
+  border-radius: var(--r-nav);
+  justify-content: center;
+  gap: 10px;
+  padding: 10px;
+}
+.actions .calc { width: 200px; }
+.actions .touch { width: 136px; }
+
+/* Collapsed to its mark, and opens to the comp's 108 × 40 on hover.
+   `width` is animated deliberately here — the layout shift *is* the
+   interaction. Because the pills are elastic and this stays `flex: none`,
+   the row to its left gives up the 62px and closes again on the way out. */
+.account {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--nav-h);
+  height: var(--nav-h);
+  border-radius: var(--r-nav);
+  background: rgba(203, 203, 203, .15);
+  color: var(--white);
+  font-size: 12px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  backdrop-filter: blur(4px);
+  flex: none;
+  transition: width 340ms var(--ease-out), background-color var(--dur-std) var(--ease-out);
+}
+.account:hover,
+.account:focus-visible { width: 108px; background: rgba(203, 203, 203, .28); }
+
+/* The gap lives on the label, not on the flex container: a container gap
+   would still be spent while the label is at zero width and push the mark
+   off centre. */
+.accountLabel {
+  max-width: 0;
+  margin-inline-start: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-width 340ms var(--ease-out),
+              margin-inline-start 340ms var(--ease-out),
+              opacity 180ms linear 80ms;
+}
+.account:hover .accountLabel,
+.account:focus-visible .accountLabel {
+  max-width: 5rem;
+  margin-inline-start: 10px;
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .account, .accountLabel { transition: none; }
+}
+
+.burger {
+  display: none;
+  place-items: center;
+  width: var(--nav-h);
+  height: var(--nav-h);
+  border-radius: var(--r-nav);
+  background: rgba(0, 0, 0, .2);
+  color: var(--white);
+  flex: none;
+}
+
+/* ── Mobile ─────────────────────────────────────────────────── */
+/* These hide elements that carry their own `display` from Button.module.css.
+   Class-on-class keeps the rule above it whichever order the bundler emits
+   the two modules in — a plain `.calc` loses the tie and the mobile bar
+   overflows. */
+@media (max-width: 1279px) {
+  .items { display: none; }
+  .actions .calc { display: none; }
+}
+@media (max-width: 767px) {
+  .actions .touch { display: none; }
+  .inner .account { display: none; }
+  .inner .burger { display: grid; }
+}
+
+.sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+  padding: calc(var(--nav-h) + 3.5rem) var(--frame) var(--frame);
+  background: var(--black);
+  overflow-y: auto;
+  opacity: 0;
+  transition: opacity 300ms var(--ease-out);
+}
+.sheetOpen { opacity: 1; }
+.sheet[hidden] { display: none; }
+
+.sheetList { display: grid; gap: .25rem; }
+.sheetLink {
+  display: block;
+  padding-block: .75rem;
+  font-family: var(--font-heading);
+  font-size: clamp(1.75rem, 8vw, 2.5rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--white);
+  border-bottom: 1px solid rgba(255, 255, 255, .12);
+  opacity: 0;
+  transform: translateY(14px);
+  animation: sheetIn 500ms var(--ease-out) forwards;
+  animation-delay: calc(var(--i) * 55ms + 80ms);
+}
+.sheetSubs { display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; padding: .75rem 0 1rem; }
+.sheetSub { font-size: var(--t-sm); color: rgba(255, 255, 255, .6); }
+.sheetSub:hover { color: var(--cyan-400); }
+.sheetActions { display: grid; gap: .5rem; margin-top: 2rem; }
+.sheetActions > * { justify-content: space-between; }
+
+@keyframes sheetIn { to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .bar, .panel, .sheetLink { transition: none; animation: none; opacity: 1; transform: none; }
+}
+
+/* ── Light ground ───────────────────────────────────────────────
+   Figma `1589:2330`. The bar does not go pale on white sections — it goes the
+   other way, to a deep translucent navy, which is what keeps one bar identity
+   across the whole page instead of two unrelated navs. Values are the comp's:
+   the pills are `rgba(0,29,96,.5)`, the panel one step denser at .6, and the
+   carets take brand blue where they were blue-400 on dark. */
+.bar.light .link { background: rgba(0, 29, 96, .5); backdrop-filter: blur(4px); }
+.bar.light .link:hover { background: rgba(0, 29, 96, .66); }
+.bar.light .caret { color: var(--blue-700); }
+
+.bar.light .panel { background: rgba(0, 29, 96, .6); backdrop-filter: blur(3px); }
+.bar.light .subArrow { color: var(--blue-200); }
+.bar.light .sub:hover { background: var(--blue-400); }
+.bar.light .sub:hover .subArrow { color: var(--blue-500); }
+
+.bar.light .account { background: rgba(0, 29, 96, .5); }
+.bar.light .account:hover,
+.bar.light .account:focus-visible { background: rgba(0, 29, 96, .66); }
+
+/* The resting plate is the comp's blue-400 with pale type; the `primary`
+   variant underneath supplies the darker wipe on hover. */
+.bar.light .actions .calc { background: var(--blue-400); color: var(--blue-200); }
+
+.bar.light .burger { background: rgba(0, 29, 96, .5); }

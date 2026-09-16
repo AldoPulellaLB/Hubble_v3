@@ -1,0 +1,77 @@
+.svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+  --draw: 0;
+  /* Defaults; every use site overrides these on the wrapper. */
+  --flow-ink: var(--cyan-400);
+  --flow-pulse: var(--white);
+}
+
+.trace, .pulse {
+  fill: none;
+  stroke: var(--flow-ink);
+  stroke-width: var(--w);
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+  /* This route's own progress. `--dd` is the share of the window it spends
+     waiting: subtracting it and dividing by what is left both delays the start
+     and compresses the travel, so a staggered line still lands with its
+     siblings at the end of the window instead of being cut short by its own
+     delay. Declared on both strokes so the pulse reads the same number the
+     trace does. With no delay it reduces to `--draw`. */
+  --drawn: clamp(0, calc((var(--draw) - var(--dd, 0)) / (1 - var(--dd, 0))), 1);
+}
+
+/* Base route — revealed by scroll. */
+.trace {
+  opacity: var(--o);
+  stroke-dasharray: 1;
+  stroke-dashoffset: calc(1 - var(--drawn));
+}
+.rev .trace { stroke-dashoffset: calc(var(--drawn) - 1); }
+
+/* The travelling charge. Held back until the route is essentially drawn,
+   so a pulse never runs ahead of the line it is running along. */
+.pulse {
+  stroke: var(--flow-pulse);
+  /* Falls back to the trace's own weight, so routes that don't set a pulse
+     width are unchanged. */
+  stroke-width: var(--pw, var(--w));
+  stroke-dasharray: var(--pl) calc(1 - var(--pl));
+  animation: flow var(--sp) linear infinite;
+  animation-delay: var(--dl);
+  opacity: clamp(0, calc((var(--drawn) - 0.85) * 8), 1);
+  filter: drop-shadow(0 0 4px var(--flow-pulse));
+}
+
+/* Gated layers only. `--pulse-gate` is a plain multiplier on the opacity the
+   scrub already computes, so 0 holds the charge back entirely and 1 releases it.
+   The transition is here rather than on `.pulse` because on an ungated route
+   the opacity *is* the scrubbed value, and transitioning it would make the
+   pulse lag the scroll. On a gated one the scrubbed term has finished moving by
+   the time the gate opens, so the only thing the transition smooths is the
+   gate. */
+.gated .pulse {
+  opacity: calc(clamp(0, calc((var(--drawn) - 0.85) * 8), 1) * var(--pulse-gate, 1));
+  transition: opacity 560ms linear;
+}
+
+@keyframes flow {
+  from { stroke-dashoffset: 1; }
+  to   { stroke-dashoffset: 0; }
+}
+
+/* 'enter' mode: one class flip, the transition does the drawing. */
+.svg.drawn { --draw: 1; }
+.svg { transition: none; }
+.drawn .trace { transition: stroke-dashoffset 1800ms var(--ease-out); }
+
+@media (prefers-reduced-motion: reduce) {
+  .svg { --draw: 1; }
+  .pulse { animation: none; opacity: 0; }
+  .trace { transition: none; }
+}

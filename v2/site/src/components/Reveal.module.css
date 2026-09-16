@@ -1,0 +1,57 @@
+.r { transition-delay: var(--rd, 0s); }
+
+.up {
+  opacity: 0;
+  transform: translate3d(0, 28px, 0);
+  transition: opacity 720ms var(--ease-out), transform 720ms var(--ease-out);
+  transition-delay: var(--rd, 0s);
+}
+.fade {
+  opacity: 0;
+  transition: opacity 900ms var(--ease-out);
+  transition-delay: var(--rd, 0s);
+}
+/* A block wipe — used on headings, where a fade reads as soft and a slide
+   reads as generic. The type is revealed by its own advancing edge.
+
+   This is a mask rather than a clip on purpose: a clip empties the element's
+   intersection rectangle, which would stop the very observer that is meant to
+   trigger the reveal from ever seeing it. A mask is a paint effect and leaves
+   the geometry alone. The mask is twice the element's height with the soft
+   edge across its middle, so sliding it one full step wipes top to bottom. */
+.mask {
+  opacity: 0;
+  transform: translate3d(0, 12px, 0);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0 46%, #000 54% 100%);
+  mask-image: linear-gradient(to bottom, transparent 0 46%, #000 54% 100%);
+  -webkit-mask-size: 100% 220%;
+  mask-size: 100% 220%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: 0% 0%;
+  mask-position: 0% 0%;
+  transition: mask-position 950ms var(--ease-out),
+              -webkit-mask-position 950ms var(--ease-out),
+              opacity 400ms linear,
+              transform 950ms var(--ease-out);
+  transition-delay: var(--rd, 0s);
+}
+
+/* No entrance of its own: the observer runs, `data-in` lands, and the use site
+   animates whatever it likes off it. `opacity: 1` is not decoration — an empty
+   rule is dropped by the minifier, `s.none` would then be `undefined`, and the
+   element would ship with the literal class "undefined" and no observer target
+   worth naming. Products' partner panel is the caller. */
+.none { opacity: 1; }
+
+.up.in, .fade.in { opacity: 1; transform: none; }
+.mask.in {
+  opacity: 1;
+  transform: none;
+  -webkit-mask-position: 0% 100%;
+  mask-position: 0% 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .up, .fade, .mask { opacity: 1; transform: none; -webkit-mask-image: none; mask-image: none; }
+}

@@ -1,0 +1,23 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .625rem;
+  min-height: var(--btn-h);
+  padding: .375rem 1rem .375rem .875rem;
+  border-radius: var(--r-btn);
+  transition: background-color var(--dur-std) var(--ease-out);
+}
+
+/* The stores' own near-black lockup, for a dark ground. */
+.dark { background: #1B1D1F; color: var(--white); }
+.dark:hover { background: #2A2D30; }
+
+/* The same lockup on a light section. `--n-100` is the page's quiet-button
+   plate — the ground Products' "Talk to our team" sits on — so a badge beside a
+   quiet button reads as the same family rather than as a third treatment. */
+.light { background: var(--n-100); color: var(--n-900); }
+.light:hover { background: var(--n-200); }
+.mark { display: grid; place-items: center; }
+.text { display: grid; line-height: 1.1; }
+.sub { font-size: .625rem; letter-spacing: .01em; opacity: .82; }
+.label { font-family: var(--font-heading); font-size: var(--t-btn); font-weight: 600; letter-spacing: -0.01em; }

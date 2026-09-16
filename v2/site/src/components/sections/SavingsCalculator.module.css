@@ -1,0 +1,1504 @@
+/* Bounded at the card's own resting edge rather than `inset: 0`. The card sits
+   `75vh` down plus the 5% its 0.9 scale gives back — 80vh — and then a further
+   `--calc-drop`, which is the height this panel was given back for the steps
+   to work in. Everything below that line is behind the card, so the calculator
+   gets the strip above it and nothing scrolls: `.body` takes the remainder of
+   this box and each step sizes itself to that budget.
+
+   The drop is a global token because it is the same number in both places: get
+   them out of step and the panel either overhangs the card or leaves a band of
+   dead surface above it. */
+.panel {
+  position: absolute;
+  inset: 0 0 auto;
+  height: calc(80vh + var(--calc-drop));
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  /* 5vw, not --frame: the site card is `scale: .9` about its own centre when
+     open, so its visible edge sits (1 - 0.9) / 2 = 5% of the viewport in from
+     each side. Matching that puts the calculator on the card's own lines. */
+  padding: clamp(2rem, 4.4vw, 4rem) 5vw clamp(1rem, 2vw, 1.75rem);
+  /* One card padding for the whole surface. There were six of them — the
+     headline card, the breakdown, the detail, the carry block, the option
+     cards, the running total and the plates all within a few pixels of each
+     other and none of them equal, which is what put every label on this
+     screen on its own left edge. */
+  --pad-card: clamp(.7rem, 1.6vh, 1rem) clamp(.85rem, 1.6vw, 1.25rem);
+  color: var(--n-900);
+  /* Held back until the site has started moving, so the surface reads as
+     something uncovered rather than something that arrived. */
+  opacity: 0;
+  translate: 0 10px;
+  transition: opacity 320ms var(--ease-out), translate 320ms var(--ease-out);
+}
+[data-open='true'] .panel {
+  opacity: 1;
+  translate: 0 0;
+  transition-delay: 420ms;
+}
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.title {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: clamp(2rem, 4.2vw, 3.5rem);
+  line-height: 1;
+  letter-spacing: -.035em;
+  color: var(--n-900);
+}
+
+.close {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--r-full);
+  border: 1px solid rgba(10, 18, 40, .3);
+  color: var(--n-900);
+  transition: background-color 180ms var(--ease-out), border-color 180ms var(--ease-out);
+}
+.close:hover { background: rgba(10, 18, 40, .07); border-color: rgba(10, 18, 40, .5); }
+
+@media (prefers-reduced-motion: reduce) {
+  .panel { transition: none; }
+}
+
+/* ══ The calculator ══════════════════════════════════════════════════════════
+   Monochromatic: the whole surface is built from the neutral ramp, and blue is
+   reserved for exactly three things — the step you are on, the option you have
+   chosen, and the number the whole exercise is for. Nothing else is coloured,
+   so the eye goes to the state rather than to the chrome.
+
+   Nothing scrolls. Every track below is `minmax(0, …)` or a fixed budget, and
+   the panes are `overflow: hidden`, so a step that outgrows its box is clipped
+   rather than pushing a scrollbar into a surface that is meant to be a single
+   view. The type and spacing ramp on `vh` as well as `vw` for the same reason:
+   a short laptop window gets a smaller calculator, not a cropped one. */
+
+.body {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 15rem) minmax(0, 1fr);
+  /* The foot is a row of the body, spanning both columns, rather than a row of
+     the pane: that is what runs its rule and its buttons the full width of the
+     panel at every step, and it puts the running total above the line instead
+     of alongside it. */
+  grid-template-rows: minmax(0, 1fr) auto auto;
+  grid-template-areas: 'rail pane' 'live pane' 'foot foot';
+  /* Named, because the divider below is positioned off both of them: half the
+     column gutter to sit in the middle of it, and the whole row gutter to
+     reach down to the foot's rule. Split rather than the `gap` shorthand
+     because only the column half takes part in the intro transition. */
+  --gap-col: clamp(1.5rem, 3vw, 3rem);
+  --gap-row: clamp(1rem, 2vh, 1.5rem);
+  row-gap: var(--gap-row);
+  column-gap: var(--gap-col);
+  padding-top: clamp(1rem, 2.4vh, 2rem);
+  transition:
+    grid-template-columns 620ms var(--ease-out),
+    column-gap 620ms var(--ease-out);
+}
+
+/* ── The intro ────────────────────────────────────────────────
+   Step one is an intro screen. Neither the rail nor the running total means
+   anything before a connection type is chosen — every later step and every
+   rand of the total is derived from it — so the left column starts closed and
+   the two cards have the panel's full width.
+
+   Closed to nothing rather than removed: grid track sizes interpolate when
+   both ends are lengths, so the column opening and the rail arriving are one
+   move instead of a reflow followed by an animation. The pane spans both rows,
+   so its height is the body's height either way and no row track has to be
+   touched here.
+
+   `.live` is capped at nothing as well. It sits in the closed column, and left
+   to itself it would size the `auto` row from text wrapped at zero width —
+   invisible, but tall enough to shove the row split around. */
+.body[data-intro] {
+  grid-template-columns: minmax(0, 0rem) minmax(0, 1fr);
+  column-gap: 0;
+}
+.body[data-intro] .live { max-height: 0; }
+
+/* The rule between the two columns. A grid item of the body's own — a
+   pseudo-element of a grid container is one — placed in the first column and
+   pushed half a gutter into the gap, so it reads as sitting between the
+   columns rather than against either.
+
+   It spans the rail's row and the total's, which is exactly the pane's height,
+   then the negative bottom margin carries it across the last row gutter to
+   meet the foot's rule. `stretch` is doing the vertical sizing, which is why a
+   negative margin lengthens it. */
+.body::before {
+  content: '';
+  grid-row: 1 / 3;
+  grid-column: 1;
+  justify-self: end;
+  width: 1px;
+  margin-right: calc(var(--gap-col) / -2);
+  margin-bottom: calc(var(--gap-row) * -1);
+  background: var(--n-200);
+}
+
+/* All three are clipped or hidden while the column is narrower than they are. */
+.rail, .live, .body::before {
+  overflow: hidden;
+  opacity: 1;
+  translate: 0 0;
+  /* Held until the column is most of the way open, so the navigation arrives
+     into room that is already there rather than being squeezed into it. */
+  transition:
+    opacity 400ms var(--ease-out) 280ms,
+    translate 460ms var(--ease-out) 280ms;
+}
+.body[data-intro] .rail, .body[data-intro] .live, .body[data-intro]::before {
+  opacity: 0;
+  translate: -16px 0;
+  /* No delay on the way out: they leave first, then the column closes. */
+  transition-delay: 0s;
+  /* Genuinely collapsed rather than merely clipped. `box-sizing` is border-box,
+     so padding and a border hold a box open even against a zero track — the
+     rail keeps 17px of height and the total 40px of width — and that invisible
+     sliver would sit over the pane and take clicks meant for a card. Snapping
+     them is fine: nothing is on screen to see it, and it means the rail is
+     already correctly laid out on the first frame of its fade. */
+  padding: 0;
+  border-top-width: 0;
+  pointer-events: none;
+}
+
+/* ── The rail ─────────────────────────────────────────────── */
+/* The nav sits on a tray: a soft step *down* from the ground, which is what
+   lets the current step read as a white card lifted off it. The calculator's
+   ground is --n-300, so lifting the tray toward white instead would leave the
+   white pill with nothing to stand against.
+
+   Drawn as a pseudo-element rather than the rail's own background, so the
+   hairline above stays a rule across the top of the column — as the head's
+   own line, continued — instead of becoming the tray's square top edge under
+   a rounded one. */
+.rail {
+  grid-area: rail;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-content: start;
+  border-top: 1px solid var(--n-200);
+  padding: 1.5rem .625rem .625rem;
+  min-height: 0;
+}
+.rail::before {
+  content: '';
+  position: absolute;
+  inset: 1rem 0 0;
+  border-radius: var(--r-card);
+  background: rgba(13, 20, 33, .05);
+}
+/* Over the tray. Both are positioned at `z-index: auto`, so tree order
+   decides, and `::before` is the rail's first child. */
+.railRow { position: relative; }
+
+.railRow {
+  display: grid;
+  grid-template-columns: 1.5rem 1fr auto;
+  align-items: center;
+  gap: .5rem;
+  padding: clamp(.4rem, .9vh, .7rem) .5rem;
+  border-radius: var(--r-btn);
+  text-align: left;
+  color: var(--n-500);
+  transition: color 200ms var(--ease-out), background-color 200ms var(--ease-out);
+}
+/* A lift off the tray rather than --n-75, which at this size is so close to
+   the selected pill's white that hovering read as selecting. */
+.railRow:not(:disabled):hover { background: rgba(255, 255, 255, .45); color: var(--n-900); }
+/* Legible as an upcoming step rather than invisible — --n-300 on this
+   ground reads as nothing at all. */
+.railRow:disabled { color: var(--n-400); cursor: not-allowed; }
+.railRow[data-done] { color: var(--n-600); }
+.railRow[data-on] { background: var(--white); color: var(--blue-600); }
+
+.railChip { display: grid; place-items: center; opacity: .7; }
+.railChip svg { width: 15px; height: 15px; }
+.railRow[data-on] .railChip { opacity: 1; }
+
+.railArw { opacity: 0; transition: opacity 180ms var(--ease-out); }
+.railRow[data-on] .railArw, .railRow:hover .railArw { opacity: .7; }
+
+.railName {
+  font-size: var(--t-sm);
+  font-weight: 500;
+  letter-spacing: -.01em;
+}
+
+/* ── The pane ─────────────────────────────────────────────── */
+.pane {
+  grid-area: pane;
+  /* The same hairline the rail carries, continued across the pane so the two
+     read as one rule under the heading. It runs to the pane's own right edge,
+     which is the panel's content edge — the line the close button sits on. */
+  border-top: 1px solid var(--n-200);
+  padding-top: .75rem;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: clamp(.75rem, 1.8vh, 1.5rem);
+  animation: paneIn 420ms var(--ease-out) both;
+}
+
+@keyframes paneIn {
+  from { opacity: 0; translate: 0 12px; }
+  to { opacity: 1; translate: 0 0; }
+}
+
+.paneHead { display: grid; gap: .25rem; }
+
+.stepTitle {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: clamp(1.25rem, 2.4vh, 1.75rem);
+  /* 1.1 clipped the descenders on "Load profile" at this size. */
+  line-height: 1.2;
+  letter-spacing: -.03em;
+  color: var(--n-900);
+}
+
+.stepBlurb {
+  font-size: var(--t-sm);
+  line-height: 1.5;
+  color: var(--n-600);
+}
+
+.stepBody { min-height: 0; overflow: hidden; }
+
+/* ── Voltage cards ────────────────────────────────────────── */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(.75rem, 1.5vw, 1.25rem);
+  height: 100%;
+}
+
+.card {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  gap: .5rem;
+  align-content: start;
+  padding: clamp(1rem, 2.2vh, 1.6rem);
+  border-radius: var(--r-card);
+  border: 1px solid var(--n-200);
+  background: var(--n-75);
+  /* Crops the render's bleed to the radius. The drawn `.edge` is inset inside
+     the box, so it is not touched. */
+  overflow: hidden;
+  text-align: left;
+  transition: border-color 220ms var(--ease-out), background-color 220ms var(--ease-out),
+              box-shadow 220ms var(--ease-out), transform 220ms var(--ease-out);
+  animation: lift 460ms var(--ease-out) both;
+  animation-delay: calc(var(--i) * 90ms);
+}
+.card:hover { border-color: var(--n-400); transform: translateY(-2px); }
+/* The 1px border goes transparent when selected, or it rings the drawn edge
+   with a grey hairline — the traced outline is the border at that point. */
+/* The connection cards are the one chooser that does not take the blue tile:
+   they are two thirds photograph, and a solid fill would paint over the render
+   that is the whole point of the step. They keep the traced outline — the
+   strongest selected state on the surface already — and take the lift, so
+   they share the vocabulary without losing the picture. */
+.card[data-sel] {
+  background: var(--blue-200);
+  border-color: transparent;
+  box-shadow: 0 18px 34px -14px rgba(0, 16, 73, .38);
+  /* These already animate their selection — the outline traces itself round
+     the card over 620ms — so all they needed was the same lift the tiles take.
+     `.card:hover` uses -2px, so a chosen card that is also hovered does not
+     move again under the pointer. */
+  transform: translateY(-2px);
+}
+
+/* Sits over the card and is inert; the rect is sized in CSS because SVG
+   attributes cannot take `calc`, and SVG2 geometry properties can. */
+.edge {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+.edge rect {
+  x: 1.5px;
+  y: 1.5px;
+  width: calc(100% - 3px);
+  height: calc(100% - 3px);
+  rx: 18px;
+  fill: none;
+  stroke: var(--blue-500);
+  stroke-width: 3;
+  /* One unit of dash is the whole perimeter, so the offset runs 1 → 0 as the
+     line travels round. */
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 620ms var(--ease-out);
+}
+.card[data-sel] .edge rect { stroke-dashoffset: 0; }
+
+@keyframes lift {
+  from { opacity: 0; translate: 0 14px; }
+  to { opacity: 1; translate: 0 0; }
+}
+
+.kicker {
+  font-size: var(--t-xs);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--n-500);
+}
+.card[data-sel] .kicker { color: var(--blue-600); }
+
+.cardTitle {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: clamp(1rem, 2vh, 1.35rem);
+  letter-spacing: -.02em;
+  color: var(--n-900);
+}
+
+.cardBody { font-size: var(--t-sm); line-height: 1.5; color: var(--n-600); }
+
+/* The render stands on the card's bottom edge and bleeds past the padding to
+   its left and right ones — hence `overflow: hidden` on the card, so the radius
+   crops it. Width-driven at its own aspect: the two assets share a width but
+   not a height, and anchoring the foot is what puts both on the same line. The
+   type and the tags are lifted over it below. */
+.cardArt {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  z-index: 0;
+  width: 100%;
+  height: auto;
+  /* Card-width at every size, which is the whole point of it — the render is
+     the card's floor, not a picture sitting in it.
+
+     `cover` rather than `contain` is what holds that. `width: 100%` with
+     `height: auto` gives a box on the render's own ratio, so neither fit crops
+     anything until the ceiling below binds; once it does, `contain` would
+     letterbox — shrinking the render and pulling it off the right-hand edge —
+     where `cover` keeps the box full and takes the difference off the top of
+     the image instead. These renders carry their empty sky up there, so the
+     top is the right place to lose it.
+
+     The ceiling is a length off the bottom, not a share of the card. What it
+     has to clear is the type block — kicker, title, two lines of prose — and
+     that is a fixed ~123px whatever the card's height, so as a percentage it
+     moves: 21% of a tall card and 31% of a short one, which is how 70% came to
+     graze the prose by 3px at 1440x900. Measured from the foot it holds at
+     every height, and `max()` keeps it sane if a card is ever shorter than the
+     reserve itself. */
+  max-height: max(0px, calc(100% - 8.5rem));
+  pointer-events: none;
+  object-fit: cover;
+  object-position: left bottom;
+}
+
+/* The render is positioned, so without a layer of their own these in-flow
+   children would paint under it. */
+.kicker, .cardTitle, .cardBody, .tags { position: relative; z-index: 1; }
+
+.tags { display: flex; flex-wrap: wrap; gap: .35rem; }
+.tag {
+  font-size: var(--t-xs);
+  padding: .2rem .5rem;
+  border-radius: var(--r-full);
+  background: var(--white);
+  border: 1px solid var(--n-200);
+  color: var(--n-600);
+}
+
+/* ── Option rows ──────────────────────────────────────────── */
+@keyframes slidein {
+  from { opacity: 0; translate: -10px 0; }
+  to { opacity: 1; translate: 0 0; }
+}
+
+.row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: clamp(.45rem, 1.1vh, .8rem) clamp(.6rem, 1.2vw, 1rem);
+  border-radius: var(--r-btn);
+  border: 1px solid transparent;
+  background: var(--n-75);
+  text-align: left;
+  transition: border-color 200ms var(--ease-out), box-shadow 260ms var(--ease-out),
+              transform 260ms var(--ease-out), color 200ms var(--ease-out);
+}
+.row:hover { border-color: var(--n-300); }
+/* ── Chosen ───────────────────────────────────────────────────
+   The comp turns the picked card into a solid blue tile with white type and
+   lifts it off the surface, rather than tinting it a pale blue and outlining
+   it. The point is that a chooser should read at a glance from across the
+   screen, and --blue-200 against an --n-75 card is a difference you have to
+   look for.
+
+   Nothing here changes size, weight or position of any text, so choosing
+   never reflows the row — which is also why the figures above carry their
+   mark and their label in both states. */
+
+/* The fill lives on a layer of its own, and this is not a nicety: a gradient
+   is not an interpolable value, so `transition: background` between `none` and
+   a `linear-gradient` has nothing to animate and simply cuts. The tile used to
+   snap in under a shadow and a text colour that faded — half a transition.
+   On a pseudo-element it is opacity and transform, both of which animate.
+
+   `isolation` plus `z-index: -1` puts it above the card's own --n-75 ground
+   and below every child, so nothing inside needs a stacking order of its own. */
+.row, .chip { position: relative; isolation: isolate; }
+
+.row::before,
+.chip::before {
+  content: '';
+  position: absolute;
+  /* Over the 1px border, not inside it, or a hairline of the old ground shows
+     around the fill. */
+  inset: -1px;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(158deg, var(--blue-400) 0%, var(--blue-500) 58%, var(--blue-600) 100%);
+  opacity: 0;
+  transform: scaleX(.35);
+  transform-origin: left center;
+  /* Leaving: shorter and without the travel. The card you just moved away
+     from should get out of the way, not perform on the way out. */
+  transition: opacity 150ms var(--ease-out), transform 1ms linear 150ms;
+}
+.row[data-sel]::before,
+.chip[data-sel]::before {
+  opacity: 1;
+  transform: scaleX(1);
+  /* Arriving: the fill crosses the card from the left — the same gesture the
+     site's buttons use for their hover wipe, so a selection reads as the same
+     kind of event. The colour lands ahead of the travel finishing, which is
+     what stops it feeling like a wipe *revealing* a card rather than a card
+     becoming chosen. */
+  transition: opacity 200ms var(--ease-out), transform 440ms var(--ease-out);
+}
+
+.row[data-sel],
+.chip[data-sel] {
+  border-color: transparent;
+  box-shadow: 0 14px 28px -12px rgba(0, 16, 73, .42);
+  /* Forward, with the shadow. 2px is all it takes at this size, and it is the
+     same lift the connection cards already use on hover. */
+  transform: translateY(-2px);
+}
+/* Everything that recolours does it on one duration, so the type crosses over
+   with the ground rather than a beat behind it. */
+/* `.chip`/`.chip b` are deliberately not in this list: the base `.chip` rule
+   further down declares its own `transition` and wins, so naming them here
+   would look like it worked and do nothing. Theirs is on that rule. */
+.rowName, .rowMeta, .kicker, .rowNums, .numGroup > span, .numGroup b {
+  transition: color 240ms var(--ease-out);
+}
+
+.row[data-sel] .rowName,
+.row[data-sel] .rowMeta,
+.row[data-sel] .kicker,
+.row[data-sel] .rowNums,
+.row[data-sel] .numGroup > span,
+.chip[data-sel],
+.chip[data-sel] b { color: var(--white); }
+.row[data-sel] .rowMeta,
+.row[data-sel] .numGroup > span { color: rgba(255, 255, 255, .78); }
+.row[data-sel] .kicker { color: rgba(255, 255, 255, .66); }
+.row[data-sel] .rowNums b { color: var(--white); }
+
+/* The rule and the discs pick up the tile's own ground. */
+.row[data-sel] .rowNums > .numGroup + .numGroup { border-left-color: rgba(255, 255, 255, .3); }
+.row[data-sel] .numMark { border-color: transparent; }
+
+/* Hover on the chosen card must not undo it — the neutral hover border would
+   otherwise draw a grey hairline round a blue tile. */
+.row[data-sel]:hover,
+.chip[data-sel]:hover { border-color: transparent; }
+
+.rowMain { display: grid; gap: 1px; min-width: 0; }
+.rowName {
+  font-size: var(--t-sm);
+  font-weight: 600;
+  letter-spacing: -.01em;
+  color: var(--n-900);
+}
+.rowMeta {
+  font-size: var(--t-xs);
+  color: var(--n-500);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowNums {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: clamp(.6rem, 1.1vw, 1rem);
+  font-size: var(--t-xs);
+  color: var(--n-500);
+  font-variant-numeric: tabular-nums;
+}
+.rowNums b { color: var(--n-900); font-weight: 600; }
+
+/* A mark, the figure, and what the figure is — the mark spanning both rows so
+   it sits on the pair rather than on the number. */
+.numGroup {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0 .5rem;
+}
+.numGroup .numMark { grid-row: span 2; }
+.numGroup b {
+  font-family: var(--font-heading);
+  font-size: clamp(.95rem, 2vh, 1.15rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -.02em;
+}
+.numGroup > span { font-size: var(--t-xs); line-height: 1.2; }
+
+/* The rule between the two, as the comp draws it. */
+.rowNums > .numGroup + .numGroup {
+  border-left: 1px solid var(--n-200);
+  padding-left: clamp(.6rem, 1.1vw, 1rem);
+  transition: border-color 240ms var(--ease-out);
+}
+
+/* The disc carries a small diagonal: leaning up for the expensive band,
+   down for the cheap one. Decoration on top of the word beside it — "Peak"
+   and "Off peak" are what actually say which is which. */
+.numMark {
+  width: 1.25rem;
+  height: 1.25rem;
+  /* Rides the fill: white discs on a blue tile, bordered discs on a pale one,
+     crossing over on the same curve as the ground beneath them. */
+  transition: background-color 260ms var(--ease-out), border-color 260ms var(--ease-out);
+  border-radius: var(--r-full);
+  background: var(--white);
+  border: 1px solid var(--n-200);
+  background-image: var(--mark);
+  background-repeat: no-repeat;
+  background-position: center;
+  transition: border-color 200ms var(--ease-out);
+}
+.numMark[data-band='peak'] {
+  --mark: linear-gradient(45deg, transparent 44%, #E2564A 44%, #E2564A 56%, transparent 56%);
+}
+.numMark[data-band='off'] {
+  --mark: linear-gradient(-45deg, transparent 44%, #4E9A57 44%, #4E9A57 56%, transparent 56%);
+}
+
+/* ── Rows instead of columns ──────────────────────────────────
+   The storage step's own layout: the choice across the top, then the control
+   and its read-out, then the day. Every track is `auto` except the curve's, so
+   the chart is the only thing that grows and the blocks above it keep the
+   height their content asks for. */
+.stack {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  gap: clamp(.6rem, 1.5vh, 1.1rem);
+  height: 100%;
+  min-height: 0;
+}
+
+/* The same option buttons the other steps stack, turned into cards. Reusing
+   `.row` keeps the hover, the selected outline and the blue plate identical
+   across all four choosers — only the box's shape changes here. */
+.optionCards {
+  display: grid;
+  /* One equal column per option, whatever the count — three storage formats,
+     four tariffs, four load shapes, five sites. `repeat(3, …)` was fine while
+     only the storage step used this. */
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: clamp(.5rem, 1.2vw, .875rem);
+}
+/* The label some choosers carry above their row — the sites need one, where
+   the others are named by the step's own heading. */
+.chooser { display: grid; gap: .35rem; min-height: 0; }
+.optionCards > li { animation: lift 380ms var(--ease-out) both; animation-delay: calc(var(--i) * 55ms); }
+/* A card, not a row: the name and its figures stack instead of sitting at
+   opposite ends of a 300px box. Both the option buttons and the site chips
+   take it, so all four choosers read as one control. */
+.optionCards .row,
+.optionCards .chip {
+  /* `.row` already carried `width: 100%`; `.chip` never did — it was built for
+     a vertical list, so as a card it shrank to its label and sat 154px wide in
+     a 255px cell. */
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: .35rem;
+  padding: var(--pad-card);
+  text-align: left;
+}
+.optionCards .rowMain { gap: 2px; }
+.optionCards .chip { border-radius: var(--r-btn); }
+.optionCards .chip b { font-weight: 600; }
+
+/* The control and the read-out. The stepper needs a fixed measure and the
+   donut wants the rest — an even split left the ring and its legend cramped
+   beside three buttons and a pill. */
+.duo {
+  display: grid;
+  grid-template-columns: minmax(0, 15rem) minmax(0, 1fr);
+  gap: clamp(.5rem, 1.2vw, .875rem);
+  align-items: stretch;
+}
+/* Where the left half is a field rather than a stepper: a big number and a
+   slider need a measure, and the donut beside it needs to stay above the
+   23rem at which it stacks. */
+.duoWide { grid-template-columns: minmax(0, 22rem) minmax(0, 1fr); }
+
+/* Every block in every column sits on this plate, which is what gives each
+   column a single left edge. Before it, the results step alone had three: the
+   headline card's label at 399 (20px of padding and a border), the figures
+   strip below it flush at 378, and the summary cards' kickers at 388.6 on
+   9.6px of their own. Three blocks stacked in one container, none of them
+   lining up.
+ 
+   Named `plate`, not `panel`: `.panel` in this module is the calculator's own
+   outer section, and a second rule under that name landed an --n-75 fill, a
+   border and the wrong padding on the whole surface. */
+.plate,
+.stack > .facts, .duo > .facts,
+.headline {
+  display: grid;
+  align-content: center;
+  padding: var(--pad-card);
+  border-radius: var(--r-card);
+  background: var(--n-75);
+  border: 1px solid var(--n-200);
+}
+
+.kv { align-content: start; }
+
+.field { display: grid; gap: .4rem; }
+.fieldLab {
+  font-size: var(--t-xs);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--n-500);
+}
+
+.fieldIn {
+  display: flex;
+  align-items: baseline;
+  gap: .4rem;
+  border-bottom: 1px solid var(--n-300);
+  padding-bottom: .25rem;
+  transition: border-color 200ms var(--ease-out);
+}
+.fieldIn:focus-within { border-color: var(--blue-500); }
+.fieldIn input {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: clamp(1.5rem, 3.4vh, 2.25rem);
+  letter-spacing: -.03em;
+  color: var(--n-900);
+  background: none;
+  border: 0;
+  font-variant-numeric: tabular-nums;
+}
+.fieldIn input::-webkit-outer-spin-button,
+.fieldIn input::-webkit-inner-spin-button { appearance: none; margin: 0; }
+.fieldIn input { appearance: textfield; }
+.unit { font-size: var(--t-sm); color: var(--n-500); }
+
+/* A neutral track with a blue thumb — the only coloured control on the page. */
+.range { width: 100%; appearance: none; background: none; height: 18px; }
+.range::-webkit-slider-runnable-track {
+  height: 3px; border-radius: 3px; background: var(--n-200);
+}
+.range::-webkit-slider-thumb {
+  appearance: none;
+  width: 14px; height: 14px; margin-top: -5.5px;
+  border-radius: var(--r-full);
+  background: var(--blue-500);
+  transition: transform 160ms var(--ease-out);
+}
+.range:hover::-webkit-slider-thumb { transform: scale(1.15); }
+.range::-moz-range-track { height: 3px; border-radius: 3px; background: var(--n-200); }
+.range::-moz-range-thumb {
+  width: 14px; height: 14px; border: 0;
+  border-radius: var(--r-full); background: var(--blue-500);
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+}
+.stepper button {
+  width: 2.25rem; height: 2.25rem;
+  display: grid; place-items: center;
+  border-radius: var(--r-full);
+  border: 1px solid var(--n-300);
+  color: var(--n-900);
+  font-size: 1rem;
+  transition: background-color 180ms var(--ease-out), border-color 180ms var(--ease-out);
+}
+.stepper button:hover { background: var(--n-75); border-color: var(--n-500); }
+.stepper input {
+  width: 4rem;
+  text-align: center;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.25rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--n-900);
+  background: none; border: 0;
+}
+.stepper input::-webkit-outer-spin-button,
+.stepper input::-webkit-inner-spin-button { appearance: none; margin: 0; }
+
+.ghost {
+  justify-self: start;
+  align-self: start;
+  font-size: var(--t-sm);
+  padding: .4rem .75rem;
+  border-radius: var(--r-full);
+  border: 1px solid var(--n-300);
+  color: var(--n-700);
+  transition: background-color 180ms var(--ease-out), border-color 180ms var(--ease-out), color 180ms var(--ease-out);
+}
+.ghost:hover { background: var(--n-75); border-color: var(--blue-500); color: var(--blue-600); }
+
+.chip {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding: .5rem .75rem;
+  border-radius: var(--r-btn);
+  border: 1px solid transparent;
+  background: var(--n-75);
+  font-size: var(--t-sm);
+  color: var(--n-900);
+  animation: slidein 320ms var(--ease-out) both;
+  animation-delay: calc(var(--i) * 45ms);
+  /* The same list `.row` carries. This selector is declared twice in this file
+     — once here and once in the recolour group above — and the later one wins,
+     so the group's `transition: color` never reached a chip and the lift and
+     shadow it grew for the selected state snapped instead of animating. Kept
+     whole here rather than split across the two. */
+  transition: border-color 200ms var(--ease-out), box-shadow 260ms var(--ease-out),
+              transform 260ms var(--ease-out), color 240ms var(--ease-out);
+}
+.chip b { font-size: var(--t-xs); color: var(--n-500); font-variant-numeric: tabular-nums; }
+.chip:hover { border-color: var(--n-300); }
+
+
+/* The charts moved to SavingsCharts.module.css when the 24-bar figure was
+   replaced by a real curve, a heatmap and a donut. Nothing here draws data
+   any more — the axis and caption styles went with them. */
+
+/* ── Read-outs ────────────────────────────────────────────── */
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(6rem, 1fr));
+  gap: .5rem clamp(.75rem, 1.5vw, 1.5rem);
+}
+.facts[data-cols='2'] { grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr)); }
+.facts div { display: grid; gap: 1px; }
+.facts dt {
+  font-size: var(--t-xs);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--n-500);
+}
+.facts dd {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: clamp(.9rem, 1.9vh, 1.15rem);
+  letter-spacing: -.02em;
+  color: var(--n-900);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── The result ───────────────────────────────────────────── */
+.result {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: clamp(.45rem, 1.1vh, .9rem);
+  height: 100%;
+  min-height: 0;
+}
+
+/* The headline card was full width with nothing beside it. Its own content is
+   three lines, so the width went to waste; the breakdown now sits in it. */
+.resultTop {
+  display: grid;
+  /* The figure's card holds three lines and needs about 360px; the breakdown
+     holds a ring plus three legend rows with a percentage on the end of each,
+     and wants every pixel it can get. Weighted the other way round it was the
+     wide card that had room to spare. */
+  grid-template-columns: minmax(0, .78fr) minmax(0, 1.22fr);
+  gap: clamp(.5rem, 1.4vw, 1rem);
+  align-items: stretch;
+}
+.breakdown {
+  display: grid;
+  align-content: center;
+  padding: var(--pad-card);
+  border-radius: var(--r-card);
+  background: var(--n-75);
+  border: 1px solid var(--n-200);
+  animation: lift 480ms var(--ease-out) both;
+  animation-delay: 80ms;
+}
+.big { align-content: center; }
+
+.big {
+  display: grid;
+  gap: .2rem;
+  padding: var(--pad-card);
+  border-radius: var(--r-card);
+  background: var(--n-75);
+  border: 1px solid var(--n-200);
+  animation: lift 480ms var(--ease-out) both;
+}
+.bigLab {
+  font-size: var(--t-xs);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--n-500);
+}
+.bigNum {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: clamp(1.75rem, 4.6vh, 2.75rem);
+  line-height: 1;
+  letter-spacing: -.04em;
+  color: var(--blue-600);
+  font-variant-numeric: tabular-nums;
+}
+.bigSub { font-size: var(--t-sm); color: var(--n-600); }
+
+
+/* ── The simulation step ──────────────────────────────────── */
+.sim {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: clamp(.75rem, 2vh, 1.5rem);
+  height: 100%;
+}
+.simList { display: flex; flex-direction: column; gap: 2px; min-height: 0; overflow: hidden; }
+.simList li {
+  display: grid;
+  grid-template-columns: minmax(0, 12rem) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: baseline;
+  padding: clamp(.35rem, .9vh, .6rem) 0;
+  border-bottom: 1px solid var(--n-200);
+  animation: slidein 320ms var(--ease-out) both;
+  animation-delay: calc(var(--i) * 55ms);
+}
+.simList b { font-size: var(--t-sm); font-weight: 600; color: var(--n-900); }
+.simList span { font-size: var(--t-sm); color: var(--n-600); }
+
+/* ── The foot ─────────────────────────────────────────────── */
+.foot {
+  grid-area: foot;
+  display: flex;
+  align-items: center;
+  gap: clamp(.75rem, 2vw, 1.5rem);
+  border-top: 1px solid var(--n-200);
+  padding-top: clamp(.6rem, 1.4vh, 1rem);
+}
+
+.back, .next {
+  padding: .6rem 1.1rem;
+  border-radius: var(--r-btn);
+  font-size: var(--t-btn);
+  font-weight: 600;
+  transition: background-color 200ms var(--ease-out), border-color 200ms var(--ease-out),
+              color 200ms var(--ease-out), opacity 200ms var(--ease-out);
+}
+.back { border: 1px solid var(--n-300); color: var(--n-700); }
+.back:hover:not(:disabled) { background: var(--n-75); border-color: var(--n-500); }
+.next { background: var(--n-900); color: var(--white); margin-left: auto; }
+.next:hover:not(:disabled) { background: var(--blue-600); }
+.back:disabled, .next:disabled { opacity: .35; cursor: not-allowed; }
+
+.progress {
+  flex: 1;
+  height: 2px;
+  background: var(--n-200);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress > span {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: var(--blue-500);
+  transform-origin: 0 50%;
+  scale: var(--p) 1;
+  transition: scale 420ms var(--ease-out);
+}
+
+/* ── Narrow ───────────────────────────────────────────────── */
+/* The rail becomes a scrolling strip of numbers along the top — the only
+   scroller in the component, and horizontal, so the view itself still never
+   moves. Both two-up steps collapse to one column. */
+@media (max-width: 900px) {
+  .body {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto auto;
+    grid-template-areas: 'rail' 'pane' 'live' 'foot';
+    gap: clamp(.5rem, 1.4vh, 1rem);
+  }
+  .rail {
+    flex-direction: row;
+    gap: .35rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding: .75rem 0 .25rem;
+  }
+  /* A scrolling strip of icons has nothing to sit on, and the divider has no
+     columns to divide once they stack. */
+  .rail::before, .body::before { display: none; }
+  .rail::-webkit-scrollbar { display: none; }
+  .railRow { grid-template-columns: auto; padding: .4rem .55rem; }
+  .railName, .railArw { display: none; }
+
+  /* The intro closes vertically here — the rail is a strip above the pane and
+     the total sits below it, so there is no column to close. Both tracks are
+     stated as a flat 0 so neither is sized from its clipped content, and the
+     rule has to name `[data-intro]` to out-specify the desktop one above. */
+  .body[data-intro] {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 0 minmax(0, 1fr) 0 auto;
+    row-gap: 0;
+  }
+  .body[data-intro] .rail, .body[data-intro] .live { translate: 0 -12px; }
+  /* Three cards across a 700px pane leaves each too narrow for its own spec
+     line; one column, and the step body scrolls as the others do here. */
+  .optionCards, .duo, .duoWide {
+    grid-auto-flow: row;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .stack { grid-template-rows: auto auto auto auto; height: auto; }
+  .simList li { grid-template-columns: minmax(0, 1fr); gap: 0; }
+
+  /* The renders go with the cards stacking. One up they are ~180px tall, and
+     every size the render can take at that height either runs through the
+     prose or hides behind the tags — the same call this file makes elsewhere
+     for the day charts: a secondary figure is what gives way, and the choice
+     itself stays whole. */
+  .cardArt { display: none; }
+}
+
+/* On a phone the budget is roughly 350px of step body — 80vh less the heading
+   and the foot. Everything below is cut to fit inside it rather than being
+   allowed to overflow: a clipped control is worse than an absent one, and the
+   brief is a single view with no scroll. What goes is explanatory prose and
+   secondary figures; every control stays reachable. */
+@media (max-width: 560px) {
+  .rowNums { display: none; }
+  .stepBlurb { display: none; }
+  .cardBody { display: none; }
+  .rowMeta { display: none; }
+  .card { grid-template-rows: auto auto auto; gap: .35rem; padding: .75rem .85rem; }
+  .cards { gap: .5rem; }
+  .row { padding: .5rem .7rem; }
+  /* The list takes what is left and the controls keep their natural height —
+     the other way round squeezed the stepper and slider while letting the list
+     run past the bottom of the view. */
+  .facts { gap: .35rem .75rem; padding-top: .45rem; }
+  .facts dd { font-size: .95rem; }
+  .fieldIn input { font-size: 1.5rem; }
+  .big { padding: .75rem .9rem; }
+  .bigNum { font-size: clamp(1.75rem, 8vw, 2.5rem); }
+  .simList li { padding: .3rem 0; }
+
+  /* The day and generation charts go: they illustrate a number that is stated
+     directly underneath them, and they are the largest thing that can be given
+     up without losing a control. Selected structurally — they live in their own
+     CSS module, so there is no class here to name.
+
+     Named against `.stack`/`.duo`: this rule used to say `.side > figure`, and
+     when every step became a stack it silently stopped matching anything —
+     the charts had been quietly reappearing on phones since. */
+  .stack > figure, .duo > figure, .plate > figure { display: none; }
+
+  /* Sites become one horizontal row rather than five stacked, the same move the
+     rail makes — five rows is 200px this layout does not have. */
+  .chip { flex: none; flex-direction: column; align-items: flex-start; gap: 0; padding: .4rem .6rem; }
+
+  /* The option list is the one thing left that cannot be shortened — a list of
+     batteries with a battery missing is not a choice. It takes whatever height
+     is left and scrolls inside itself if the phone is too short for all of it.
+     The view itself still does not move. */
+  .foot { gap: .5rem; }
+  .back, .next { padding: .55rem .8rem; font-size: var(--t-sm); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* The global rule zeroes every duration, which would leave the fill parked
+     at scaleX(.35) for the instant before it snaps. Parking it at full width
+     means the only difference between the two states is that it is there. */
+  .row::before, .chip::before { transform: none; }
+  .pane, .card, .chip, .optionCards > li, .simList li, .big { animation: none; }
+  .edge rect { transition: none; }
+  .progress > span { transition: none; }
+}
+
+
+/* ── Restored from the prototype ─────────────────────────────────────────────
+   Everything below is a piece of the original that the first pass left out:
+   the running total, the step icon, kicker and progress ring, the tariff
+   detail, the three read-out tables, the summary cards and the carried
+   configuration. */
+
+/* The running total sits at the foot of the rail and is the one thing on screen
+   at every step. `margin-top: auto` pins it under the rows. */
+.live {
+  grid-area: live;
+  display: grid;
+  gap: 2px;
+  padding: var(--pad-card);
+  border-radius: var(--r-card);
+  background: var(--n-900);
+  color: var(--white);
+  /* Lifted off the tray beside it. Two layers: a wide soft one for the lift
+     and a tight one to seat the card, on the same ink as the project cards'
+     shadow. Scaled to this card rather than reusing their 30/30/70 — that is
+     a 435px card's shadow, and at 240px it reads as a smear thrown off to one
+     side. `.pixel-card`'s `overflow: hidden` does not touch it: a box-shadow
+     is painted outside the border box. */
+  box-shadow:
+    0 18px 40px -14px rgba(0, 16, 73, .45),
+    0 3px 9px -2px rgba(0, 16, 73, .18);
+}
+
+/* Over the pixel canvas, which is absolutely positioned and would otherwise
+   paint above in-flow content. The same layer the Stats card's number and
+   label take, for the same reason. */
+.liveLab, .liveNum, .liveSub, .liveBar { position: relative; z-index: 1; }
+.liveLab {
+  display: flex; align-items: center; gap: .4rem;
+  font-size: var(--t-xs);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .66);
+}
+.liveNum {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: clamp(1.1rem, 2.4vh, 1.5rem);
+  letter-spacing: -.035em;
+  font-variant-numeric: tabular-nums;
+}
+.liveSub { font-size: var(--t-xs); color: rgba(255, 255, 255, .55); }
+.liveBar {
+  margin-top: .4rem;
+  height: 4px;
+  border-radius: var(--r-full);
+  background: rgba(255, 255, 255, .16);
+  overflow: hidden;
+}
+.liveBar > span {
+  display: block; height: 100%; width: 100%;
+  background: var(--blue-400);
+  transform-origin: 0 50%;
+  scale: var(--p) 1;
+  transition: scale 700ms var(--ease-out);
+}
+
+/* Step header: mark, text, ring. */
+.paneHead {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: .75rem;
+}
+.paneHeadText { display: grid; gap: .15rem; min-width: 0; }
+.stepIcon {
+  display: grid; place-items: center;
+  width: 2.25rem; height: 2.25rem;
+  border-radius: var(--r-btn);
+  background: var(--n-75);
+  color: var(--blue-600);
+}
+.stepIcon svg { width: 18px; height: 18px; }
+
+/* A real ring rather than a disc with a lighter disc on top: the gradient is
+   masked to its outer 3px, so the centre is a hole and whatever the panel sits
+   on shows through. The mask is on a pseudo-element because a mask applies to
+   an element's children too, and it would take the label with it. */
+/* Reset and Share, and the ring they sit beside. Ghosted rather than solid:
+   they are always on screen at every step, and the palette's one job here is to
+   keep blue for the step you are on, the option you chose and the number — so
+   the two controls that are never the point stay in the neutral ramp. */
+.tools {
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+}
+
+.tool {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .4rem .6rem;
+  border-radius: var(--r-btn);
+  border: 1px solid var(--n-200);
+  font-size: var(--t-xs);
+  font-weight: 600;
+  color: var(--n-600);
+  white-space: nowrap;
+  transition: background-color 180ms var(--ease-out), border-color 180ms var(--ease-out),
+              color 180ms var(--ease-out), opacity 180ms var(--ease-out);
+}
+.tool svg { width: 14px; height: 14px; flex: none; }
+.tool:hover:not(:disabled) { background: var(--n-75); border-color: var(--n-400); color: var(--n-900); }
+.tool:disabled { opacity: .4; cursor: not-allowed; }
+
+/* The placeholder where a chart has nothing to draw yet — the solar step at
+   0 kWp. Keeps the two-column row's shape so raising the slider off zero does
+   not reflow the control under the reader's hand. */
+.empty {
+  align-content: center;
+  font-size: var(--t-sm);
+  line-height: 1.5;
+  color: var(--n-500);
+}
+
+/* Only shown when the report window is refused, so it has to read as a fault
+   rather than as chrome. */
+.note {
+  margin-top: .4rem;
+  font-size: var(--t-xs);
+  color: var(--blue-600);
+}
+
+.ring {
+  position: relative;
+  flex: none;
+  display: grid; place-items: center;
+  width: 2.75rem; height: 2.75rem;
+}
+.ring::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r-full);
+  background: conic-gradient(var(--blue-500) var(--deg), var(--n-200) 0);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 3px));
+  transition: background 420ms var(--ease-out);
+}
+.ring > span {
+  position: relative;
+  font-size: var(--t-xs);
+  font-weight: 600;
+  color: var(--n-900);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Key/value tables — the shape every read-out in the prototype uses. */
+.kv { display: grid; gap: 1px; min-width: 0; }
+.kv > div {
+  display: flex; align-items: baseline; justify-content: space-between; gap: .75rem;
+  padding: .25rem 0;
+  border-bottom: 1px solid var(--n-200);
+}
+.kv > div:last-child { border-bottom: 0; }
+.kv dt { font-size: var(--t-xs); color: var(--n-500); }
+.kv dd {
+  font-size: var(--t-sm);
+  font-weight: 600;
+  color: var(--n-900);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* Tariff detail. */
+.detail {
+  display: grid; gap: .35rem;
+  padding: var(--pad-card);
+  border-radius: var(--r-card);
+  background: var(--n-75);
+  border: 1px solid var(--n-200);
+}
+.badge {
+  justify-self: start;
+  font-size: var(--t-xs);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: .15rem .5rem;
+  border-radius: var(--r-full);
+  background: var(--blue-200);
+  color: var(--blue-600);
+}
+.detailName {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: -.02em;
+  color: var(--n-900);
+}
+
+/* Results: the three headline figures. */
+.headline {
+  align-content: center;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: .25rem clamp(.75rem, 1.5vw, 1.5rem);
+}
+.headline > div { display: grid; gap: 1px; }
+.headline dt {
+  font-size: var(--t-xs); letter-spacing: .1em; text-transform: uppercase; color: var(--n-500);
+}
+.headline dd {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: clamp(.95rem, 2vh, 1.2rem);
+  letter-spacing: -.02em;
+  color: var(--n-900);
+  font-variant-numeric: tabular-nums;
+}
+.headline p { font-size: var(--t-xs); color: var(--n-500); }
+
+/* The five configuration cards, each with its way back. */
+/* Five equal columns rather than a 13rem flex track that scrolled. At this
+   width all five fit, and a horizontal scroller hid the last card's figures
+   behind an edge with nothing to say it could be scrolled — the fifth card's
+   values were simply cut. It falls back to the scroller below 900px, where
+   five columns genuinely do not fit. */
+.cardsRow {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: .5rem;
+  min-height: 0;
+}
+.cardsRow::-webkit-scrollbar { display: none; }
+.sum {
+  min-width: 0;
+  /* The Edit button is the point of these cards — keep the internals tight so
+     it is never the thing that falls off the bottom of the track. */
+  font-size: var(--t-xs);
+  scroll-snap-align: start;
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  gap: .25rem;
+  padding: var(--pad-card);
+  /* The rule this surface follows: anything you click takes --r-btn, anything
+     that only holds content takes --r-card. These hold content; the Edit
+     button inside them is the control. */
+  border-radius: var(--r-card);
+  background: var(--n-75);
+  border: 1px solid var(--n-200);
+  animation: lift 340ms var(--ease-out) both;
+  animation-delay: calc(40ms + var(--i) * 38ms);
+}
+.sumTitle {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: .875rem;
+  letter-spacing: -.02em;
+  color: var(--n-900);
+}
+/* The cards carry two or three rows; the three-row ones set the height, so
+   their internals are tightened until the tallest fits the track with its Edit
+   button intact. */
+.sum .kv > div { padding: .1rem 0; }
+.sum { gap: .15rem; }
+
+.sum .kv dt, .sum .kv dd { font-size: var(--t-xs); }
+/* `align-content` defaults to `stretch`, and on a grid of auto rows that hands
+   the spare height to the gaps — which is what pushed 40px between "Peak
+   (winter)" and "Demand" and left the card reading as three loose figures. */
+.sum .kv { align-content: start; }
+/* Long values wrap rather than being cut now that the cards share the width. */
+.sum .kv dd { text-align: right; overflow-wrap: anywhere; }
+
+.edit {
+  justify-self: start;
+  margin-top: .2rem;
+  font-size: var(--t-xs);
+  padding: .2rem .6rem;
+  border-radius: var(--r-full);
+  background: var(--n-100);
+  color: var(--n-700);
+  transition: background-color 180ms var(--ease-out), color 180ms var(--ease-out);
+}
+.edit:hover { background: var(--blue-200); color: var(--blue-600); }
+
+/* The simulation step carries the configuration across. */
+/* The last step is now two stacked blocks: the offer, then the detail behind
+   it. Both tracks are `fr` rather than a height on the banner, so the pair
+   divides whatever budget the step body has instead of the banner claiming a
+   fixed slice and pushing the list past the bottom of a short window. The
+   banner takes the larger share, roughly as the comp draws it. */
+.simWrap {
+  display: grid;
+  grid-template-rows: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: clamp(.75rem, 2vh, 1.25rem);
+  height: 100%;
+  min-height: 0;
+}
+
+/* Copy at the top, buttons at the foot, the photograph behind both. */
+.banner {
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: var(--r-card);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: clamp(.75rem, 2.5vh, 2rem);
+  padding: clamp(1rem, 2.6vh, 2rem) clamp(1.1rem, 2.2vw, 2.25rem);
+  /* Under the photograph, so a slow connection shows a plate rather than a
+     hole — and the wash below has a ground to sit on either way. */
+  background: var(--n-900);
+}
+
+.bannerArt {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* The subject is on the right of the frame and the copy is on the left, so
+     a crop takes off the left — which is the part the wash covers anyway. */
+  object-position: right center;
+}
+
+/* The wash. The photograph is warm and busy on its left as well, and the copy
+   over it is white — a flat scrim would kill the image, so it is a rake from
+   the copy's edge that runs out before it reaches the subject. */
+.banner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    to right,
+    rgba(6, 10, 20, .92) 0%,
+    rgba(6, 10, 20, .8) 30%,
+    rgba(6, 10, 20, .4) 56%,
+    rgba(6, 10, 20, .1) 80%,
+    rgba(6, 10, 20, 0) 100%
+  );
+}
+
+.bannerCopy, .bannerCtas { position: relative; z-index: 2; }
+
+.bannerCopy {
+  /* The comp's measure is 18em of copy, and this font's `0` is a wide .66em —
+     34ch came out at 22.5em, which fitted enough extra words per line to leave
+     "save." alone on the third. 27ch lands the breaks the comp draws. */
+  max-width: 27ch;
+  font-size: clamp(1rem, 2.5vh, 1.5rem);
+  font-weight: 400;
+  line-height: 1.3;
+  letter-spacing: -.015em;
+  color: var(--white);
+}
+
+.bannerCtas { display: flex; flex-wrap: wrap; gap: .625rem; }
+
+.sim { grid-template-columns: minmax(0, 20rem) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); display: grid; gap: clamp(1rem, 2vw, 2rem); height: 100%; }
+.carry {
+  display: grid; gap: .35rem; align-content: start;
+  padding: var(--pad-card);
+  border-radius: var(--r-card);
+  background: var(--n-75);
+  border: 1px solid var(--n-200);
+}
+.carryTitle {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: .95rem;
+  letter-spacing: -.02em;
+  color: var(--n-900);
+}
+.simList li { grid-template-columns: 1.5rem minmax(0, 11rem) minmax(0, 1fr); }
+.simNo {
+  font-size: var(--t-xs);
+  color: var(--blue-600);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 900px) {
+  /* Five columns of figures do not fit; the track scrolls again here, where
+     the pane is narrow enough that a scroller is the expected shape. */
+  .cardsRow {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+  }
+  .cardsRow::-webkit-scrollbar { display: none; }
+  .sum { flex: 0 0 12rem; scroll-snap-align: start; }
+  .resultTop { grid-template-columns: minmax(0, 1fr); }
+
+  .sim { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+  .simList li { grid-template-columns: 1.5rem minmax(0, 1fr); }
+  .simList li b { grid-column: 2; }
+  .simList li > span:last-child { grid-column: 2; }
+
+  /* Below this width the content genuinely exceeds the strip the card
+     uncovers — roughly 400px on a phone against the ~600 the desktop gets, for
+     the same seven steps. Rather than clip a control or drop another panel, the
+     step's own body scrolls inside its box. The view does not move: the
+     heading, the rail, the running total and the buttons all stay put. */
+  .stepBody { overflow-y: auto; scrollbar-width: none; }
+  .stepBody::-webkit-scrollbar { display: none; }
+  /* `.simWrap` joins them: with the step body scrolling here, an `fr` pair
+     against a fixed height would squeeze the banner and the list rather than
+     letting the pair run on and scroll. */
+  .result, .sim, .cards, .simWrap { height: auto; }
+  .simWrap { grid-template-rows: auto auto; }
+}
+
+@media (max-width: 900px) {
+  /* Icon only. The pane head is competing with a two-line heading by here, and
+     both marks are conventional enough to carry it. `title` is already on the
+     buttons, so the name is still one hover away. */
+  .toolLab { display: none; }
+  .tool { padding: .4rem; }
+}
+
+@media (max-width: 560px) {
+  /* The rail is horizontal here, so the running total moves under the pane
+     rather than sitting at the foot of a column that no longer exists. */
+  .live { margin-top: 0; }
+  .stepIcon, .ring { display: none; }
+  .carry { display: none; }
+  .sum { flex: 0 0 11rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sum { animation: none; }
+  .ring::before, .liveBar > span { transition: none; }
+}

@@ -1,0 +1,263 @@
+/* ==============================================================
+   Hubble 2026 — v2 design system
+   Tokens transcribed from the Hubble2 Figma landing page
+   (file EhfzMjyCPVx7KwWTcfUVee, node 60:76) measured at 1440px,
+   reconciled with the Hubble design-system variables.
+   See context/design-direction.md §2 for the three stale Figma
+   values this file deliberately overrides.
+   ============================================================== */
+
+/* ── Fonts ─────────────────────────────────────────────────── */
+@font-face { font-family: Sora; src: url('/fonts/Sora-Regular.woff2') format('woff2');
+             font-weight: 400; font-display: swap; font-style: normal; }
+@font-face { font-family: Sora; src: url('/fonts/Sora-Medium.woff2') format('woff2');
+             font-weight: 500; font-display: swap; font-style: normal; }
+@font-face { font-family: Sora; src: url('/fonts/Sora-SemiBold.woff2') format('woff2');
+             font-weight: 600; font-display: swap; font-style: normal; }
+@font-face { font-family: Sora; src: url('/fonts/Sora-Bold.woff2') format('woff2');
+             font-weight: 700; font-display: swap; font-style: normal; }
+@font-face { font-family: Sora; src: url('/fonts/Sora-ExtraBold.woff2') format('woff2');
+             font-weight: 800; font-display: swap; font-style: normal; }
+@font-face { font-family: Montserrat; src: url('/fonts/Montserrat-Regular.woff2') format('woff2');
+             font-weight: 400; font-display: swap; font-style: normal; }
+@font-face { font-family: Montserrat; src: url('/fonts/Montserrat-Medium.woff2') format('woff2');
+             font-weight: 500; font-display: swap; font-style: normal; }
+@font-face { font-family: Montserrat; src: url('/fonts/Montserrat-SemiBold.woff2') format('woff2');
+             font-weight: 600; font-display: swap; font-style: normal; }
+
+:root {
+  /* ── Colour ──────────────────────────────────────────────── */
+  --blue-700: #0832B4;   /* brand blue — panels, footer, headings */
+  --blue-600: #123FC7;
+  --blue-500: #1748DF;   /* buttons, marquee */
+  --blue-400: #3164FF;   /* nav chevrons, hairlines */
+  --blue-300: #E1E9FF;
+  --blue-200: #F0F4FF;
+
+  --cyan-600: #00ABE6;   /* eyebrows, pixel accents, button chevrons */
+  --cyan-500: #3DBEEB;
+  --cyan-400: #66D7FF;
+  /* The comp's cyan is 2.5:1 on the light grounds — fine as a graphic mark,
+     short of AA as 13px label text. This is the same hue held down to 5.1:1,
+     used for eyebrows on white and on the services grey only. On black
+     (8.0:1) and on the brand blue (4.6:1) the comp's own cyan is kept. */
+  --cyan-ink: #00719A;
+
+  --green-500: #CAD900;  /* the single loud accent — "Get in touch" */
+  --green-400: #DAE356;
+
+  --white: #FFFFFF;
+  --n-50:  #F8FAFB;
+  --n-75:  #F7F7F7;      /* services section ground */
+  --n-100: #F0F2F5;      /* stat cards */
+  --n-200: #E4E7ED;
+  --n-300: #CDD2DB;
+  --n-400: #A0A8B4;
+  --n-500: #717B8A;
+  --n-600: #4D5563;
+  --n-700: #2D3748;
+  --n-800: #1A2232;
+  --n-900: #0D1421;
+  --black: #000000;
+  --ink-black: #040706;  /* the hero ground and the statement panel's field */
+
+  /* ── Type ────────────────────────────────────────────────── */
+  --font-heading: Sora, system-ui, -apple-system, sans-serif;
+  --font-body: Montserrat, system-ui, -apple-system, sans-serif;
+
+  /* Sized from the 1440 comp, then made fluid. The vw term is set so each
+     token lands on its comp value exactly at 1440. */
+  --t-display: clamp(2.75rem, 6.1vw, 5.5rem);     /* 88 */
+  --t-h2:      clamp(2.25rem, 5vw, 4.5rem);       /* 72 */
+  /* The half-step under h2. The solutions pages set their quieter section
+     titles here — 56 in Sora Bold rather than 72 in ExtraBold, so a page can
+     open loud and then speak at a lower volume without dropping to h3. */
+  --t-h2s:     clamp(2rem, 3.89vw, 3.5rem);       /* 56 */
+  --t-h3:      clamp(1.25rem, 2.50vw, 2.2rem);    /* 40 */
+  --t-h3s:     clamp(1.5rem, 2.22vw, 2rem);       /* 32 — numbered step titles */
+  --t-h5:      clamp(1.25rem, 1.67vw, 1.5rem);    /* 24 — card titles, numerals */
+  --t-h4:      clamp(1.375rem, 1.95vw, 1.75rem);  /* 28 */
+  --t-num-lg:  clamp(2.75rem, 5.3vw, 4.75rem);    /* 76 — service numerals */
+  --t-num-md:  clamp(2.5rem, 4.45vw, 4rem);       /* 64 — stat numerals */
+  --t-marquee: clamp(2.5rem, 5vw, 4.5rem);        /* 72 */
+  --t-lead:    clamp(1rem, 1.18vw, 1.0625rem);    /* 17 */
+  --t-lead-lg: clamp(1.125rem, 1.39vw, 1.25rem);  /* 20 — case-study standfirst */
+  --t-body:    1rem;
+  --t-sm:      0.8rem;
+  --t-xs:      0.8125rem;                          /* 13 — eyebrows, chips */
+  /* The control layer runs two steps under body copy, so it reads as chrome
+     rather than as text. Kept as its own tokens rather than by leaning on
+     --t-sm/--t-body, which body copy elsewhere depends on. */
+  --t-btn:     0.875rem;                           /* 14 — button labels */
+  --t-nav:     0.75rem;                           /* 12 — nav labels */
+
+  --lh-display: 0.94;
+  --lh-h2: 1.10;
+  --lh-h2s: 1.15;
+  --lh-h3: 1.14;
+  --lh-h3s: 1.25;
+  --lh-h5: 1.30;
+  --lh-body: 1.62;
+
+  /* ── Space ───────────────────────────────────────────────── */
+  --s-1: .25rem; --s-2: .5rem;  --s-3: .75rem; --s-4: 1rem;   --s-5: 1.25rem;
+  --s-6: 1.5rem; --s-8: 2rem;   --s-10: 2.5rem; --s-12: 3rem; --s-16: 4rem;
+  --s-20: 5rem;  --s-24: 6rem;  --s-32: 8rem;
+
+  /* ── Shape ───────────────────────────────────────────────── */
+  --r-btn: 10px;
+  --r-card: 20px;
+  --r-panel: 24px;
+  --r-full: 9999px;
+
+  /* ── Motion ──────────────────────────────────────────────── */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 160ms; --dur-std: 240ms; --dur-slow: 460ms;
+
+  /* ── Layout ──────────────────────────────────────────────── */
+  /* The comp runs two measures: 80px gutters for the type-led sections and
+     120px for the image-led ones. Both are kept — the tighter measure is
+     what gives the render sections their air. */
+  --frame: clamp(1rem, 2.8vw, 2.5rem);   /* 40 — panel inset, nav inset */
+  --gut:   clamp(1.25rem, 5.55vw, 5rem); /* 80 */
+  --gut-wide: clamp(1.25rem, 8.33vw, 7.5rem); /* 120 */
+  --maxw: 1440px;
+  /* One height for the whole control layer: nav pills, the logo plate, the
+     login button and every labelled button on the page. */
+  --nav-h: 50px;
+
+  /* How much further the site card drops past its 75vh rest, and therefore how
+     much taller the calculator's panel is than 80vh. The two are the same
+     number by definition — the panel is exactly the strip the card uncovers —
+     so they read it from here rather than each carrying their own literal. */
+  --calc-drop: 100px;
+  --btn-h: 50px;
+  --pixel: 30px;                          /* dissolve cell */
+}
+
+@media (max-width: 767px) {
+  :root { --pixel: 24px; --r-panel: 18px; --r-card: 16px; }
+}
+
+/* ── Reset ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--black);
+  color: var(--n-900);
+  font-family: var(--font-body);
+  font-size: var(--t-body);
+  line-height: var(--lh-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+img, svg, video, canvas { display: block; max-width: 100%; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { background: none; border: 0; cursor: pointer; }
+a { color: inherit; text-decoration: none; }
+ul, ol { list-style: none; padding: 0; }
+:focus-visible { outline: 2px solid var(--cyan-400); outline-offset: 3px; border-radius: 4px; }
+::selection { background: var(--green-500); color: var(--n-900); }
+
+/* ── Layout helpers ────────────────────────────────────────── */
+.frame { width: 100%; max-width: var(--maxw); margin-inline: auto; padding-inline: var(--frame); }
+.wrap  { width: 100%; max-width: var(--maxw); margin-inline: auto; padding-inline: var(--gut); }
+.wrapIn{ width: 100%; max-width: var(--maxw); margin-inline: auto; padding-inline: var(--gut-wide); }
+
+/* From the comp's own width up, content sits on the edge of the 1440 box and
+   the gutter goes — the plates included, so the Statement's and the Footer's
+   panels span the same measure as the copy in every section between them.
+   Below 1440 the box *is* the viewport, so the gutter is the only thing keeping
+   content off the glass and every wrapper keeps it. */
+@media (min-width: 1440px) {
+  .frame,
+  .wrap,
+  .wrapIn { padding-inline: 0; }
+}
+
+/* ── Type utilities ────────────────────────────────────────── */
+.t-display, .t-h2, .t-h2s, .t-h3, .t-h3s, .t-h4, .t-h5 {
+  font-family: var(--font-heading);
+  /* Optical alignment — pull the first glyph's sidebearing back to the grid */
+  margin-inline-start: -0.045em;
+  text-wrap: balance;
+}
+.t-display { font-size: var(--t-display); font-weight: 800; line-height: var(--lh-display); letter-spacing: -0.038em; }
+.t-h2      { font-size: var(--t-h2);      font-weight: 800; line-height: var(--lh-h2);      letter-spacing: -0.034em; }
+.t-h3      { font-size: var(--t-h3);      font-weight: 700; line-height: var(--lh-h3);      letter-spacing: -0.028em; }
+.t-h4      { font-size: var(--t-h4);      font-weight: 700; line-height: 1.2;               letter-spacing: -0.02em; }
+/* Sora Bold rather than ExtraBold — the comp steps the weight down with the
+   size, so the half-step reads as a quieter voice and not just a smaller h2. */
+.t-h2s     { font-size: var(--t-h2s);     font-weight: 700; line-height: var(--lh-h2s);     letter-spacing: -0.03em; }
+.t-h3s     { font-size: var(--t-h3s);     font-weight: 600; line-height: var(--lh-h3s);     letter-spacing: -0.022em; }
+.t-h5      { font-size: var(--t-h5);      font-weight: 600; line-height: var(--lh-h5);      letter-spacing: -0.016em; }
+
+.t-eyebrow {
+  font-family: var(--font-body);
+  font-size: var(--t-xs);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  color: var(--eyebrow-ink, var(--cyan-600));
+}
+/* Light sections set this on their own root. */
+.on-light { --eyebrow-ink: var(--cyan-ink); }
+.t-lead { font-size: var(--t-lead); line-height: var(--lh-body); text-wrap: pretty; }
+.t-body { font-size: var(--t-body); line-height: var(--lh-body); text-wrap: pretty; }
+.t-sm   { font-size: var(--t-sm);   line-height: 1.55; }
+
+/* Inline weight step inside body copy — see lib/emphasis.tsx. Montserrat
+   Medium is a real face, so this is not a synthesised weight. The ink follows
+   the paragraph unless a section sets `--em-ink`, the same arrangement as
+   `.t-eyebrow` and `--eyebrow-ink`. */
+.t-med  { font-weight: 500; color: var(--em-ink, inherit); }
+
+.num { font-variant-numeric: tabular-nums; }
+
+/* ── Section rhythm ────────────────────────────────────────── */
+.sec { position: relative; }
+.sec-pad { padding-block: clamp(4rem, 8.3vw, 7.5rem); }
+
+/* ── Full-screen sections ──────────────────────────────────────
+   One attribute does two jobs on purpose: it sets the height, and it is what
+   `ScrollSnap` looks for. Declaring a section full-height and giving it soft
+   snapping is therefore a single act, and the two cannot drift apart.
+
+   `lvh` and not `vh` — a collapsing browser toolbar changes `vh` mid-scroll and
+   would resize the section under the reader. `min-height` and not `height`, so
+   long copy pushes the section taller instead of spilling out of it.
+
+   To opt a section out at a breakpoint, out-specify this with two selectors:
+   `.sec[data-full-vh] { min-height: 0 }`. `ScrollSnap` re-measures anyway and
+   will not snap to a section that is not currently a screen tall, so the
+   attribute is safe to leave in place. */
+[data-full-vh] { min-height: 100lvh; }
+
+/* ── Reduced motion ────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── Skip link ─────────────────────────────────────────────── */
+.skip {
+  position: fixed;
+  top: -100px;
+  left: var(--frame);
+  z-index: 200;
+  padding: .75rem 1.25rem;
+  border-radius: var(--r-btn);
+  background: var(--white);
+  color: var(--blue-700);
+  font-size: var(--t-sm);
+  transition: top var(--dur-std) var(--ease-out);
+}
+.skip:focus-visible { top: 12px; }

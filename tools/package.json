@@ -1,0 +1,9 @@
+{
+  "name": "hubble-placeholder-tools",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "puppeteer-core": "^25.8.0",
+    "sharp": "^0.34.2"
+  }
+}

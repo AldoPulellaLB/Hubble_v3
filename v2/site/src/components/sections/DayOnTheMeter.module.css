@@ -1,0 +1,225 @@
+.sec {
+  position: relative;
+  background: var(--n-75);
+  --eyebrow-ink: var(--blue-400);
+  /* 200.1 per bar row and a 50 radius on the track's outer ends, both ramping
+     with the viewport and pinned at the comp's values from 1440 up. */
+  --bar-h: clamp(120px, 13.9vw, 200px);
+  --bar-r: clamp(28px, 3.47vw, 50px);
+}
+
+.inner { padding-block: clamp(3rem, 4.72vw, 4.25rem) clamp(3.5rem, 4.7vw, 4.25rem); }
+
+/* The rule under the head block is the comp's own 1px #D2D2D2, and it spans the
+   full measure — it is the thing that separates the argument from the evidence
+   below it. */
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--s-10);
+  padding-bottom: clamp(2rem, 3.75vw, 3.375rem);
+  border-bottom: 1px solid #D2D2D2;
+}
+
+.headText { flex: 1 1 auto; min-width: 0; }
+
+.title { margin-top: var(--s-5); color: var(--blue-700); }
+
+.lede {
+  flex: 0 1 21.6rem;
+  align-self: center;
+  color: var(--n-600);
+  font-size: var(--t-body);
+  line-height: 1.4;
+  text-wrap: pretty;
+}
+
+/* 291 label column, 35 gutter, and the track takes the rest — 1034 at 1440,
+   which is the comp's 1033. */
+.body {
+  display: grid;
+  grid-template-columns: minmax(0, 291px) minmax(0, 1fr);
+  column-gap: 35px;
+  margin-top: clamp(2rem, 2.75vw, 2.5rem);
+}
+
+/* The label rides the top of the track and the caption sits at its foot, which
+   is where the comp puts them — 350 and 687 against a track running 339 to 796.
+   `space-between` gets both without either carrying a magic offset. */
+.side { display: flex; flex-direction: column; justify-content: space-between; gap: var(--s-8); }
+
+.barLabel { color: var(--n-900); max-width: 18ch; }
+
+.caption {
+  max-width: 256px;
+  color: var(--n-600);
+  font-size: var(--t-body);
+  line-height: 1.4;
+  text-wrap: pretty;
+}
+
+.chart { position: relative; }
+
+/* The pixel fields are canvas, so they need React state rather than the class
+   `Reveal` flips — and an observer needs an element with *area*. A zero-height
+   marker would sit at ratio 0 for ever and a 0.25 threshold would never fire, so
+   this is an inset overlay carrying the chart's own box. Paints nothing. */
+.probe {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* The two rows touch, with no gap — the comp stacks them so the pill ends read
+   as one track notched in the middle rather than as two separate bars. */
+/* The row *is* the pale plate — the track's inert ground, full width, all four
+   corners rounded — and the coloured bands sit on top of it. That is the comp's
+   own structure (1765:4070 builds the lower row as a `#E8ECF3` plate at radius
+   50 with the two loud bands clipped inside it), and it is what the graphic
+   needs rather than a tidier arrangement: the avoided band's right corners are
+   rounded *in the middle of the track*, so the wedges outside that curve have to
+   show the pale ground. With the ground painted by a `rest` band beside it they
+   would show the section's `--n-75` instead, a shade too light and visible.
+
+   `overflow: hidden` against this radius is also what rounds every outer corner
+   of every band, so no band needs a radius for being first or last. */
+.row {
+  position: relative;
+  height: var(--bar-h);
+  background: #DBE1EE;
+  border-radius: var(--bar-r);
+  overflow: hidden;
+  /* The wipe. `--i` staggers the rows on top of Reveal's own `--rd`, which is
+     inherited rather than replaced so the cascade survives a fast scroll or an
+     anchor jump — a fixed delay would start both rows together the moment they
+     cross the threshold in one observer batch. */
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 1100ms var(--ease-out);
+  transition-delay: calc(var(--rd, 0s) + var(--i) * 160ms);
+}
+.chart[data-in] .row { clip-path: inset(0 0 0 0); }
+
+.band {
+  position: absolute;
+  inset-block: 0;
+  display: grid;
+  place-items: center;
+  /* The texture is screened, so the band has to be its own stacking context or
+     the blend would reach through to the page behind it. */
+  isolation: isolate;
+  overflow: hidden;
+}
+
+/* The pixel field. `.band .pix` rather than `.pix`, deliberately: `PixelCard`'s
+   own `.pixel-card` sets `position: relative` at the same single-class
+   specificity, so a lone `.pix` would win or lose on stylesheet order — which is
+   not something a CSS-module import order should be trusted to decide. */
+.band .pix {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.grid    { background: var(--blue-500); }
+.hubble  { background: var(--blue-400); }
+/* The brand green, now that it can be. This was #B5C200 for as long as the
+   texture was a screened bitmap: screen lightens, so the ground had to be set a
+   step *below* the brand value to come out at it. The pixel field composites
+   normally, so the ground is simply the token again. */
+/* The loud run ends here rather than at the track's edge, so this band closes
+   it: the right corners are rounded against the pale ground behind, which is
+   the change the new comp makes and the reason the ground moved to `.row`. */
+.avoided {
+  background: var(--green-500);
+  border-start-end-radius: var(--bar-r);
+  border-end-end-radius: var(--bar-r);
+}
+
+/* The inert stretch paints nothing now — the row's own ground is underneath it.
+   It stays in the content file as a band because its width is what places its
+   label in the middle of the pale, and because "the widths total 100" is the
+   invariant that keeps the two rows' edges honest. */
+.rest { background: transparent; }
+
+/* The comp lightens the lower row's ground a step — it is the part of the bill
+   that is gone, so it recedes further than the top row's. */
+.row + .row { background: #E8ECF3; }
+
+
+/* Sora Regular — the one place on the page that uses the display face at its
+   book weight, which is why the 400 file is loaded at all. */
+.bandLabel {
+  position: relative;
+  z-index: 1;
+  padding-inline: var(--s-3);
+  font-family: var(--font-heading);
+  font-weight: 400;
+  font-size: clamp(.875rem, 1.25vw, 1.125rem);
+  line-height: 1.4;
+  /* The lower row's pale label is two lines in the comp. `pre-line` on a `\n`
+     rather than a `<br>`: it breaks the line exactly the same way, and because
+     the newline stays a text node the accessible name still reads as one
+     sentence — which a `<br>` does not do on its own (see `ScrollRevealTitle`,
+     where the fix was to render a space alongside it). */
+  white-space: pre-line;
+  color: var(--white);
+  text-align: center;
+}
+/* `--n-900` on the green, which is the comp's own value now and fixes what was
+   a real problem: the old `#FEFFE9` was ~1.3:1 against `--green-500`. */
+.avoided .bandLabel { color: var(--n-900); }
+
+/* The inert stretches speak in the comp's blue-grey rather than white — they are
+   the state the reader is being moved away from, so they sit back. */
+.rest .bandLabel { color: #8798CC; }
+
+.axis {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  margin-top: clamp(1.5rem, 2.54vw, 2.29rem);
+}
+
+.tick {
+  flex: none;
+  color: var(--blue-700);
+  font-size: var(--t-nav);
+  line-height: 1.6;
+}
+
+.axisLine { flex: 1 1 auto; height: 1px; background: #CFCFCF; }
+
+@media (min-width: 1920px) {
+  .sec .inner { max-width: none; padding-inline: 120px; }
+}
+
+@media (max-width: 1023px) {
+  .head { flex-direction: column; }
+  .lede { flex: none; align-self: stretch; max-width: 46ch; }
+
+  /* The label column stops paying for itself below this width — 291px of a
+     1000px viewport is a third of the screen for two lines of text. The label
+     and the caption become a row above and a line below the track. */
+  .body { grid-template-columns: minmax(0, 1fr); row-gap: var(--s-6); }
+  .side { display: contents; }
+  .barLabel { max-width: 32ch; }
+  .captionWrap { order: 3; }
+  .caption { max-width: 60ch; }
+  .chart { order: 2; }
+}
+
+@media (max-width: 599px) {
+  .sec { --bar-h: clamp(88px, 22vw, 120px); --bar-r: clamp(20px, 5.5vw, 30px); }
+
+  /* The narrowest band is 20% of the track — 69px on a 375 phone — so the
+     labels are allowed to wrap rather than being hidden. "WITH HUBBLE" breaks
+     over two lines and stays readable; dropping them would take the chart's
+     only labelling with it, and there is no legend to fall back on. */
+  .bandLabel {
+    padding-inline: var(--s-1);
+    font-size: .625rem;
+    line-height: 1.25;
+    letter-spacing: .01em;
+  }
+}

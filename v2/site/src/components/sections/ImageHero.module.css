@@ -1,0 +1,185 @@
+/* 919 tall on the 1440 comp — 63.8vw, held between a floor that keeps the copy
+   off the fold on a laptop and a ceiling so the masthead doesn't turn into a
+   full screen of sky on a 27in display. The blue ground is the section's own,
+   showing in the last few pixels below the photograph exactly as the comp has
+   it, and it is also what the fade resolves to. */
+.sec {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: flex-start;
+  min-height: clamp(620px, 63.8vw, 940px);
+  background: var(--blue-700);
+  overflow: hidden;
+  /* ── The parallax ─────────────────────────────────────────────────────────
+     Three values, and the shape of them is the whole design:
+
+       --reach  how much taller than the frame the plate is. This is the only
+                one that costs anything, and it buys the crop.
+       --head   how far the image rests *above* the frame — the resting
+                composition. Spends `--reach`, never adds to it.
+       --lift   what is left, and therefore how far the image travels.
+
+     `--p` runs 0 → 1 as the section leaves (see `exitProgress`), so 0 is the
+     resting frame and is the right fallback for a no-JS render. At `--p: 1` the
+     window sits exactly on the plate's bottom edge, which is what `--reach`
+     being the sum means: the frame can never run out of photograph, and not a
+     pixel of plate is unused.
+
+     **Deriving the lift rather than declaring it is deliberate.** A nudge to
+     the resting frame is a framing decision and must not quietly tighten the
+     crop; a change of pace is a motion decision and must not quietly reframe.
+     Held this way the two cannot leak into each other — move `--head` and the
+     photograph translates, exactly, at constant scale.
+
+     That last word matters, because the obvious alternative does not work.
+     Growing the plate to make room for a bigger head is *not* a translate: the
+     plate's height is also the scale, so it zooms as well as shifts, and the
+     two partly cancel. Asked for a 15px lift of the resting frame, growing the
+     plate delivers −11.9px in the high sky, −9.2 and −6.3 at the two ends of
+     the roofline, and −3.0 at the mark. Measured, not guessed. If a framing
+     value ever needs to move, move it inside `--reach`.
+
+     ── What `--reach` costs ──
+     The extra height is what `object-fit: cover` has to fill, and because this
+     photograph is far wider than the plate (1.671 against ~1.38) the height
+     drives the scale, so every pixel of reach zooms the crop in. No way
+     around it: the asset's surplus is all horizontal, so vertical room can
+     only come from scale, and no taller original of this photograph exists.
+
+     Measured at 1440, against the 56px reach this section shipped with:
+
+       top edge   source y 41 → 39 of 1436, and `--head` is what holds it —
+                  which is why the roofline still cuts the frame where the comp
+                  cuts it.
+       sides      88.4% of the width → 82.5%, so 58px more off each edge. Sky
+                  on the left, the building's far corner on the right. This is
+                  the visible cost, and the one to weigh before spending more.
+       bottom     source y 1395 → 1304. Looks worse than it is: this section's
+                  last 400px are under `.fade` on their way to solid blue, so
+                  most of what is given up there was already going.
+
+     The reach ramps with the viewport so the crop and the differential both
+     stay put across the range. At 1440 it is 124.5, spent 43 / 81.5 — a travel
+     of ~8.9% of the section's height: enough to read as a window onto a moving
+     image rather than a box with a picture in it, and short of the register
+     where a masthead becomes something to watch instead of read. */
+  --reach: clamp(92px, 6.7vw + 28px, 128px);
+  --head: 43px;
+  --lift: calc(var(--reach) - var(--head));
+  --eyebrow-ink: var(--blue-700);
+}
+
+.media {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background: var(--blue-700);
+}
+
+.img {
+  position: absolute;
+  top: calc(var(--head) * -1);
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: calc(100% + var(--reach));
+  object-fit: cover;
+  /* The comp crops to the roofline: the building's top edge cuts the frame
+     diagonally and the Hubble mark sits low and right. Centred horizontally as
+     the comp centres it — the deeper crop the lift buys is taken evenly off
+     both edges rather than shifted, which keeps the mark where the comp puts
+     it. Above ~1780px the plate is wide enough that the width drives the crop
+     instead, and the 46% is what then holds the roofline. */
+  object-position: 50% 46%;
+  transform: translate3d(0, calc(var(--p, 0) * var(--lift) * -1), 0);
+  will-change: transform;
+}
+
+/* The hand-off to the section below. 400px on the comp, ramping with the
+   viewport, and it must resolve to a *solid* brand blue at the bottom edge —
+   any transparency left at the end shows as a seam against the next section. */
+.fade {
+  position: absolute;
+  inset: auto 0 0 0;
+  z-index: 1;
+  height: clamp(240px, 27.8vw, 400px);
+  background: linear-gradient(to bottom, rgb(8 50 180 / 0) 0%, var(--blue-700) 100%);
+  pointer-events: none;
+}
+
+.inner {
+  position: relative;
+  z-index: 2;
+  /* 166.3 to the eyebrow's cap line on the comp — clear of the nav, which sits
+     in its own fixed layer above this one. */
+  padding-block: clamp(7rem, 11.55vw, 10.4rem) 0;
+}
+
+.title {
+  margin-top: var(--s-5);
+  color: var(--blue-700);
+}
+
+/* 683 on the comp, and the comp runs this at 120% rather than the 162% body
+   copy takes elsewhere — three tight lines, so it reads as a standfirst under
+   the heading instead of as a paragraph. */
+.copy {
+  margin-top: var(--s-4);
+  max-width: 43rem;
+  color: var(--n-700);
+  font-size: var(--t-body);
+  line-height: 1.2;
+  text-wrap: pretty;
+}
+
+/* The button holds the left, the rule-link the right. The link is given the
+   comp's own share of the row (622.7 of 1280) rather than being allowed to
+   take everything left over, which would run the hairline all the way back to
+   the button and lose the gap the comp opens between them. */
+.actions {
+  display: flex;
+  align-items: center;
+  margin-top: clamp(2rem, 3.9vw, 3.5rem);
+}
+
+.more {
+  flex: 0 1 48.6%;
+  min-width: 0;
+  margin-inline-start: auto;
+  color: var(--blue-700);
+}
+
+/* Matching the sections below: above the comp's own width the wrapper is capped
+   and centred by globals.css, which from 1440 up also zeroes its gutter. A flat
+   120px puts the copy back on the page's line. `.sec` out-specifies the global
+   `.wrap`, which sets the cap and the padding at the same specificity. */
+@media (min-width: 1920px) {
+  .sec .inner {
+    max-width: none;
+    padding-inline: 120px;
+  }
+}
+
+@media (max-width: 767px) {
+  /* Content-height here, so the reach is set outright rather than off vw —
+     6.7vw of a phone would clamp to the floor anyway.
+
+     76 spent 35 / 41 is a travel of ~5.5% of the section rather than the 8.9%
+     above, and deliberately: the aspect mismatch is so wide at this width that
+     only ~27% of the photograph shows, and at that magnification 41px of travel
+     reads about as strongly as 81px does on a laptop. It is still 4x the ~10px
+     the old symmetric arrangement actually delivered here. The head carries the
+     same 15px shift as the desktop frame — it is the same photograph and the
+     same compositional decision. */
+  .sec { min-height: 0; --reach: 76px; --head: 35px; }
+  .inner { padding-block: clamp(6rem, 26vw, 8rem) clamp(14rem, 62vw, 22rem); }
+  .copy { max-width: none; }
+
+  /* The row becomes two rows: the button first, then the link. Stacked, the
+     link's hairline has nothing to span, and `RuleLink` drops it at this
+     breakpoint for exactly that reason. */
+  .actions { display: grid; gap: var(--s-5); justify-items: start; }
+  .more { flex: none; margin-inline-start: 0; }
+}

@@ -1,0 +1,328 @@
+/* The three tokens the Partnered Innovations panel is built from. They are
+   declared here, on the section, rather than on the panel because the circuit
+   run has to know where the panel's top edge is: `.flow` is lifted off the
+   section's foot by `--pi-h + --pi-pad-b`, which puts its floor on the plate.
+   One set of numbers, two consumers — they cannot drift apart, and nothing has
+   to be re-measured when the panel changes height. */
+.sec {
+  --pi-h: clamp(15rem, 21.59vw, 19.43rem);  /* 310.9 at 1440, the comp's plate */
+  --pi-gap: clamp(3rem, 7.3vw, 6.6rem);     /* 105.1 at 1440, render foot to plate */
+  /* `--pi-gap` is deliberately absent from the run's `bottom` below: it is the
+     margin *above* the plate, so it falls inside the run's box, not under it. */
+  --pi-pad-b: clamp(2rem, 4vw, 3.5rem);
+
+  position: relative;
+  background: var(--white);
+  padding-block: clamp(3.5rem, 6.9vw, 6.25rem) var(--pi-pad-b);
+  /* Clipped sideways only. `clip` is what makes the pair legal — with `hidden`
+     on one axis the other computes to `auto` and the section would scroll
+     instead of letting the run through. The head is authored above the box and
+     needs to leave it; nothing here overflows horizontally. */
+  overflow-x: clip;
+  overflow-y: visible;
+}
+/* A positive index moves the traces past the *next* section's ground, which is
+   opaque white and later in the document — at 0 the tail was painted and then
+   immediately covered. Stats' own cells answer with an index of their own, so
+   the run passes behind the blue plates rather than across them. Upward the
+   head still bleeds under the dissolve band, which carries 2/3.
+
+   The box is capped and centred rather than left at `inset: 0`, so the route's
+   1440 units land on the same 1440 the layout is capped at. Full-bleed, the two
+   only agree up to `--maxw`: past it the content stops growing and centres
+   while the svg keeps stretching, so every coordinate drifts left of the thing
+   it was authored against — at 1799 the tail sat 4px outside the stat card it
+   is supposed to run behind. Below the cap both scale with the viewport, so
+   this holds at every width.
+
+   Vertically the box runs from the section's top edge to the top of the partner
+   plate: the route's floor is the panel, not the foot of the section. `100%` on
+   an absolutely positioned box is the section's padding box, so subtracting the
+   plate and the section's own foot padding lands the floor exactly on the plate
+   at every width.
+
+   It has to be a *height*, not `bottom` + `height: auto`. An `<svg>` carrying a
+   viewBox is a replaced element with an intrinsic aspect ratio, and `auto` takes
+   that ratio in preference to the box `top` and `bottom` describe — so `bottom`
+   was quietly ignored and the floor came out at `width x 1262/1440`. At 1440
+   that is 1262, exactly the right answer for the wrong reason; at 1280 it was
+   88px short and the tail's overshoot hung in the white above the plate. Setting
+   the height outright also beats FlowLines' own `height: 100%`, which is the
+   other thing this has to win against. */
+.flow {
+  --flow-ink: var(--blue-500);
+  --flow-pulse: var(--blue-400);
+  z-index: 1;
+  left: 50%;
+  right: auto;
+  width: min(100%, var(--maxw));
+  transform: translateX(-50%);
+  top: 0;
+  height: calc(100% - var(--pi-h) - var(--pi-pad-b));
+}
+/* Same box as `.flow` — kept at --maxw so the scale stays ~1:1 and the corner
+   radii stay circular. Only the route inside it differs. */
+.flowXl {
+  --flow-ink: var(--blue-500);
+  --flow-pulse: var(--blue-400);
+  z-index: 1;
+  left: 50%;
+  right: auto;
+  width: min(100%, var(--maxw));
+  transform: translateX(-50%);
+  top: 0;
+  height: calc(100% - var(--pi-h) - var(--pi-pad-b));
+  display: none;
+}
+
+.inner { position: relative; z-index: 1; }
+
+.title { color: var(--blue-700); margin-top: var(--s-5); max-width: 13ch; }
+
+.row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: center;
+  gap: clamp(1.5rem, 3vw, 3rem);
+  margin-top: clamp(2rem, 4.2vw, 3.75rem);
+}
+.flip .copyCol { order: 2; }
+.flip .shot { order: 1; }
+
+.copyCol { max-width: 30rem; }
+.flip .copyCol { justify-self: end; }
+
+.name { color: var(--n-900); }
+
+/* The comp's blue line between the name and the copy — who the tier is for.
+   `.t-eyebrow` carries the size, weight and tracking; only the ink changes, and
+   it changes through `--eyebrow-ink` rather than `color` so the eyebrow keeps
+   owning its own cascade. The comp draws it at 12px against the system's 13 —
+   13 is the smallest step the scale has and what every other eyebrow and chip
+   on the site takes, so it stays on the scale. */
+.kicker { --eyebrow-ink: var(--blue-400); margin-top: var(--s-4); }
+
+.copy { color: var(--n-700); margin-top: var(--s-2); max-width: 40ch; }
+.actions { display: flex; flex-wrap: wrap; gap: .625rem; margin-top: var(--s-8); }
+/* A ghost button re-skinned onto a light plate, so it takes the light plate's
+   arrow: blue, not the label's grey. */
+.quiet { background: var(--n-100); color: var(--n-700); --chev-ink: var(--blue-500); backdrop-filter: none; }
+.quiet:hover { color: var(--n-900); }
+
+/* Capped to the comp's render width so the section keeps its proportion, and
+   pushed toward the outer edge of its column the way the comp sets it — the
+   two renders lean away from each other, which is what opens the diagonal the
+   circuit run travels down.
+
+   `width: 100%` is load-bearing. `justify-self` makes this box shrink-to-fit,
+   and without an explicit width it sizes to the image's *intrinsic* width —
+   which is whatever variant next/image happened to serve. That is a feedback
+   loop: a small pick shrinks the box, a smaller box justifies a smaller pick,
+   and the renders quietly settle at ~349px instead of the 496 cap. */
+.shot { position: relative; width: 100%; max-width: 31rem; justify-self: end; }
+
+/* The lit state, laid exactly over the unlit one. `inset: 0` rather than a
+   second flow item, so the row's height is set by the base render alone and the
+   two can never disagree about it.
+
+   1170ms — Reveal's 900 plus 30%, the lights coming up slowly enough to read as
+   a change of state rather than a swap. The delay is on the arriving rule only:
+   on the way out the fade starts at once, or the lights would hang around after
+   the row had left. */
+.lit {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 1170ms var(--ease-out);
+}
+.lit[data-on='true'] { opacity: 1; transition-delay: .55s; }
+
+/* ── Partnered Innovations ───────────────────────────────────────────────────
+   The blue panel that closes the section. Its wrapper is a `Reveal` with no
+   entrance of its own; everything below hangs off the `data-in` it sets, which
+   is the one trigger this needs. A panel this wide is a screen's worth of
+   content, and one `Reveal` per part would each fire on its own crossing — the
+   copy finished before the plate it sits on had arrived. */
+.partners { margin-top: var(--pi-gap); }
+
+.plate {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: var(--pi-h);
+  border-radius: var(--r-card);
+}
+
+/* The ground, as a layer of its own rather than a background on `.plate`, so it
+   can be clipped without taking the photograph with it — the cut-out stands
+   proud of the plate's top edge and a clip on the box would behead it.
+
+   Right to left, because that is the side the circuit run comes down: the tail
+   falls at x=1235 of 1440, so the charge reaches this edge first and the colour
+   follows it across. `round` keeps the leading edge on the same radius as the
+   corners, so the plate grows as a plate instead of as a rectangle that rounds
+   off at the last moment. A clip and not a scale: a scale would squash every
+   child on the way and the type would stretch back into shape as it opened. */
+.plate::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(--blue-500);
+  border-radius: inherit;
+  clip-path: inset(0 0 0 100% round var(--r-card));
+  transition: clip-path 1000ms var(--ease-out);
+  transition-delay: var(--rd, 0s);
+}
+.partners[data-in] .plate::before { clip-path: inset(0 0 0 0 round var(--r-card)); }
+
+/* 121.03% of the plate's height — the comp's 376.297 against its 310.916 — with
+   the width following from this box's own aspect rather than from a share of
+   the plate. Sized off the *height* deliberately: the plate is as wide as the
+   page and only as tall as the comp drew it, so at 1440 a width share made this
+   663 against the comp's 545 and clipped 22% of the photograph instead of 5.5%.
+   What sets how big a person should look here is the height of the panel they
+   are standing in, and that is the measure that carries across widths.
+
+   Taller than the plate and pinned to its foot, so the overhang is all at the
+   top — where the subject is — and the clip falls on the desk. The image's own
+   aspect (1.3725 against this box's 1.4483) then leaves it 5.5% deeper than the
+   box, which is the rest of the desk going.
+
+   Only the bottom-left corner is rounded: it is the one corner of this box that
+   is also a corner of the plate. */
+.figure {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  z-index: 1;
+  height: 121.03%;
+  aspect-ratio: 544.949 / 376.297;
+  overflow: hidden;
+  border-end-start-radius: var(--r-card);
+  opacity: 0;
+  transform: translate3d(0, 26px, 0);
+  transition: opacity 760ms var(--ease-out), transform 940ms var(--ease-out);
+  transition-delay: calc(var(--rd, 0s) + 400ms);
+}
+.figure img { display: block; width: 100%; height: auto; }
+.partners[data-in] .figure { opacity: 1; transform: none; }
+
+/* Both measures are shares of the plate, which is what the comp draws: the copy
+   starts at 639.37 of 1182.74 and runs 484 wide, leaving a 5% margin at the
+   right. Percentages rather than a grid track because the figure beside it is
+   out of flow — there is no second track for a track list to describe. */
+.pCopy {
+  position: relative;
+  z-index: 2;
+  margin-inline-start: 54.06%;
+  width: 40.92%;
+}
+
+/* 28px on `--ease-out` is Reveal's own `up`, re-timed. The delays are added to
+   `--rd` rather than replacing it, so the cascade survives a fast scroll or an
+   anchor jump — a fixed delay would start all four together the moment the
+   panel crossed the threshold in one observer batch. They start after the wipe
+   has opened enough of the plate to sit on. */
+.pTitle, .pKicker, .pBody, .pAction {
+  opacity: 0;
+  transform: translate3d(0, 28px, 0);
+  transition: opacity 620ms var(--ease-out), transform 820ms var(--ease-out);
+}
+.pTitle  { transition-delay: calc(var(--rd, 0s) + 240ms); }
+.pKicker { transition-delay: calc(var(--rd, 0s) + 320ms); }
+.pBody   { transition-delay: calc(var(--rd, 0s) + 380ms); }
+.pAction { transition-delay: calc(var(--rd, 0s) + 440ms); }
+.partners[data-in] .pTitle,
+.partners[data-in] .pKicker,
+.partners[data-in] .pBody,
+.partners[data-in] .pAction { opacity: 1; transform: none; }
+
+.pTitle  { color: var(--white); }
+.pKicker { --eyebrow-ink: var(--blue-200); margin-top: var(--s-4); }
+/* 4px, not the rows' 8: the panel's caption and its sentence are one block in
+   the comp, set tighter than the same pair on white. */
+.pBody   { color: var(--n-200); margin-top: var(--s-1); max-width: 22.5rem; }
+.pAction { margin-top: var(--s-6); }
+
+/* Extra-large displays, matching every other section. The global `wrapIn` caps
+   this at --maxw (1440) and centres it, and from 1440 up globals.css zeroes
+   every wrapper's inline padding — so at 2560 the heading sat 560px in from the
+   edge. Full width on a flat 120px gutter puts it on the page's own line.
+
+   `.sec` is in the selector to out-specify the global `.wrapIn`, which sets the
+   cap and the padding at the same single-class specificity. */
+@media (min-width: 1920px) {
+  .sec .inner {
+    max-width: none;
+    padding-inline: 120px;
+  }
+
+  .flow { display: none; }
+  .flowXl { display: block; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lit { transition: none; }
+  .plate::before { clip-path: none; transition: none; }
+  .figure, .pTitle, .pKicker, .pBody, .pAction {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+.flip .shot { justify-self: start; }
+.shot img { width: 100%; height: auto; }
+
+@media (max-width: 1023px) {
+  .row { grid-template-columns: 1fr; }
+  .shot, .flip .shot { justify-self: center; }
+  .flip .copyCol { order: 1; justify-self: start; }
+  .flip .shot { order: 2; }
+  .copyCol { max-width: none; }
+
+  /* The panel stacks at the same width the rows do, and for the same reason:
+     below this there is no room for a person and a paragraph side by side. The
+     side-by-side arrangement was tried down to 768 and the photograph ran 113px
+     into the copy at 820 — the figure is sized off the plate's *height*, which
+     stops shrinking at the `--pi-h` floor, while the plate's width keeps going.
+     Column order is the figure then the copy, which is the desktop reading
+     order too: the person, then the pitch.
+
+     The plate's height stops being a number and becomes a floor. `--pi-h` is
+     the circuit run's `bottom` as well, so if the two disagreed the traces
+     would end in the white above the plate instead of under it — erring long is
+     the safe direction, since a floor set too low only buries more of the
+     tail. */
+  .sec { --pi-h: 34rem; }
+
+  .plate {
+    height: auto;
+    min-height: var(--pi-h);
+    flex-direction: column;
+    align-items: stretch;
+    overflow: hidden;
+  }
+
+  /* Back into flow, so the column decides the plate's height rather than the
+     plate having to reserve room for an absolute child. `aspect-ratio: auto`
+     hands the height back to the image; the `min()` keeps the subject a person
+     standing in a panel rather than a face filling one, at 390 and at 1023
+     alike. */
+  .figure {
+    position: relative;
+    align-self: flex-start;
+    width: min(72%, 26rem);
+    height: auto;
+    aspect-ratio: auto;
+    margin-top: clamp(1.5rem, 5vw, 2.5rem);
+    border-end-start-radius: 0;
+  }
+
+  .pCopy {
+    margin-inline-start: 0;
+    width: auto;
+    padding: clamp(1.5rem, 4vw, 2.25rem) clamp(1.25rem, 4vw, 2.5rem) clamp(1.75rem, 4vw, 2.5rem);
+  }
+  .pBody { max-width: 34rem; }
+}

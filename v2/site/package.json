@@ -1,0 +1,28 @@
+{
+  "name": "hubble-2026",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "next dev -p 3210",
+    "build": "next build --no-lint",
+    "start": "next start -p 3210",
+    "check": "NEXT_DIST_DIR=.next-check next build --no-lint",
+    "normalise-sequence": "node scripts/normalise-sequence.mjs"
+  },
+  "dependencies": {
+    "next": "15.5.4",
+    "react": "19.1.1",
+    "react-dom": "19.1.1",
+    "gsap": "^3.13.0",
+    "lenis": "^1.3.14",
+    "three": "^0.180.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "@types/three": "^0.180.0",
+    "typescript": "^5.7.0"
+  }
+}

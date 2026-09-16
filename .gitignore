@@ -1,0 +1,73 @@
+# ─── Dependencies ────────────────────────────────────────────────────────────
+node_modules/
+.pnp
+.pnp.*
+
+# ─── Next.js build output ────────────────────────────────────────────────────
+# .next-check is the isolated dist dir used by `npm run check` so a production
+# build never clobbers a running dev server. Both are regenerable.
+.next/
+.next-check/
+out/
+build/
+*.tsbuildinfo
+next-env.d.ts
+
+# ─── Secrets ─────────────────────────────────────────────────────────────────
+# .env.example is committed as the template; every real value stays local.
+.env
+.env.local
+.env.*.local
+.env.production
+.env.development
+
+# ─── Not in this repo (see docs/ASSETS.md) ───────────────────────────────────
+# All of the below lives in the sibling folder ../Hubble 2026 Masters/.
+# These patterns are a guard: dropping a render export or a client deliverable
+# back into the tree must not be able to reach a commit by accident.
+
+# Uncompressed render masters. The site ships the encoded webp sets in
+# v2/site/public/sequence/ — these are the originals they were made from.
+**/Intro/
+**/product sequence/
+*.zip
+
+# Client-supplied material.
+**/Docs/
+**/*.fig
+**/reference/calc/
+**/Electricity Calculator/
+
+# ON.energy placeholder artwork — removed from the repo. The landing hero
+# shares Hubble's own desktop render across both variants until a real mobile
+# cut is rendered. Do not restore these frames.
+v2/site/public/sequence/mobile/
+**/sequence-old-onenergy/
+
+# Internal working record.
+context/_transcripts/
+context/_backup-*/
+context/reference-on-energy.md
+context/reference-cantor8.md
+
+# ─── macOS / editor noise ────────────────────────────────────────────────────
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+*.swp
+*~
+~$*
+
+# ─── Logs & caches ───────────────────────────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.eslintcache
+.turbo/
+.vercel/
+
+# ─── Local tooling scratch ───────────────────────────────────────────────────
+.claude/settings.local.json

@@ -1,0 +1,41 @@
+{
+  "eyebrow": "FIVE WAYS WE PUT INTELLIGENT ENERGY TO WORK",
+  "title": "Every business asks something different",
+  "items": [
+    {
+      "num": "01",
+      "title": "Energy Solutions",
+      "promise": "Built around your business",
+      "body": "Generation, storage, hardware, software and Cloudlink built around your operational realities, energy profile and growth plans, protecting continuity and strengthening control.",
+      "href": "/solutions/energy-solutions"
+    },
+    {
+      "num": "02",
+      "title": "Energy Arbitrage",
+      "promise": "Make timing work harder.",
+      "body": "Storage and intelligent software responsive to changing energy prices, charging when power costs less and deploying it for greater commercial value and new income potential.",
+      "href": "/solutions/energy-arbitrage"
+    },
+    {
+      "num": "03",
+      "title": "Wheeling",
+      "promise": "Power where business happens.",
+      "body": "Remotely generated renewable energy connected to your operations when needed, extending your energy strategy beyond a single site, for cleaner supply and greater control.",
+      "href": "/solutions/wheeling"
+    },
+    {
+      "num": "04",
+      "title": "Power Purchase Agreements",
+      "promise": "Secure energy. Preserve capital.",
+      "body": "Finance, delivery and management of purpose-built energy systems through long-term agreements, enabling predictable energy costs, dependable performance, and retained capital.",
+      "href": "/solutions/ppa"
+    },
+    {
+      "num": "05",
+      "title": "Service Level Agreements",
+      "promise": "Performance that keeps delivering.",
+      "body": "Cloudlink-led monitoring, maintenance and optimisation to identify issues early, protect availability and adapt the system as your needs evolve, enabling sustained performance.",
+      "href": "/solutions/sla"
+    }
+  ]
+}

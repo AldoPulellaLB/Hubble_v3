@@ -36,8 +36,10 @@ type Phase = 'drawing' | 'closing' | 'opening' | 'gone'
  * site behind it.
  *
  * The line carries a trail of `PixelCard`'s pixels — the same effect as the
- * Stats and meter cards — and the standing line, right-aligned to the leading
- * edge. At 99% both fade off; at 100% the halves part.
+ * Stats and meter cards. The standing line sits **centred** above it and fades
+ * in and out on its own clock: riding the leading edge was tried first and is
+ * simply not readable, because the text is moving the whole time it is on
+ * screen. At 99% the label and trail fade off; at 100% the halves part.
  *
  * Three things it has to get right, each of which is a way this pattern
  * normally breaks:
@@ -59,33 +61,6 @@ export default function Preloader() {
      jump and would leave the line at 0 and then 1. */
   const [p, setP] = useState(0)
   const done = useRef(false)
-
-  /* The label is right-aligned to the leading edge, so on a narrow screen it
-     runs off the left of the viewport: measured at -298px of a 301px label on
-     a 375 phone, at full opacity, for the first 1.2s. Both fixes below need
-     its real width, and a fraction would only know today's copy — so measure
-     it, and re-measure when the webfont swaps in and on resize. */
-  const labelRef = useRef<HTMLSpanElement>(null)
-  const [labelW, setLabelW] = useState(0)
-  const [vw, setVw] = useState(0)
-
-  useEffect(() => {
-    const el = labelRef.current
-    if (!el) return
-    const measure = () => { setLabelW(el.offsetWidth); setVw(window.innerWidth) }
-    measure()
-    const ro = new ResizeObserver(measure)
-    ro.observe(el)
-    window.addEventListener('resize', measure)
-    document.fonts?.ready.then(measure)
-    return () => { ro.disconnect(); window.removeEventListener('resize', measure) }
-  }, [])
-
-  /* Show it only once the line is actually long enough to carry it. Before
-     that the label would either clip off-screen or stick out past the end of
-     the line it is supposed to be riding. Same threshold as the `max()` in
-     the stylesheet, so the two cannot disagree. */
-  const labelFits = labelW > 0 && vw > 0 && p * vw >= labelW + 8
 
   useEffect(() => {
     const mountedAt = performance.now()
@@ -204,7 +179,7 @@ export default function Preloader() {
   return (
     <div
       className={`${s.root} ${s[phase]}`}
-      style={{ ['--p' as string]: p, ['--labelw' as string]: `${labelW}px` }}
+      style={{ ['--p' as string]: p }}
       role="status"
       aria-live="polite"
       aria-label="Loading Hubble Energy"
@@ -222,12 +197,7 @@ export default function Preloader() {
           </div>
         </div>
         <span className={s.line} />
-        <span
-          ref={labelRef}
-          className={`${s.label} ${labelFits ? s.labelIn : ''}`}
-        >
-          {PRELOADER_LABEL}
-        </span>
+        <span className={s.label}>{PRELOADER_LABEL}</span>
       </div>
     </div>
   )

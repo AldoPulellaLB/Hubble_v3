@@ -87,24 +87,27 @@
 .pix { position: absolute; inset: 0; }
 
 /* ── The label ───────────────────────────────────────────────────────────
-   Rides the leading edge, right-aligned to it. The brand-blue ground is not
-   decoration: it is what stops the pixel trail running underneath the text,
-   which is the relationship in the comp. */
+   Centred, and static. It was first written to ride the leading edge of the
+   line, right-aligned to it — which looks right in a still and is unreadable
+   in motion, because the text travels the full width of the page during the
+   only seconds it is on screen. Holding it still is the whole point: it fades
+   in, is read, and fades out.
+
+   The brand-blue ground with padding either side keeps it legible where the
+   pixel trail passes behind it. */
 .label {
   position: absolute;
   bottom: 5px;
-  /* `max()` is the hard guard: the label can never be pushed past the left
-     edge of the viewport however short the line is. */
-  left: max(calc(var(--p, 0) * 100%), var(--labelw, 0px));
-  transform: translateX(-100%);
-  opacity: 0;
+  left: 50%;
+  transform: translateX(-50%);
   height: 20px;
   display: flex;
   align-items: center;
-  padding-left: 14px;
+  padding-inline: 16px;
   background: var(--blue-700);
   color: var(--white);
   white-space: nowrap;
+  opacity: 0;
 
   font-family: var(--font-body);
   font-size: var(--t-xs);
@@ -116,16 +119,14 @@
   line-height: 1.2;
 }
 
-/* On a phone the label is 80% of the viewport at the desktop setting, so it
-   only clears its own width in the last fifth of the draw and barely appears.
-   One step down in size and tracking brings that forward to about 60%. 11px
-   is the floor here — below it Montserrat stops being a label a reader can
-   use. */
+/* At the desktop setting the label plus its padding is 329px, which overflows
+   a 320px phone. One step down in size and tracking clears it. 11px is the
+   floor — below that Montserrat stops being a label a reader can use. */
 @media (max-width: 640px) {
   .label {
     font-size: 11px;
     letter-spacing: 0.08em;
-    padding-left: 10px;
+    padding-inline: 12px;
   }
 }
 
@@ -133,16 +134,19 @@
    A long ease-out. It covers most of its width early and then creeps, which
    reads as progress against an unknown total. */
 .drawing .line,
-.drawing .band,
-.drawing .label {
+.drawing .band {
   transition:
     transform 900ms var(--ease-out),
-    width 900ms var(--ease-out),
-    left 900ms var(--ease-out);
+    width 900ms var(--ease-out);
 }
 
-/* Set by the component once the line is long enough to carry the label. */
-.drawing .labelIn { opacity: 1; transition: opacity 420ms var(--ease-out); }
+/* Fades up shortly after the panel lands, then simply holds until `closing`
+   takes it back out. The delay lets the line get moving first, so the label
+   arrives onto something rather than with it. */
+.drawing .label {
+  opacity: 1;
+  transition: opacity 700ms var(--ease-out) 300ms;
+}
 
 /* ── Phase: closing — 99% to 100% ────────────────────────────────────────
    The line completes its last percent while the label and the trail fade off
@@ -184,10 +188,9 @@
 @media (prefers-reduced-motion: reduce) {
   .line { transform: scaleX(1); }
   .band { display: none; }
-  .label { left: 100%; }
+  .drawing .label { opacity: 1; transition: none; }
   .drawing .line,
   .drawing .band,
-  .drawing .label,
   .closing .line { transition: none; }
   .opening .line,
   .opening .label,

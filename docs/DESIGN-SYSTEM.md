@@ -663,9 +663,9 @@ that amount; only the render is meant to be consumed.
 The site's entry. A field of `--blue-700` split by a white 2px line that draws
 left to right while the first view loads. The line carries a trail of
 `PixelCard`'s pixels — the same effect as the Stats and meter cards — and the
-standing line **CONNECTED INTELLIGENT ENERGY**, right-aligned to the leading
-edge. At 99% the label and the trail fade off; at 100% the line completes and
-the two blue halves part from it, opening the page.
+standing line **CONNECTED INTELLIGENT ENERGY** sits centred above it, fading in
+and holding still. At 99% the label and the trail fade off; at 100% the line
+completes and the two blue halves part from it, opening the page.
 
 Phases are `drawing → closing → opening → gone`. The draw creeps to a **0.99
 ceiling** over 3.4s; `closing` is the 99→100 fade, `opening` the parting.
@@ -717,25 +717,28 @@ with a hard left end.
 The label's brand-blue ground is not decoration — it is what stops the pixels
 running underneath the text, which is the relationship in the comp.
 
-### The label has to be measured, not guessed
+### The label is centred and static — and that was the second attempt
 
-It is right-aligned to the leading edge, so early in the draw it runs off the
-left of the viewport: measured at **-298px of a 301px label on a 375 phone, at
-full opacity, for the first 1.2s**. A fraction would only know today's copy, so
-the component measures the label (`ResizeObserver` + `fonts.ready` + resize) and
-publishes `--labelw`. Two things use it, and they share one threshold so they
-cannot disagree:
+It was first written to ride the leading edge of the line, right-aligned to it.
+That looks correct in a still and **is not readable in motion**: the text
+travels the full width of the page during the only two seconds it is on screen,
+so there is no moment at which a reader can settle on it. Aldo's note was "the
+title text is not working animating across the page."
 
-- CSS `left: max(calc(var(--p) * 100%), var(--labelw))` — the hard guard, so it
-  can never be pushed off-screen.
-- `labelFits` in the component — the label is only painted once the line is
-  genuinely long enough to carry it, so it never sticks out past the end of the
-  line it is supposed to be riding.
+It is now `left: 50%` with a `translateX(-50%)`, fading up 300ms after the panel
+lands and holding until `closing` takes it out. Verified across the whole
+sequence: its centre sat on the page centre — 742 against 742 — in every sample.
 
-Below 640px the label steps down to 11px / 0.08em tracking. At the desktop
-setting it is 80% of a phone's width and would only clear its own width in the
-last fifth of the draw; the step-down brings that forward to about 60%. 11px is
-the floor — below that Montserrat stops being a label a reader can use.
+Holding it still also deleted the machinery the moving version needed: a
+`ResizeObserver` measuring the label, a published `--labelw`, a CSS `max()`
+guard so it could not be pushed off-screen, and a `labelFits` gate so it was not
+painted before the line was long enough to carry it. All of that existed only
+because it moved.
+
+The brand-blue ground with padding either side stays — it is what keeps the
+label legible where the pixel trail passes behind it. Below 640px the label
+steps down to 11px / 0.08em tracking: at the desktop setting it plus its padding
+is 329px, which overflows a 320px phone.
 
 ### Two things that bit during the build
 
@@ -751,9 +754,10 @@ single `lenis?.stop()` there silently no-ops and the page scrolls behind the
 panel. Verified: `isStopped` stayed `false`. The `documentElement.overflow` lock
 masks it enough to look fine, which is what makes it easy to miss.
 
-Measured lifecycle (desktop, dev): draw runs to the 0.99 ceiling with the label
-and trail tracking the edge, `closing` at ~1.2s fades both over 400ms, `opening`
-at ~1.8s parts the halves, node removed at ~3.0s.
+Measured lifecycle (desktop, dev): the label fades up at 300ms over 700ms and
+holds; the draw runs to its 0.99 ceiling with the trail tracking the edge;
+`closing` at ~1.4s fades label and trail over 400ms; `opening` at ~2.0s parts
+the halves; node removed at ~3.1s.
 
 ## The hero sequence
 

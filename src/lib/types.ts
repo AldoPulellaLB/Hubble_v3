@@ -2,17 +2,20 @@ export type MegaItem = {
   title: string
   copy: string
   href: string
-  /** The comp hangs a named project off two of the Product Types rows. Its own
-   *  link, not the row's — so it is a sibling target rather than nested, which
-   *  an anchor inside an anchor would be. */
-  chip?: { label: string; href: string }
 }
 
-export type MegaColumn = {
+/** A labelled run of rows — a heading, its note, and the rows under them. */
+export type MegaGroup = {
   label: string
   note: string
   items: MegaItem[]
-  footnote?: string
+}
+
+/** A column is a list of groups, not a single labelled list: `1816:10` stacks
+ *  two under one another in the left column ("Buy Hubble Products" over "Build
+ *  a Hubble Solution", a rule between them) and gives the right column one. */
+export type MegaColumn = {
+  groups: MegaGroup[]
 }
 
 export type Mega = {

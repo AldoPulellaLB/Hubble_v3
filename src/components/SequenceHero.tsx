@@ -37,7 +37,9 @@ type Props = {
   poster: string
   scrollHint: string
   primary: { label: string; href: string }
-  secondary: { label: string; href: string }
+  /** The ghost button beside the primary. Omit it and the hero runs on the
+   *  primary alone — the landing page does, high voltage still carries one. */
+  secondary?: { label: string; href: string }
 }
 
 const MOBILE_BREAK = 834
@@ -261,7 +263,9 @@ export default function SequenceHero({
             {/* `light`, the nav bar's own treatment: white plate, blue label —
                 and the variant already carries a blue chevron. */}
             <Button href={primary.href} variant="light">{primary.label}</Button>
-            <Button href={secondary.href} variant="ghost">{secondary.label}</Button>
+            {secondary && (
+              <Button href={secondary.href} variant="ghost">{secondary.label}</Button>
+            )}
           </div>
         </div>
 

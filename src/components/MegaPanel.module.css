@@ -14,6 +14,20 @@
   right: var(--frame);
   z-index: 20;
   pointer-events: none;
+  /* The plate's shadow, and it has to live out here as a filter rather than on
+     `.sheet` as a `box-shadow`. `clip-path` clips an element's shadow along with
+     everything else it paints, and the plate's open state is `inset(0)` — flush
+     with its own border box — so a `box-shadow` there is cut off in full and
+     never draws. That is why the panel has never had one.
+
+     `drop-shadow` on the wrapper reads the child's *rendered* result, which is
+     the clipped plate, so the shadow is the shape of however much of the plate
+     is currently showing and grows with it as it opens. No second state is
+     needed, and none would work: the shadow cannot key off `.open`, because
+     that class is dropped the moment the panel starts closing and the shadow
+     would vanish while the plate was still on screen. Closed, the plate is
+     clipped to nothing and paints nothing, so this costs nothing. */
+  filter: drop-shadow(15px 15px 80px rgba(0, 0, 0, .40));
 }
 .open { pointer-events: auto; }
 
@@ -38,8 +52,8 @@
    own, independently.
 
    `round var(--r-panel)` keeps the corners correct at every step of the
-   expansion. The shadow is clipped with the plate, which is right: the plate's
-   shadow should grow with the plate. */
+   expansion. The shadow should grow with the plate, which is exactly why it is
+   not here: see the `drop-shadow` on `.mega`. */
 /* Two columns and two rows: the heading spans the top, and the three text
    columns and the promo share the row under it. That shared row is what puts
    the promo card's top edge on the column labels' — structurally, rather than
@@ -56,7 +70,6 @@
   padding: 32px;
   border-radius: var(--r-panel);
   background: var(--white);
-  box-shadow: 0 24px 60px rgb(8 22 60 / .18);
   clip-path: inset(0 0 100% 0 round var(--r-panel));
   opacity: 0;
   transition: clip-path var(--mega-out) var(--ease-out),

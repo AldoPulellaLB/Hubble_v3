@@ -16,7 +16,6 @@ type Home = {
   hero: {
     scrollHint: string
     primary: { label: string; href: string }
-    secondary: { label: string; href: string }
     sequence: { frames: FrameCount; poster: string }
     beats: Beat[]
   }
@@ -41,7 +40,6 @@ export default function HomePage() {
         beats={home.hero.beats}
         scrollHint={home.hero.scrollHint}
         primary={home.hero.primary}
-        secondary={home.hero.secondary}
       />
 
       <Statement {...home.statement} />

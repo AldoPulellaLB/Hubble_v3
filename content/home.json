@@ -4,12 +4,8 @@
     "title": "Energy that works for you.",
     "copy": "Across a hundred sites or at home, Hubble Energy is designed around what you need it to do, through an integrated system that responds, performs and keeps contributing long after installation.",
     "primary": {
-      "label": "Calculate your savings",
+      "label": "Talk to an expert",
       "href": "/calculate-your-savings"
-    },
-    "secondary": {
-      "label": "Explore",
-      "href": "/solutions"
     },
     "scrollHint": "Scroll to explore",
     "sequence": {
@@ -33,7 +29,7 @@
         "frame": 295,
         "eyebrow": "BUILT FOR AFRICAN OPERATING REALITY",
         "title": "Energy that works anywhere.",
-        "copy": "We design around actual loads, unstable grids, commercial pressures and changing needs across the African continent, with an active presence and back-up service on the ground."
+        "copy": "From home to industry, we design intelligent energy solutions around what you need, keeping the power on, costs down and your energy working harder.Sub-copy for Energy that works as one: When storage, software and service work as one integrated system, costs are reduced, continuity is protected and energy is turned into a performing asset."
       }
     ]
   },
@@ -52,79 +48,42 @@
         "YOUR POWER CLEAN"
       ]
     },
-    "copy": "Generation, storage, hardware, software and Cloudlink built around your operational realities, energy profile and growth plans, protecting continuity and strengthening control."
+    "copy": "Generation, storage, hardware, software and Cloudlink built around your operational realities, energy profile and growth plans, protecting continuity, lowering costs, and strengthening control."
   },
   "howWeWork": {
-    "eyebrow": "How we put intelligent energy to work",
-    "title": "Every business asks\nsomething different\nof energy.",
-    "process": {
-      "title": "Our process",
-      "steps": [
-        {
-          "icon": "insight",
-          "title": "Insight",
-          "copy": "Assess and understand your energy use, needs and goals"
-        },
-        {
-          "icon": "integration",
-          "title": "Integration",
-          "copy": "Design an integrated, end to end solution"
-        },
-        {
-          "icon": "innovation",
-          "title": "Innovation",
-          "copy": "Add value through proprietary software/ systems"
-        },
-        {
-          "icon": "installation",
-          "title": "Installation",
-          "copy": "Install and commission across a single or multiple sites"
-        },
-        {
-          "icon": "impact",
-          "title": "Impact",
-          "copy": "Monitor and manage the system to your commercial advantage"
-        }
-      ]
-    },
+    "eyebrow": "TWO WAYS TO WORK WITH HUBLLE",
+    "title": "Choose how Hubble\nworks for you.",
+    "copy": "Buy the technology you need. Or let us design an energy solution around what you want to achieve.",
     "options": {
       "title": "Your options",
       "items": [
         {
           "num": "01",
-          "title": "Product ecosystem",
-          "kicker": "Proven technology that’s built to perform",
-          "copy": "Proven, ready-to-deploy energy products for commercial, industrial, small business and home, each one part of the same intelligent system, so performance, monitoring and support come standard.",
+          "title": "Buy Hubble products",
+          "kicker": "The technology you need, ready to go.",
+          "copy": "Choose from our proven range of batteries, inverters and energy technology for home, small business, commercial and industrial applications.",
+           "footnote": "Proven products. Hubble technology. Service and support.",
           "primary": {
-            "label": "See our products",
+            "label": "Explore our products",
             "href": "/products"
           },
           "secondary": {
-            "label": "Let’s talk",
+            "label": "Let’s Connect",
             "href": "/contact"
           }
         },
         {
           "num": "02",
-          "title": "Configured solutions",
-          "kicker": "Designed around what you need it to deliver",
-          "blocks": [
-            {
-              "title": "Turnkey projects",
-              "copy": "You own the hardware; we design, commission, service and support it.(See it in action: [Aspen](/projects))"
-            },
-            {
-              "title": "Funded partnerships",
-              "copy": "We finance the hardware through asset-based finance, .\nand deliver the same design, commissioning and support.\n(See it in action: [Idwala](/projects))"
-            }
-          ],
-          "footnote": "Both approaches allow you to benefit from energy arbitrage and wheeling.",
+          "title": "Build a Hubble solution",
+          "kicker": "The energy outcome you need, designed around you.",
+          "copy": "We assess your energy needs and configure the right combination of solar, inverter, battery storage, intelligent energy management, arbitrage and wheeling.",
+          "footnote": "Designed, commissioned, monitored and supported by Hubble.",
           "primary": {
-            "label": "See our solutions",
+            "label": "Configure a solution",
             "href": "/contact"
           },
           "secondary": {
-            "label": "Let’s talk",
+            "label": "Let’s Connect",
             "href": "/contact"
           }
         }
@@ -211,7 +170,7 @@
     "partners": {
       "title": "Partnered Innovations",
       "kicker": "For channel & EPC partners, engineers, investors",
-      "copy": "Intelligent energy with insight, integration, innovation and impact built in.",
+      "copy": "Proof that's always visible: The system demonstrates the credibility and integration capability you're putting your name behind.",
       "image": "/images/partners/partnered-innovations.webp",
       "cta": {
         "label": "Become a partner",

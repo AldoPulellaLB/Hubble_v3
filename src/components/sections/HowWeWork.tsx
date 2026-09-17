@@ -38,7 +38,14 @@ type Option = {
 type Props = {
   eyebrow: string
   title: string
-  process: { title: string; steps: Step[] }
+  /** The section's lead paragraph. Optional, and deliberately so: `load` casts
+   *  the JSON unchecked, so a required key the content file does not carry
+   *  ships as an empty `<p>` — the bug the footer's `sub` records. */
+  copy?: string
+  /** The five-step row. Omit it and the section is the options half alone —
+   *  which also drops the wider seam above "Your options", since that gap was
+   *  measuring the step row to the heading and there is no step row left. */
+  process?: { title: string; steps: Step[] }
   options: { title: string; items: Option[] }
 }
 
@@ -79,7 +86,7 @@ type Props = {
  * tightly staggered than the entrance, per the house contract (an exit runs
  * ~60-70% of its enter; a reader leaving has already decided).
  */
-export default function HowWeWork({ eyebrow, title, process, options }: Props) {
+export default function HowWeWork({ eyebrow, title, copy, process, options }: Props) {
   return (
     <section className={`on-light ${s.sec}`} aria-labelledby="how-we-work-title">
       <div className={`wrap ${s.inner}`}>
@@ -88,35 +95,40 @@ export default function HowWeWork({ eyebrow, title, process, options }: Props) {
           <h2 id="how-we-work-title" className={`t-h2 ${s.title}`}>
             <ScrollRevealTitle>{title}</ScrollRevealTitle>
           </h2>
+          {copy ? <p className={`t-lead ${s.lead}`}>{emphasise(copy)}</p> : null}
         </Reveal>
 
         {/* ── Our process ─────────────────────────────────────────────── */}
-        <Reveal variant="mask" className={s.subHead} repeat>
-          <h3 id="our-process" className={`t-h3 ${s.subTitle}`}>{process.title}</h3>
-        </Reveal>
+        {process && (
+          <>
+            <Reveal variant="mask" className={s.subHead} repeat>
+              <h3 id="our-process" className={`t-h3 ${s.subTitle}`}>{process.title}</h3>
+            </Reveal>
 
-        <Reveal variant="none" className={s.processWrap} amount={0.12} repeat>
-          <ol className={s.steps} aria-labelledby="our-process">
-            {process.steps.map((step, i) => (
-              <li key={step.title} className={s.step} style={{ ['--i' as string]: i }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  className={s.stepIcon}
-                  src={`${ICON_DIR}${ICONS[step.icon]}`}
-                  alt=""
-                  width={48}
-                  height={48}
-                  aria-hidden="true"
-                />
-                <h4 className={`t-h5 ${s.stepName}`}>{i + 1}. {step.title}</h4>
-                <p className={`t-body ${s.stepCopy}`}>{step.copy}</p>
-              </li>
-            ))}
-          </ol>
-        </Reveal>
+            <Reveal variant="none" className={s.processWrap} amount={0.12} repeat>
+              <ol className={s.steps} aria-labelledby="our-process">
+                {process.steps.map((step, i) => (
+                  <li key={step.title} className={s.step} style={{ ['--i' as string]: i }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      className={s.stepIcon}
+                      src={`${ICON_DIR}${ICONS[step.icon]}`}
+                      alt=""
+                      width={48}
+                      height={48}
+                      aria-hidden="true"
+                    />
+                    <h4 className={`t-h5 ${s.stepName}`}>{i + 1}. {step.title}</h4>
+                    <p className={`t-body ${s.stepCopy}`}>{step.copy}</p>
+                  </li>
+                ))}
+              </ol>
+            </Reveal>
+          </>
+        )}
 
         {/* ── Your options ────────────────────────────────────────────── */}
-        <Reveal variant="mask" className={`${s.subHead} ${s.optionsHead}`} repeat>
+        <Reveal variant="mask" className={`${s.subHead} ${process ? s.optionsHead : ''}`} repeat>
           <h3 id="your-options" className={`t-h3 ${s.subTitle}`}>{options.title}</h3>
         </Reveal>
 

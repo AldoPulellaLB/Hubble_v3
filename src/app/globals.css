@@ -152,7 +152,14 @@ body {
   line-height: var(--lh-body);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  overflow-x: hidden;
+  /* `clip`, not `hidden`. A `hidden` on one axis coerces the other from
+     `visible` to `auto`, which makes the body a scroll container — and a
+     sticky descendant then sticks to *that* box, which never scrolls, so the
+     hero's pin silently stops holding. Chromium's viewport propagation hides
+     the mistake; WebKit does not. `clip` does the same job of stopping the
+     full-bleed sections from opening a horizontal scrollbar without turning
+     the body into a scroller. */
+  overflow-x: clip;
 }
 img, svg, video, canvas { display: block; max-width: 100%; }
 button, input, select, textarea { font: inherit; color: inherit; }

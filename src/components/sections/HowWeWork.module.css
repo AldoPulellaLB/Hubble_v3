@@ -22,10 +22,16 @@
 .title {
   color: var(--blue-700);
   margin-top: var(--s-5);
-  /* No `max-width`: the three lines are forced with `\n` in the content file,
-     which is the only thing `.t-h2`'s `text-wrap: balance` cannot override. A
+  /* No `max-width`: the lines are forced with `\n` in the content file, which
+     is the only thing `.t-h2`'s `text-wrap: balance` cannot override. A
      measure here would fight them. */
 }
+
+/* The section's lead paragraph. `--n-700` and a 42ch measure are the pairing
+   CloudLink's intro takes on its light ground — this is the same slot under the
+   same `.t-h2`, so it reads in the same voice. `.copy` further down is the
+   option cards' own, at a much narrower measure, which is why this is not it. */
+.lead { color: var(--n-700); margin-top: var(--s-5); max-width: 42ch; --em-ink: var(--n-900); }
 
 /* ── Subheadings ─────────────────────────────────────────────────────────── */
 
@@ -188,11 +194,33 @@
 
 .cards {
   display: grid;
-  /* The comp's 439 : 831 of a 1280 row, expressed as shares so the gap comes
-     out of the pair rather than off the end. */
-  grid-template-columns: 439fr 831fr;
-  gap: 10px;
+  /* An even pair. The comp draws 439 : 831, but the two cards carry the same
+     three parts and the same weight of argument, and at 439 card 01's copy ran
+     a line longer than card 02's off nothing but the narrower measure.
+     `minmax(0, 1fr)` rather than `1fr`: a bare `1fr` floors at min-content, so a
+     long unbroken string in either card would push the column past its share. */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  /* Head, body, actions — three rows the *pair* shares, not three each. Both
+     cards subgrid onto these, which is what makes the numerals sit on one line,
+     the kickers on the next and the buttons on a common foot. Before this each
+     card was a centred flex column, so a card whose copy ran a line longer
+     pushed its own head up and its own buttons down, independently of the other.
+
+     The last row takes the slack and the buttons align to its end, so the foot
+     is the foot of the taller card — which is card 01, the one this was asked
+     to match. */
+  grid-template-rows: auto auto 1fr;
+  column-gap: 10px;
+  /* The rhythm `.cardIn` used to carry as its flex `gap`. It moves here because
+     the rows are the parent's now; the value is unchanged. */
+  row-gap: clamp(1.5rem, 2.85vw, 2.5625rem);
   align-items: stretch;
+  /* The comp's 487, and it belongs to the row owner. Neither card can carry it
+     any more: both are subgrids, and a subgrid takes its height from the tracks
+     rather than giving one to them, so the `min-height` that used to sit on the
+     plate was quietly doing nothing and the pair settled at 454. Here the slack
+     lands in the third row, which is the one the buttons hang off the end of. */
+  min-height: 487px;
   list-style: none;
   margin: clamp(1.5rem, 2.4vw, 2.125rem) 0 0;
   padding: 0;
@@ -256,16 +284,26 @@
 .cardsWrap[data-in] .cardBody { transition: transform 700ms var(--ease-out) calc(var(--sd) + 200ms); }
 .cardsWrap[data-in] .actions  { transition: transform 700ms var(--ease-out) calc(var(--sd) + 280ms); }
 
+/* Both wrappers pass the rows straight through. `.card` is the grid item the
+   pair's rows belong to and `.cardIn` is the plate that paints them, so each
+   spans all three and re-declares them as `subgrid` rather than opening a grid
+   of its own. The plate's padding insets its tracks, but identically on both
+   cards, so the two still agree. */
+.card,
 .cardIn {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: clamp(1.5rem, 2.85vw, 2.5625rem);
+  display: grid;
+  grid-row: span 3;
+  grid-template-rows: subgrid;
+}
+
+.cardIn {
   width: 100%;
-  min-height: 487px;
   padding: clamp(1.5rem, 3.1vw, 2.75rem);
   border-radius: var(--r-card);
 }
+
+/* Bottom of the last row, which is the row that grew. */
+.actions { align-self: end; }
 /* Two pale blues, neither in the palette: the comp separates the two cards by a
    half-step of the same hue rather than by a border. */
 .card:first-child .cardIn { background: #D8EAFF; }
@@ -298,7 +336,22 @@
 .cardTitle {
   color: var(--n-900);
   line-height: 1.15;
-  max-width: 14rem;
+  /* In `em`, not rem or px, and that is the whole point. `--t-h3` is a clamp on
+     `vw`, so the type shrinks with the viewport while a fixed measure does not —
+     card 02 read "Build a Hubble / solution" at 1440 and "Build a / Hubble
+     solution" by 1280, off nothing but the window width. An `em` measure is the
+     same number of characters at every size, so the break stays put.
+
+     7.5em is the middle of the band that puts card 02 on two lines: below
+     ~7.15em "Build a Hubble" no longer fits its line and it breaks over three,
+     above ~7.85em the balance flips to the 116-against-277 rag. The break it
+     buys, "Build a Hubble / solution", is the shape card 01 already has in
+     "Buy Hubble / products" — Hubble ending the first line, one word under it.
+
+     Card 01 itself never sees this value. It is the narrow column of the pair,
+     so its own width reaches the heading first — 268px at 1440, 142px by 1023,
+     where it breaks over three lines whatever is written here. */
+  max-width: 7.5em;
 }
 
 /* Layout only — entrance transform above. */
@@ -315,7 +368,11 @@
   margin-bottom: var(--s-3);
 }
 
-.copy { color: var(--n-800); max-width: 18.75rem; }
+/* No measure. The comp caps this at 300, but the kicker above it and the
+   footnote below take the card's full body width, so the 300 read as one
+   paragraph indented out of a column of three. The plate's own padding is the
+   measure. */
+.copy { color: var(--n-800); }
 
 .blocks {
   display: grid;
@@ -385,9 +442,30 @@
 }
 
 @media (max-width: 1023px) {
-  .cards { grid-template-columns: minmax(0, 1fr); }
-  .cardIn { min-height: 0; }
-  .copy { max-width: none; }
+  /* One column, so there is no neighbour to line up with and the shared rows
+     stop earning their keep. The pair goes back to being two ordinary cards:
+     each sizes itself, `.cardIn` carries the internal rhythm as its own flex
+     gap again, and `.cards` row-gap is free to be the 10px between the cards
+     rather than doing both jobs at one value. */
+  .cards {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+    row-gap: 10px;
+    min-height: 0;
+  }
+  .card {
+    display: block;
+    grid-row: auto;
+    grid-template-rows: none;
+  }
+  .cardIn {
+    display: flex;
+    flex-direction: column;
+    grid-row: auto;
+    grid-template-rows: none;
+    gap: clamp(1.5rem, 2.85vw, 2.5625rem);
+  }
+  .actions { align-self: auto; }
 }
 
 @media (max-width: 767px) {

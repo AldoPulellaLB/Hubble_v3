@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import Button from './Button'
 import MegaPanel from './MegaPanel'
-import { Calculator, Close, Menu, PixelArrow, User } from './Icons'
+import { Close, Menu, PixelArrow, User } from './Icons'
 import { prefersReducedMotion } from '@/lib/motion'
 import type { NavItem } from '@/lib/types'
 import s from './Nav.module.css'
@@ -211,20 +211,6 @@ export default function Nav({ items: all }: Props) {
           </ul>
 
           <div className={s.actions}>
-            {/* On light ground the plate inverts — blue with pale type, per the
-                comp. `primary` rather than an override of `light`, because the
-                variant also owns the hover wipe: a `light` button wipes to
-                blue-200, which under pale type would erase the label. */}
-            <Button
-              href="/calculate-your-savings"
-              variant={onLight ? 'primary' : 'light'}
-              chevron={false}
-              icon={<Calculator />}
-              iconAfter
-              className={s.calc}
-            >
-              Calculate your savings
-            </Button>
             <Button href="/contact" variant="accent" chevron={false} className={s.touch}>
               Get In touch
             </Button>
@@ -267,9 +253,6 @@ export default function Nav({ items: all }: Props) {
           ))}
         </ul>
         <div className={s.sheetActions}>
-          <Button href="/calculate-your-savings" variant="light" icon={<Calculator />} iconAfter chevron={false}>
-            Calculate your savings
-          </Button>
           <Button href="/contact" variant="accent" chevron={false}>Get In touch</Button>
         </div>
       </div>

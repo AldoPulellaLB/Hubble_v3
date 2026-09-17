@@ -225,10 +225,9 @@
   flex: none;
 }
 .actions :global(a), .actions :global(button) { min-height: var(--nav-h); }
-/* Class-on-class, for the same reason as the hide rules below: these two are
-   Button components, and a bare `.calc` loses the tie against Button's own
+/* Class-on-class, for the same reason as the hide rules below: this is a
+   Button component, and a bare `.touch` loses the tie against Button's own
    `.btn` font-size depending on which module the bundler emits first. */
-.actions .calc,
 .actions .touch {
   font-size: var(--t-nav);
   border-radius: var(--r-nav);
@@ -236,7 +235,6 @@
   gap: 10px;
   padding: 10px;
 }
-.actions .calc { width: 200px; }
 .actions .touch { width: 136px; }
 
 /* Collapsed to its mark, and opens to the comp's 108 × 40 on hover.
@@ -300,11 +298,10 @@
 /* ── Mobile ─────────────────────────────────────────────────── */
 /* These hide elements that carry their own `display` from Button.module.css.
    Class-on-class keeps the rule above it whichever order the bundler emits
-   the two modules in — a plain `.calc` loses the tie and the mobile bar
+   the two modules in — a plain `.touch` loses the tie and the mobile bar
    overflows. */
 @media (max-width: 1279px) {
   .items { display: none; }
-  .actions .calc { display: none; }
 }
 @media (max-width: 767px) {
   .actions .touch { display: none; }
@@ -370,9 +367,5 @@
 .bar.light .account { background: rgba(0, 29, 96, .5); }
 .bar.light .account:hover,
 .bar.light .account:focus-visible { background: rgba(0, 29, 96, .66); }
-
-/* The resting plate is the comp's blue-400 with pale type; the `primary`
-   variant underneath supplies the darker wipe on hover. */
-.bar.light .actions .calc { background: var(--blue-400); color: var(--blue-200); }
 
 .bar.light .burger { background: rgba(0, 29, 96, .5); }

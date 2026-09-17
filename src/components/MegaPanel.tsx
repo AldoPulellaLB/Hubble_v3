@@ -7,27 +7,22 @@ import s from './MegaPanel.module.css'
 type Props = { mega: Mega; open: boolean }
 
 /**
- * The wide Solutions panel (Figma `1816:10`).
+ * The wide Solutions panel (Figma `1780:6513`).
  *
- * Two columns of copy and a promo card — 1358 x 493 on the comp, which is the
- * bar's own measure rather than the trigger's. That is why `Nav` drops
- * `position: relative` from an item carrying one of these: the panel anchors to
- * `.inner`, so it spans the bar and not the word "Solutions".
+ * Three columns of copy separated by hairlines, then a promo card — 1358 x 493
+ * on the comp, which is the bar's own measure rather than the trigger's. That
+ * is why `Nav` drops `position: relative` from an item carrying one of these:
+ * the panel anchors to `.inner`, so it spans the bar and not the word
+ * "Solutions".
  *
  * It stays *inside* the trigger's `<li>` all the same, and that is load-bearing
  * rather than tidy — the open/close handlers live on the `li`, so a panel
  * rendered as its sibling would fire `mouseleave` the moment the pointer
  * reached it and shut itself.
  *
- * ── Columns of groups, not of rows ──────────────────────────────────────────
- * `1816:10` replaced the three labelled columns with two, and the left one
- * carries *two* labelled groups with a rule between them. So a column is a list
- * of groups rather than one label over one list, and the content file says which
- * groups share a column instead of the component inferring it from a count.
- *
  * `inert` while shut, for the same reason the simple dropdown carries it:
  * `opacity: 0` hides a panel from the eye but not from the tab order, and this
- * one is a dozen focus stops deep.
+ * one is twenty focus stops deep.
  */
 export default function MegaPanel({ mega, open }: Props) {
   return (
@@ -37,42 +32,46 @@ export default function MegaPanel({ mega, open }: Props) {
        hash and of anything else whose class happens to contain the word. */
     <div className={`${s.mega} ${open ? s.open : ''}`} data-mega inert={!open}>
       <div className={s.sheet}>
-        {/* The heading and the columns travel together: the comp bottom-aligns
-            this block against the promo, and the promo is the shorter of the
-            two. */}
-        <div className={s.main}>
-          <p className={s.title}>{mega.title}</p>
+        <p className={s.title}>{mega.title}</p>
 
-          <div className={s.cols}>
-            {mega.columns.map((col, ci) => (
-              /* `--c` is the column's index and the only thing its entrance
-                 delay is built from — see the CSS. */
-              <div
-                key={col.groups[0].label}
-                className={s.col}
-                style={{ ['--c' as string]: String(ci) }}
-              >
-                {col.groups.map((group) => (
-                  <section key={group.label} className={s.group}>
-                    <p className={s.groupLabel}>{group.label}</p>
-                    <p className={s.groupNote}>{group.note}</p>
+        <div className={s.cols}>
+          {mega.columns.map((col, ci) => (
+            /* `--c` is the column's index and the only thing its entrance
+               delay is built from — see the CSS. */
+            <div key={col.label} className={s.col} style={{ ['--c' as string]: String(ci) }}>
+              <p className={s.colLabel}>{col.label}</p>
+              <p className={s.colNote}>{col.note}</p>
 
-                    <ul className={s.list}>
-                      {group.items.map((item) => (
-                        <li key={item.title} className={s.row}>
-                          <Link href={item.href} className={s.rowLink}>
-                            <span className={s.rowTitle}>{item.title}</span>
-                            <span className={s.rowCopy}>{item.copy}</span>
-                            <PixelArrow className={s.rowArrow} />
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </section>
+              <ul className={s.list}>
+                {col.items.map((item) => (
+                  <li key={item.title} className={s.row}>
+                    <Link href={item.href} className={s.rowLink}>
+                      <span className={s.rowTitle}>{item.title}</span>
+                      <span className={s.rowCopy}>{item.copy}</span>
+                      <PixelArrow className={s.rowArrow} />
+                    </Link>
+                    {item.chip ? (
+                      <Link href={item.chip.href} className={s.chip}>
+                        <span>{item.chip.label}</span>
+                        <PixelArrow className={s.chipArrow} />
+                      </Link>
+                    ) : null}
+                  </li>
                 ))}
-              </div>
-            ))}
+              </ul>
+
+              {col.footnote ? (
+                <p className={s.footnote}>
+                  <span className={s.bolt} aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" focusable="false">
+                      <path d="M13 2 4.5 13.5H11l-1 8.5 8.5-11.5H12l1-8.5Z" />
+                    </svg>
+                  </span>
+                  {col.footnote}
+                </p>
+              ) : null}
           </div>
+          ))}
         </div>
 
         <div className={s.promo} style={{ ['--c' as string]: String(mega.columns.length) }}>
@@ -84,7 +83,7 @@ export default function MegaPanel({ mega, open }: Props) {
               alt={mega.promo.image.alt}
               width={760}
               height={979}
-              sizes="429px"
+              sizes="240px"
             />
           </div>
           <p className={s.promoCopy}>{mega.promo.copy}</p>

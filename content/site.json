@@ -34,70 +34,76 @@
         "title": "Energy Solutions",
         "columns": [
           {
-            "groups": [
+            "label": "Product Ecosystem",
+            "note": "Systems & Support.",
+            "items": [
               {
-                "label": "Buy Hubble Products",
-                "note": "Explore products.",
-                "items": [
-                  {
-                    "title": "Commercial & Industrial",
-                    "copy": "Products for larger energy needs.",
-                    "href": "/products/high-voltage"
-                  },
-                  {
-                    "title": "Home & Small Business",
-                    "copy": "Products for everyday energy.",
-                    "href": "/products/low-voltage"
-                  }
-                ]
+                "title": "Commercial & Industrial",
+                "copy": "Products for larger energy needs.",
+                "href": "/products/high-voltage"
               },
               {
-                "label": "Build a Hubble Solution",
-                "note": "Explore solutions.",
-                "items": [
-                  {
-                    "title": "Designed around your needs",
-                    "copy": "Designed, commissioned, monitored and supported by Hubble.",
-                    "href": "/solutions/energy-solutions"
-                  }
-                ]
+                "title": "Home & Small Business",
+                "copy": "Products for everyday energy needs.",
+                "href": "/products/low-voltage"
               }
             ]
           },
           {
-            "groups": [
+            "label": "Configured Solutions",
+            "note": "Projects & Partnerships",
+            "items": [
               {
-                "label": "Process",
-                "note": "Our Solution process",
-                "items": [
-                  {
-                    "title": "Bespoke design",
-                    "copy": "Designed around your energy needs.",
-                    "href": "/solutions/energy-solutions"
-                  },
-                  {
-                    "title": "Install & commission",
-                    "copy": "From plan to live system.",
-                    "href": "/solutions/energy-solutions"
-                  },
-                  {
-                    "title": "Monitoring & field service",
-                    "copy": "Ongoing system support.",
-                    "href": "/products/cloudlink"
-                  },
-                  {
-                    "title": "SLA",
-                    "copy": "Protect uptime and performance.",
-                    "href": "/solutions/sla"
-                  }
-                ]
+                "title": "Turnkey Projects",
+                "copy": "Design, commission, service & support.",
+                "href": "/solutions/energy-solutions",
+                "chip": {
+                  "label": "ASPEN project",
+                  "href": "/projects"
+                }
+              },
+              {
+                "title": "Funded Partnerships",
+                "copy": "Finance, design, commission & support",
+                "href": "/solutions/ppa",
+                "chip": {
+                  "label": "IDWALA project",
+                  "href": "/projects"
+                }
+              }
+            ],
+            "footnote": "Both can include Energy Arbitrage and Wheeling."
+          },
+          {
+            "label": "Our Process",
+            "note": "How we work",
+            "items": [
+              {
+                "title": "Bespoke Design",
+                "copy": "Designed around your energy needs.",
+                "href": "/solutions/energy-solutions"
+              },
+              {
+                "title": "Install & Commission",
+                "copy": "From plan to live system.",
+                "href": "/solutions/energy-solutions"
+              },
+              {
+                "title": "Monitoring & Field Service",
+                "copy": "Ongoing system support.",
+                "href": "/products/cloudlink"
+              },
+              {
+                "title": "SLA",
+                "copy": "Protect uptime and performance.",
+                "href": "/solutions/sla"
               }
             ]
           }
         ],
         "promo": {
           "title": "How can we help you?",
-          "copy": "Tell us your energy challenge. We'll guide you.",
+          "copy": "Tell us your energy challenge.\nWe'll guide you.",
           "image": {
             "src": "/images/nav/expert.webp",
             "alt": "A Hubble Energy specialist"

@@ -660,6 +660,12 @@ that amount; only the render is meant to be consumed.
 
 ## The preloader
 
+`SequenceHero` has **no loading UI of its own** — it carried a "Loading sequence
+N%" bar until 2026-09-17, which only ever sat behind this panel. Retired with
+the `loaded` state, the `pct` derivation and the frame counter that fed it,
+since nothing else read any of them.
+
+
 The site's entry. A field of `--blue-700` split by a white 2px line that draws
 left to right while the first view loads. The line carries a trail of
 `PixelCard`'s pixels — the same effect as the Stats and meter cards — and the

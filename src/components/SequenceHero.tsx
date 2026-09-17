@@ -59,8 +59,14 @@ const MOBILE_BREAK = 834
  * Frame files must be `frame_000.webp` upward — zero-based, three-digit and
  * contiguous — under whatever `dir` names. Exports rarely arrive that way; run
  * `node scripts/normalise-sequence.mjs public/sequence/<variant>` over a new
- * one. Get it wrong and index 0 is a 404, which is the one frame that gates
- * `ready`: the hero then sits behind a loader that never completes.
+ * one. Get it wrong and index 0 is a 404 and `ready` never flips — and since
+ * frame 0 is also what fires `HERO_READY`, the site-wide preloader then holds
+ * until its own MAX_MS ceiling rather than opening on the render.
+ *
+ * This component has no loading UI of its own. It used to carry a
+ * "Loading sequence N%" bar; `components/Preloader.tsx` now covers the whole
+ * site until this hero says frame 0 is decoded, so the bar only ever sat
+ * behind it.
  */
 export default function SequenceHero({
   frames, dir = LANDING_FRAMES, beats, labels, poster, scrollHint, primary, secondary,
@@ -77,7 +83,6 @@ export default function SequenceHero({
   const [total, setTotal] = useState(desktopCount)
   const [frame, setFrame] = useState(0)
   const [ready, setReady] = useState(false)
-  const [loaded, setLoaded] = useState(0)
   const [reduced, setReduced] = useState(false)
 
   useEffect(() => {
@@ -102,7 +107,6 @@ export default function SequenceHero({
     if (!ctx) return
 
     let disposed = false
-    let count = 0
     let lastDrawn = -1
     let lastWanted = -1
     let dpr = Math.min(window.devicePixelRatio || 1, 2)
@@ -146,15 +150,13 @@ export default function SequenceHero({
     worker.onmessage = (e: MessageEvent<{ blob?: Blob; index: number }>) => {
       if (disposed) return
       const { blob, index } = e.data
-      if (!blob) { count++; return }
+      if (!blob) return
       const url = URL.createObjectURL(blob)
       objectUrls.push(url)
       const img = new Image()
       img.decoding = 'async'
       img.onload = () => {
         images[index] = img
-        count++
-        setLoaded(count)
         if (index === 0) {
           setReady(true); lastDrawn = -1
           /* Frame 0 is the first thing the canvas can actually paint, so it is
@@ -163,7 +165,6 @@ export default function SequenceHero({
         }
         else if (index === lastWanted) lastDrawn = -1
       }
-      img.onerror = () => { count++ }
       img.src = url
     }
 
@@ -198,7 +199,6 @@ export default function SequenceHero({
     }
   }, [desktopCount, mobileCount, desktopDir, mobileDir])
 
-  const pct = Math.round((loaded / total) * 100)
 
   /* The active beat by index, not just by value: the headline reveal needs the
      beat's own span, which means knowing which beat follows it. */
@@ -272,13 +272,6 @@ export default function SequenceHero({
           <span className={s.hint}>{scrollHint}</span>
           <span className={s.caret}><PixelArrow dir="down" cell={3} /></span>
         </div>
-
-        {!ready && !reduced ? (
-          <div className={s.loader} role="status" aria-live="polite">
-            <span className={s.loaderBar}><span className={s.loaderFill} style={{ transform: `scaleX(${pct / 100})` }} /></span>
-            <span className={s.loaderText}>Loading sequence {pct}%</span>
-          </div>
-        ) : null}
       </div>
     </section>
   )

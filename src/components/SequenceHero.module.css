@@ -116,19 +116,6 @@
   84% { transform: translateY(3px); opacity: 1; }
 }
 
-/* ── Loader ─────────────────────────────────────────────────── */
-.loader {
-  position: absolute; inset: 0; z-index: 4;
-  display: grid; place-content: center; gap: .75rem;
-  background: var(--ink-black);
-}
-.loaderBar { display: block; width: min(46vw, 320px); height: 2px; background: rgba(255,255,255,.14); overflow: hidden; }
-.loaderFill { display: block; height: 100%; background: var(--cyan-400); transform-origin: left; transition: transform 200ms linear; }
-.loaderText {
-  font-size: var(--t-xs); letter-spacing: .12em; text-transform: uppercase;
-  color: rgba(255,255,255,.45); text-align: center;
-}
-
 /* Extra-large displays. The global `wrap` class caps this block at --maxw
    (1440) and gutters it with --gut (80 at its ceiling), which from 1920 up
    leaves the copy 320px in from the edge — 240 of dead margin from the cap

@@ -9,8 +9,8 @@
   /* The failsafe. This animation runs off the CSS clock, so it fires even if
      the bundle never executes — no JS, a hydration error, a stalled chunk.
      Without it a dead script leaves a blue sheet over the whole site with no
-     way past it. The JS path removes this element long before 9s. */
-  animation: failsafe 1ms linear 9s forwards;
+     way past it. The JS path is done by 8.7s at the very worst. */
+  animation: failsafe 1ms linear 11s forwards;
 }
 
 @keyframes failsafe {

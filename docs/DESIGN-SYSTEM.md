@@ -668,7 +668,7 @@ and holding still. At 99% the label and the trail fade off; at 100% the line
 completes and the two blue halves part from it, opening the page.
 
 Phases are `drawing → closing → opening → gone`. The draw creeps to a **0.99
-ceiling** over 3.4s; `closing` is the 99→100 fade, `opening` the parting.
+ceiling** over 3s; `closing` is the 99→100 fade, `opening` the parting.
 
 `components/Preloader.tsx` + `.module.css`, mounted **first in `<body>`** in
 `app/layout.tsx` — above `SmoothScroll`, so it covers every route including the
@@ -697,10 +697,14 @@ where there are no frames to wait for and the poster is the hero.
 
 ### Three ceilings, because a stuck preloader takes the whole site with it
 
-1. `MIN_MS` (900) — the floor, not a ceiling: the line must visibly draw, or a
-   warm reload flashes a blue frame and reads as a glitch.
-2. `MAX_MS` (5000) — opens regardless of what has or has not loaded.
-3. **A CSS `@keyframes` failsafe at 8s** on `.root`. It runs off the CSS clock,
+1. `MIN_MS` (3000) — the floor, not a ceiling: how long the panel is up before
+   it may reveal, however fast the page actually loaded. **This is the dial for
+   "the preloader is too quick."** `DRAW_MS` is kept equal to it so the creep
+   lands on its ceiling exactly as the minimum elapses, rather than finishing
+   early and sitting there. Below ~1.5s the line is gone before it reads as a
+   line at all.
+2. `MAX_MS` (7000) — opens regardless of what has or has not loaded.
+3. **A CSS `@keyframes` failsafe at 11s** on `.root`. It runs off the CSS clock,
    so it fires when the bundle never executes at all — no JS, a hydration
    error, a stalled chunk. It is on the container's visibility only, so it
    cannot fight the halves' transforms.
@@ -755,9 +759,10 @@ panel. Verified: `isStopped` stayed `false`. The `documentElement.overflow` lock
 masks it enough to look fine, which is what makes it easy to miss.
 
 Measured lifecycle (desktop, dev): the label fades up at 300ms over 700ms and
-holds; the draw runs to its 0.99 ceiling with the trail tracking the edge;
-`closing` at ~1.4s fades label and trail over 400ms; `opening` at ~2.0s parts
-the halves; node removed at ~3.1s.
+holds; the draw reaches p=0.987 at 2.4s and its ceiling at 3.0s;
+`closing` at ~3.0s fades label and trail over 400ms; `opening` at ~3.8s parts
+the halves; node removed at ~4.9s. Worst case, if nothing ever loads, `MAX_MS`
+forces the same run and the node is gone by 8.7s — inside the 11s failsafe.
 
 ## The hero sequence
 

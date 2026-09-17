@@ -11,18 +11,21 @@ export const HERO_READY = 'hubble:hero-ready'
 
 export const PRELOADER_LABEL = 'Connected intelligent energy'
 
-/* The line must be visibly drawn before it opens, or a warm reload flashes a
-   blue frame and reads as a glitch rather than an intro. */
-const MIN_MS = 1400
-/* How long the creep takes to reach its 99% ceiling. */
-const DRAW_MS = 3400
+/* How long the panel is up before it is allowed to reveal, however fast the
+   page actually loaded. This is the dial for "the preloader is too quick" —
+   at 1400 it was gone before the line had finished reading as a line. */
+const MIN_MS = 3000
+/* The creep reaches its 99% ceiling exactly as MIN_MS elapses, so the line
+   arrives at full width at the moment the reveal is allowed to start rather
+   than sitting finished and waiting. Keep the two equal. */
+const DRAW_MS = 3000
 /* 99% → 100%: the label and the trail fade off the line. */
 const CLOSE_MS = 420
 /* And it must never be the reason the site cannot be reached. Past this the
    preloader runs its close and open regardless of what has loaded. The CSS
    failsafe in the stylesheet sits further out again, for the case where none
    of this code runs at all. */
-const MAX_MS = 6500
+const MAX_MS = 7000
 
 /* The draw stops here and waits. The last percent belongs to the real ready
    signal, so the line *completing* is always the truth and never a guess. */
@@ -70,7 +73,7 @@ export default function Preloader() {
 
     /* Creep toward the ceiling on an ease-out — most of the width early, then
        a slow approach, which is what reads as loading rather than as a timed
-       animation that happens to take 3.4s. */
+       animation that happens to take 3s. */
     const creep = () => {
       const t = Math.min(1, (performance.now() - mountedAt) / DRAW_MS)
       setP(CEILING * (1 - Math.pow(1 - t, 3)))

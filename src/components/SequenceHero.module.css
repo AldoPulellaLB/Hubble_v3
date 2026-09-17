@@ -77,7 +77,11 @@
 /* Medium rather than the 400 `.t-lead` inherits from body: this lead sits on
    the render rather than on a flat ground, and the extra weight is what holds
    it against the bright frames the sequence passes through. */
-.lead { color: rgba(255,255,255,.78); max-width: 44ch; margin-top: var(--s-5); font-weight: 500; }
+/* No measure of its own — it takes the column's, which is what the title is
+   already on: `.title`'s 11ch resolves wider than `.copy` at this size, so the
+   heading is governed by the column and the lead now sits on the same right
+   edge. The 44ch this used to carry was the only thing holding it narrower. */
+.lead { color: rgba(255,255,255,.78); max-width: none; margin-top: var(--s-5); font-weight: 500; }
 
 @keyframes beat {
   from { opacity: 0; transform: translate3d(0, 18px, 0); filter: blur(8px); }
@@ -140,7 +144,19 @@
 
 @media (max-width: 1023px) {
   .copy { max-width: 100%; }
-  .title { max-width: 14ch; }
+  /* Below the column's own cap the title stops being governed by `.copy` and
+     takes a measure of its own, so the lead has to follow the title rather than
+     the column — otherwise it runs 212px past the heading and reaches 85
+     characters a line.
+
+     One declaration for both, so they cannot drift apart. It is the title's old
+     `14ch` written as a length the lead can also use: `ch` is the advance of
+     the face's "0", which in the display face is .769em (the `-0.038em`
+     letter-spacing is not part of the unit), so 14ch is 10.77 × the display
+     size. Written in `ch` it would resolve against each element's own font and
+     the lead would land at a third of the width. */
+  .title,
+  .lead { max-width: calc(10.77 * clamp(2.75rem, 6.1vw, 5.5rem)); }
 }
 @media (max-width: 767px) {
   .section { height: 300lvh; }

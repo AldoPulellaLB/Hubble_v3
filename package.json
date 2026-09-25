@@ -1,5 +1,5 @@
 {
-  "name": "hubble-2026",
+  "name": "hubble-v3",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -7,9 +7,9 @@
     "node": ">=22.0.0"
   },
   "scripts": {
-    "dev": "next dev -p 3210",
+    "dev": "next dev -p 3220",
     "build": "next build --no-lint",
-    "start": "next start -p 3210",
+    "start": "next start -p 3220",
     "check": "NEXT_DIST_DIR=.next-check next build --no-lint",
     "normalise-sequence": "node scripts/normalise-sequence.mjs"
   },

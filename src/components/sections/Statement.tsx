@@ -60,15 +60,29 @@ const FLOWS = [
  * a fluid width, and a shape this simple would rather stretch than crop. The
  * corners go slightly elliptical on wide phones, which at 1.4px is invisible. */
 const VB_M = { w: 375, h: 112 }   // the band's own proportions, so `none` maps 1:1
-const RUN_M: [number, number][] = [
-  [-40, 30],   // in through the left edge
-  [140, 30],   //   right, then down
-  [140, 82],
-  [235, 82],   //   right along the floor, then back up
-  [235, 26],
-  [415, 26],   // out through the right edge, higher than it came in
-]
 const OFFSET_M = 10
+
+/* The floor the pair steps down to, and it is derived rather than typed.
+   `.flowM` is anchored `bottom: 0` against a plate that clips, so `y = VB_M.h`
+   is the white container's last pixel. The *trailing* route runs `OFFSET_M`
+   below the leading one, so it is the one that has to land on the floor —
+   hence `VB_M.h - OFFSET_M` here, which puts the twin's step exactly on the
+   edge and the leading route ten above it.
+
+   Written as two literals (82 and 92 against a 112 box) this sat 20px clear of
+   the plate's bottom at every width below 768, which is the whole of the phone
+   range: the band reached the edge but the line inside it never did. Deriving
+   it means changing `--band` or the viewBox cannot re-open that gap. */
+const FLOOR_M = VB_M.h - OFFSET_M
+
+const RUN_M: [number, number][] = [
+  [-40, FLOOR_M - 52],   // in through the left edge
+  [140, FLOOR_M - 52],   //   right, then down
+  [140, FLOOR_M],
+  [235, FLOOR_M],        //   right along the floor, then back up
+  [235, FLOOR_M - 56],
+  [415, FLOOR_M - 56],   // out through the right edge, higher than it came in
+]
 const RUN_M_B = RUN_M.map(([x, y]) => [x + OFFSET_M, y + OFFSET_M] as [number, number])
 
 const FLOWS_M = [
